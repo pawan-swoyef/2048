@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($git = Get-Command git -ErrorAction SilentlyContinue; if \\($git\\) { \"git: $\\($git.Source\\)\" } else { \"git NOT found\" }; \"--- .gitignore exists: $\\(Test-Path '.gitignore'\\)\"; \"--- .git exists: $\\(Test-Path '.git'\\)\")"
+    ]
+  }
+}

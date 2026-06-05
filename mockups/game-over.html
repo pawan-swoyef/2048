@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Game Over Overlay Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+    background: #faf8ef;
+    color: #776e65;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 48px;
+    min-height: 100vh;
+  }
+  .phone { width: 380px; max-width: 100%; padding: 20px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+  .title { font-size:64px; font-weight:800; color:#776e65; line-height:1; }
+  .scores { display:flex; gap:8px; }
+  .score-box { background:#bbada0; border-radius:6px; padding:8px 16px; text-align:center; color:#f9f6f2; min-width:72px; }
+  .score-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#eee4da; }
+  .score-value { font-size:22px; font-weight:800; }
+
+  .board {
+    position: relative;
+    background: #bbada0;
+    border-radius: 10px;
+    padding: 12px;
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .tile { border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:32px; }
+  .t2{background:#eee4da;color:#776e65;} .t4{background:#ede0c8;color:#776e65;}
+  .t8{background:#f2b179;color:#f9f6f2;} .t16{background:#f59563;color:#f9f6f2;}
+  .t32{background:#f67c5f;color:#f9f6f2;} .t64{background:#f65e3b;color:#f9f6f2;}
+  .t128{background:#edcf72;color:#f9f6f2;font-size:28px;} .t256{background:#edcc61;color:#f9f6f2;font-size:28px;}
+  .t512{background:#edc850;color:#f9f6f2;font-size:28px;}
+
+  /* Overlay */
+  .overlay {
+    position:absolute; inset:0;
+    background: rgba(238, 228, 218, 0.73);
+    border-radius:10px;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:18px;
+  }
+  .overlay h2 { font-size:44px; font-weight:800; color:#776e65; }
+  .overlay-buttons { display:flex; gap:10px; }
+  .btn {
+    background:#8f7a66; color:#f9f6f2; border:none; border-radius:6px;
+    padding:12px 20px; font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .caption { text-align:center; margin-bottom:20px; font-size:13px; color:#bbada0; }
+</style>
+</head>
+<body>
+  <div>
+    <div class="caption">MOCKUP — Game Over Overlay (Win overlay looks the same with "You Win!" + a "Keep Going" button)</div>
+    <div class="phone">
+      <div class="header">
+        <div class="title">2048</div>
+        <div class="scores">
+          <div class="score-box"><div class="score-label">Score</div><div class="score-value">2860</div></div>
+          <div class="score-box"><div class="score-label">Best</div><div class="score-value">3580</div></div>
+        </div>
+      </div>
+
+      <div class="board">
+        <div class="tile t2">2</div><div class="tile t8">8</div><div class="tile t4">4</div><div class="tile t2">2</div>
+        <div class="tile t16">16</div><div class="tile t4">4</div><div class="tile t32">32</div><div class="tile t8">8</div>
+        <div class="tile t4">4</div><div class="tile t64">64</div><div class="tile t128">128</div><div class="tile t2">2</div>
+        <div class="tile t256">256</div><div class="tile t8">8</div><div class="tile t2">2</div><div class="tile t16">16</div>
+
+        <div class="overlay">
+          <h2>Game Over!</h2>
+          <div class="overlay-buttons">
+            <button class="btn">Try Again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

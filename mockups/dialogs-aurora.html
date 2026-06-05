@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Dialog Mockups (Aurora Glass)</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body {
+    background:linear-gradient(135deg,#5b3df5,#a23df5 55%,#f53d9e);
+    min-height:100vh; padding:32px 16px 80px; color:#fff;
+  }
+  h1 { text-align:center; font-size:24px; margin-bottom:6px; }
+  .sub { text-align:center; color:#ffffffcc; margin-bottom:36px; font-size:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:40px; justify-content:center; align-items:flex-start; }
+  .panel { width:330px; }
+  .panel .label { text-align:center; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#ffffffb0; margin-bottom:14px; }
+
+  /* ---- shared buttons ---- */
+  .btn { border:none; border-radius:8px; padding:12px 18px; font-weight:700; font-size:14px; cursor:pointer; }
+  .btn-primary { background:#fff; color:#6a2dbf; box-shadow:0 4px 10px rgba(0,0,0,.3); }
+  .btn-ghost { background:rgba(255,255,255,.22); color:#fff; }
+
+  /* ============ centered modal dialogs ============ */
+  .stage {
+    position:relative; border-radius:16px; height:300px; overflow:hidden;
+    background:rgba(255,255,255,.14); border:1.4px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .scrim { position:absolute; inset:0; background:rgba(46,26,102,.55); }
+  .card {
+    position:relative; width:86%; background:#4a2fb0; border-radius:14px;
+    padding:24px 22px; text-align:center; box-shadow:0 14px 30px rgba(0,0,0,.4);
+  }
+  .card h3 { font-size:21px; font-weight:800; margin-bottom:12px; }
+  .card p { font-size:13px; color:#ffffffcc; line-height:1.5; margin-bottom:18px; }
+  .card .rules { text-align:left; font-size:13px; line-height:1.8; margin-bottom:18px; }
+  .card .rules li { margin-left:18px; }
+  .buttons { display:flex; gap:10px; justify-content:center; }
+
+  /* ============ board overlays ============ */
+  .board {
+    position:relative; border-radius:16px; aspect-ratio:1/1;
+    background:rgba(255,255,255,.14); border:1.4px solid rgba(255,255,255,.35);
+    padding:10px; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); gap:8px;
+  }
+  .t { border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px;
+       box-shadow:0 4px 8px rgba(0,0,0,.22); }
+  .t2{background:#d9dbf7;color:#1e2a4a;} .t4{background:#7fe0d2;color:#1e2a4a;}
+  .t8{background:#ffb23f;color:#fff;} .t16{background:#ff5b5b;color:#fff;}
+  .t32{background:#ff4d9d;color:#fff;} .t64{background:#ff6a3d;color:#fff;}
+  .t128{background:#ffc93c;color:#fff;font-size:18px;} .t256{background:#54cc57;color:#fff;font-size:18px;}
+  .t512{background:#3fa3f0;color:#fff;font-size:18px;} .t2048{background:#ffc12e;color:#fff;font-size:16px;box-shadow:0 0 18px #ffc12e;}
+  .overlay {
+    position:absolute; inset:0; border-radius:16px; background:rgba(46,26,102,.80);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; padding:20px;
+  }
+  .overlay h2 { font-size:38px; font-weight:800; }
+  .overlay h2.win { color:#ffd23f; }
+  .overlay p { font-size:14px; color:#ffffffcc; }
+  .overlay .buttons { margin-top:10px; }
+</style>
+</head>
+<body>
+  <h1>2048 — Dialogs (Aurora Glass)</h1>
+  <p class="sub">The four dialogs/overlays as they look in the app now. Tell me any changes and I'll update both the mockup and the live game.</p>
+
+  <div class="row">
+
+    <!-- 1 New Game confirm -->
+    <div class="panel">
+      <div class="label">1 · New Game Confirmation</div>
+      <div class="stage">
+        <div class="scrim"></div>
+        <div class="card">
+          <h3>Start a new game?</h3>
+          <p>Your current game will be lost. Your best score stays saved.</p>
+          <div class="buttons">
+            <button class="btn btn-ghost">Cancel</button>
+            <button class="btn btn-primary">New Game</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 How to play -->
+    <div class="panel">
+      <div class="label">2 · How to Play</div>
+      <div class="stage">
+        <div class="scrim"></div>
+        <div class="card">
+          <h3>How to Play</h3>
+          <ul class="rules">
+            <li>Swipe ← ↑ → ↓ to move all tiles.</li>
+            <li>Two equal tiles merge into one.</li>
+            <li>Each merge adds to your score.</li>
+            <li>Reach the 2048 tile to win!</li>
+          </ul>
+          <div class="buttons">
+            <button class="btn btn-primary">Got it</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Win overlay -->
+    <div class="panel">
+      <div class="label">3 · Win Overlay</div>
+      <div class="board">
+        <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+        <div class="t t16">16</div><div class="t t2048">2048</div><div class="t t32">32</div><div class="t t4">4</div>
+        <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="t t8">8</div>
+        <div class="t t256">256</div><div class="t t512">512</div><div class="t t2">2</div><div class="t t16">16</div>
+        <div class="overlay">
+          <h2 class="win">You Win! 🎉</h2>
+          <p>You reached 2048. Keep going for a higher score?</p>
+          <div class="buttons">
+            <button class="btn btn-ghost">New Game</button>
+            <button class="btn btn-primary">Keep Going</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Game over overlay -->
+    <div class="panel">
+      <div class="label">4 · Game Over Overlay</div>
+      <div class="board">
+        <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+        <div class="t t16">16</div><div class="t t4">4</div><div class="t t32">32</div><div class="t t8">8</div>
+        <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="t t2">2</div>
+        <div class="t t256">256</div><div class="t t8">8</div><div class="t t2">2</div><div class="t t16">16</div>
+        <div class="overlay">
+          <h2>Game Over!</h2>
+          <p>No more moves. Final score: 2860</p>
+          <div class="buttons">
+            <button class="btn btn-primary">Try Again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

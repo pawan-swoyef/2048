@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Complete UI Mockups</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+    background: #f4ede2;
+    color: #776e65;
+    padding: 32px 16px 80px;
+  }
+  h1.page-title { text-align:center; font-size:28px; color:#776e65; margin-bottom:6px; }
+  p.page-sub { text-align:center; color:#a89d8e; margin-bottom:40px; font-size:14px; }
+
+  .grid {
+    display:flex; flex-wrap:wrap; gap:36px; justify-content:center; align-items:flex-start;
+  }
+  .panel {
+    background:#faf8ef; border-radius:20px; padding:18px;
+    box-shadow:0 6px 24px rgba(119,110,101,0.12);
+    width:360px;
+  }
+  .panel-label {
+    text-align:center; font-size:12px; font-weight:700; letter-spacing:1px;
+    text-transform:uppercase; color:#bbada0; margin-bottom:14px;
+  }
+
+  /* ---------- shared header ---------- */
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+  .title { font-size:52px; font-weight:800; color:#776e65; line-height:1; }
+  .scores { display:flex; gap:8px; }
+  .score-box { background:#bbada0; border-radius:6px; padding:7px 14px; text-align:center; color:#f9f6f2; min-width:66px; }
+  .score-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#eee4da; }
+  .score-value { font-size:20px; font-weight:800; }
+
+  .subrow { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px; }
+  .tagline { font-size:12px; color:#776e65; max-width:170px; }
+  .actions { display:flex; gap:8px; }
+  .btn {
+    background:#8f7a66; color:#f9f6f2; border:none; border-radius:6px;
+    padding:11px 15px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .btn.icon { padding:11px 14px; }
+  .btn.ghost { background:#cdc1b4; color:#776e65; }
+
+  /* ---------- board ---------- */
+  .board {
+    position:relative; background:#bbada0; border-radius:10px; padding:10px;
+    aspect-ratio:1/1; display:grid;
+    grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); gap:10px;
+  }
+  .cell { background:rgba(238,228,218,0.35); border-radius:6px; }
+  .tile { border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:30px; }
+  .t2{background:#eee4da;color:#776e65;} .t4{background:#ede0c8;color:#776e65;}
+  .t8{background:#f2b179;color:#f9f6f2;} .t16{background:#f59563;color:#f9f6f2;}
+  .t32{background:#f67c5f;color:#f9f6f2;} .t64{background:#f65e3b;color:#f9f6f2;}
+  .t128{background:#edcf72;color:#f9f6f2;font-size:26px;} .t256{background:#edcc61;color:#f9f6f2;font-size:26px;}
+  .t512{background:#edc850;color:#f9f6f2;font-size:26px;} .t1024{background:#edc53f;color:#f9f6f2;font-size:20px;}
+  .t2048{background:#edc22e;color:#f9f6f2;font-size:20px;}
+
+  .hint { text-align:center; margin-top:14px; font-size:12px; color:#bbada0; }
+
+  /* floating +score */
+  .plus-score {
+    position:absolute; top:-14px; right:90px;
+    font-weight:800; color:#776e65; font-size:22px; opacity:0.9;
+  }
+
+  /* ---------- dialog overlay ---------- */
+  .overlay {
+    position:absolute; inset:0; background:rgba(238,228,218,0.78);
+    border-radius:10px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:8px; text-align:center; padding:20px;
+  }
+  .overlay h2 { font-size:40px; font-weight:800; color:#776e65; }
+  .overlay h2.win { color:#edc22e; }
+  .overlay p { font-size:14px; color:#776e65; opacity:0.8; }
+  .overlay-buttons { display:flex; gap:10px; margin-top:8px; }
+
+  /* ---------- modal card (centered dialog) ---------- */
+  .modal-stage {
+    position:relative; background:#bbada0; border-radius:10px; aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center; padding:18px;
+  }
+  .modal-scrim { position:absolute; inset:0; background:rgba(60,52,46,0.45); border-radius:10px; }
+  .modal-card {
+    position:relative; background:#faf8ef; border-radius:14px; padding:24px 22px;
+    width:88%; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  }
+  .modal-card h3 { font-size:22px; font-weight:800; color:#776e65; margin-bottom:10px; }
+  .modal-card p { font-size:13px; color:#8f7a66; line-height:1.5; margin-bottom:18px; }
+  .modal-buttons { display:flex; gap:10px; justify-content:center; }
+  .how-list { text-align:left; font-size:13px; color:#776e65; line-height:1.7; margin-bottom:18px; }
+  .how-list li { margin-left:16px; }
+
+  /* button inventory */
+  .inv { display:flex; flex-direction:column; gap:14px; }
+  .inv-row { display:flex; align-items:center; gap:14px; }
+  .inv-row .desc { font-size:12px; color:#8f7a66; }
+</style>
+</head>
+<body>
+  <h1 class="page-title">2048 — Complete UI Mockups</h1>
+  <p class="page-sub">All screens, dialogs, and buttons for the lean &amp; polished build. Classic palette. Scroll to review everything.</p>
+
+  <div class="grid">
+
+    <!-- 1. START STATE -->
+    <div class="panel">
+      <div class="panel-label">1 · Game Screen — Start (new game)</div>
+      <div class="header">
+        <div class="title">2048</div>
+        <div class="scores">
+          <div class="score-box"><div class="score-label">Score</div><div class="score-value">0</div></div>
+          <div class="score-box"><div class="score-label">Best</div><div class="score-value">3580</div></div>
+        </div>
+      </div>
+      <div class="subrow">
+        <div class="tagline">Join the tiles, get to <b>2048!</b></div>
+        <div class="actions">
+          <button class="btn icon ghost">?</button>
+          <button class="btn">New Game</button>
+        </div>
+      </div>
+      <div class="board">
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="tile t2">2</div><div class="cell"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="tile t2">2</div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      </div>
+      <div class="hint">Swipe ← ↑ → ↓ to move</div>
+    </div>
+
+    <!-- 2. MID GAME with +score -->
+    <div class="panel">
+      <div class="panel-label">2 · Game Screen — Mid-game (+score pops on merge)</div>
+      <div class="header">
+        <div class="title">2048</div>
+        <div class="scores">
+          <div class="score-box"><div class="score-label">Score</div><div class="score-value">1240</div></div>
+          <div class="score-box"><div class="score-label">Best</div><div class="score-value">3580</div></div>
+        </div>
+      </div>
+      <div class="subrow">
+        <div class="tagline">Join the tiles, get to <b>2048!</b></div>
+        <div class="actions">
+          <button class="btn icon ghost">?</button>
+          <button class="btn">New Game</button>
+        </div>
+      </div>
+      <div class="board">
+        <div class="plus-score">+16</div>
+        <div class="tile t2">2</div><div class="tile t8">8</div><div class="tile t4">4</div><div class="tile t2">2</div>
+        <div class="cell"></div><div class="tile t16">16</div><div class="tile t32">32</div><div class="tile t4">4</div>
+        <div class="tile t4">4</div><div class="tile t64">64</div><div class="tile t128">128</div><div class="cell"></div>
+        <div class="tile t256">256</div><div class="tile t8">8</div><div class="tile t2">2</div><div class="cell"></div>
+      </div>
+      <div class="hint">Swipe ← ↑ → ↓ to move</div>
+    </div>
+
+    <!-- 3. WIN overlay -->
+    <div class="panel">
+      <div class="panel-label">3 · Win Overlay (reached 2048)</div>
+      <div class="header">
+        <div class="title">2048</div>
+        <div class="scores">
+          <div class="score-box"><div class="score-label">Score</div><div class="score-value">20480</div></div>
+          <div class="score-box"><div class="score-label">Best</div><div class="score-value">20480</div></div>
+        </div>
+      </div>
+      <div class="subrow">
+        <div class="tagline">Join the tiles, get to <b>2048!</b></div>
+        <div class="actions">
+          <button class="btn icon ghost">?</button>
+          <button class="btn">New Game</button>
+        </div>
+      </div>
+      <div class="board">
+        <div class="tile t2">2</div><div class="tile t8">8</div><div class="tile t4">4</div><div class="tile t2">2</div>
+        <div class="tile t16">16</div><div class="tile t2048">2048</div><div class="tile t32">32</div><div class="tile t4">4</div>
+        <div class="tile t4">4</div><div class="tile t64">64</div><div class="tile t128">128</div><div class="tile t8">8</div>
+        <div class="tile t256">256</div><div class="tile t512">512</div><div class="tile t2">2</div><div class="tile t16">16</div>
+        <div class="overlay">
+          <h2 class="win">You Win! 🎉</h2>
+          <p>You reached 2048. Keep going for a higher score?</p>
+          <div class="overlay-buttons">
+            <button class="btn ghost">New Game</button>
+            <button class="btn">Keep Going</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. GAME OVER overlay -->
+    <div class="panel">
+      <div class="panel-label">4 · Game Over Overlay (no moves left)</div>
+      <div class="header">
+        <div class="title">2048</div>
+        <div class="scores">
+          <div class="score-box"><div class="score-label">Score</div><div class="score-value">2860</div></div>
+          <div class="score-box"><div class="score-label">Best</div><div class="score-value">3580</div></div>
+        </div>
+      </div>
+      <div class="subrow">
+        <div class="tagline">Join the tiles, get to <b>2048!</b></div>
+        <div class="actions">
+          <button class="btn icon ghost">?</button>
+          <button class="btn">New Game</button>
+        </div>
+      </div>
+      <div class="board">
+        <div class="tile t2">2</div><div class="tile t8">8</div><div class="tile t4">4</div><div class="tile t2">2</div>
+        <div class="tile t16">16</div><div class="tile t4">4</div><div class="tile t32">32</div><div class="tile t8">8</div>
+        <div class="tile t4">4</div><div class="tile t64">64</div><div class="tile t128">128</div><div class="tile t2">2</div>
+        <div class="tile t256">256</div><div class="tile t8">8</div><div class="tile t2">2</div><div class="tile t16">16</div>
+        <div class="overlay">
+          <h2>Game Over!</h2>
+          <p>No more moves. Final score: <b>2860</b></p>
+          <div class="overlay-buttons">
+            <button class="btn">Try Again</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. NEW GAME CONFIRM dialog -->
+    <div class="panel">
+      <div class="panel-label">5 · New Game Confirmation (tapped mid-progress)</div>
+      <div class="modal-stage">
+        <div class="modal-scrim"></div>
+        <div class="modal-card">
+          <h3>Start a new game?</h3>
+          <p>Your current game will be lost. Your best score stays saved.</p>
+          <div class="modal-buttons">
+            <button class="btn ghost">Cancel</button>
+            <button class="btn">New Game</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. HOW TO PLAY dialog -->
+    <div class="panel">
+      <div class="panel-label">6 · How to Play (tapped the “?” button)</div>
+      <div class="modal-stage">
+        <div class="modal-scrim"></div>
+        <div class="modal-card">
+          <h3>How to Play</h3>
+          <ul class="how-list">
+            <li>Swipe ← ↑ → ↓ to move all tiles.</li>
+            <li>Two tiles with the same number merge into one.</li>
+            <li>Each merge adds to your score.</li>
+            <li>Reach the <b>2048</b> tile to win — then keep going!</li>
+          </ul>
+          <div class="modal-buttons">
+            <button class="btn">Got it</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. BUTTON INVENTORY -->
+    <div class="panel">
+      <div class="panel-label">7 · Button Styles (inventory)</div>
+      <div class="inv">
+        <div class="inv-row"><button class="btn">New Game</button><span class="desc">Primary action (#8f7a66)</span></div>
+        <div class="inv-row"><button class="btn">Keep Going</button><span class="desc">Primary in dialogs</span></div>
+        <div class="inv-row"><button class="btn ghost">Cancel</button><span class="desc">Secondary / ghost (#cdc1b4)</span></div>
+        <div class="inv-row"><button class="btn icon ghost">?</button><span class="desc">How-to-play icon button</span></div>
+        <div class="inv-row"><button class="btn">Try Again</button><span class="desc">Game-over primary</span></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

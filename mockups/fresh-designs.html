@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Fresh Design Directions</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { background:#1b1d22; color:#eee; padding:32px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin-bottom:40px; font-size:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:40px; justify-content:center; align-items:flex-start; }
+  .opt { width:340px; }
+  .opt h2 { text-align:center; font-size:16px; margin-bottom:4px; }
+  .opt .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:16px; }
+
+  .phone { border-radius:26px; padding:18px; }
+  .head { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .logo { font-weight:800; }
+  .scores { display:flex; gap:8px; }
+  .sbox { border-radius:10px; padding:6px 12px; text-align:center; min-width:60px; }
+  .slabel { font-size:9px; letter-spacing:1px; opacity:.7; font-weight:700; }
+  .sval { font-size:18px; font-weight:800; }
+  .grid { display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); gap:9px; aspect-ratio:1/1; border-radius:14px; padding:9px; }
+  .t { border-radius:9px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:24px; }
+  .empty { border-radius:9px; }
+  .btn { border:none; border-radius:10px; padding:10px 16px; font-weight:700; font-size:13px; cursor:pointer; }
+
+  /* ============ 1. NEON DARK ============ */
+  .neon .phone { background:#15171c; box-shadow:0 0 0 1px #262a33; }
+  .neon .logo { color:#fff; font-size:30px; text-shadow:0 0 14px #6c8cff; }
+  .neon .sbox { background:#22262f; color:#cdd3df; }
+  .neon .grid { background:#0e0f13; }
+  .neon .empty { background:#1c1f26; }
+  .neon .head { margin-bottom:16px; }
+  .neon .btn { background:linear-gradient(135deg,#6c8cff,#9a6cff); color:#fff; box-shadow:0 0 16px rgba(108,140,255,.5); }
+  .neon .t { color:#fff; }
+  .neon .t2{background:#2a3550;box-shadow:0 0 10px #2a355080;} .neon .t4{background:#36306a;box-shadow:0 0 10px #36306a80;}
+  .neon .t8{background:linear-gradient(135deg,#00d4ff,#0077ff);box-shadow:0 0 16px #00b3ff90;}
+  .neon .t16{background:linear-gradient(135deg,#7b5cff,#b14cff);box-shadow:0 0 16px #9a6cff90;}
+  .neon .t32{background:linear-gradient(135deg,#ff5ca8,#ff3d6e);box-shadow:0 0 16px #ff4d8890;}
+  .neon .t64{background:linear-gradient(135deg,#ffb14c,#ff7a3d);box-shadow:0 0 18px #ff944d90;}
+  .neon .t128{background:linear-gradient(135deg,#3dffb0,#00d98a);box-shadow:0 0 20px #1fe6a090;font-size:20px;}
+
+  /* ============ 2. GLASS / AURORA ============ */
+  .glass .phone { background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e); }
+  .glass .logo { color:#fff; font-size:30px; }
+  .glass .sbox { background:rgba(255,255,255,.18); color:#fff; backdrop-filter:blur(6px); }
+  .glass .grid { background:rgba(255,255,255,.14); backdrop-filter:blur(8px); box-shadow:inset 0 0 0 1px rgba(255,255,255,.25); }
+  .glass .empty { background:rgba(255,255,255,.12); }
+  .glass .btn { background:rgba(255,255,255,.92); color:#7a2df5; }
+  .glass .t { color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,.35), 0 6px 14px rgba(0,0,0,.18); }
+  .glass .t2{background:rgba(255,255,255,.30);color:#fff;} .glass .t4{background:rgba(255,255,255,.45);color:#5b3df5;}
+  .glass .t8{background:rgba(255,209,102,.92);color:#6a3b00;} .glass .t16{background:rgba(255,138,101,.95);}
+  .glass .t32{background:rgba(255,94,140,.95);} .glass .t64{background:rgba(124,92,255,.95);}
+  .glass .t128{background:rgba(61,255,176,.92);color:#064;font-size:20px;}
+
+  /* ============ 3. SOFT PASTEL / CLAYMORPH ============ */
+  .clay .phone { background:#eef0f6; }
+  .clay .logo { color:#5566d6; font-size:30px; }
+  .clay .sbox { background:#fff; color:#5b6270; box-shadow:6px 6px 12px #d4d7e0, -6px -6px 12px #ffffff; }
+  .clay .grid { background:#e4e7f0; box-shadow:inset 6px 6px 12px #d0d3dd, inset -6px -6px 12px #ffffff; }
+  .clay .empty { background:#eaecf4; box-shadow:inset 3px 3px 6px #d4d7e0, inset -3px -3px 6px #ffffff; }
+  .clay .btn { background:#5566d6; color:#fff; box-shadow:4px 4px 10px #c3c6cf; }
+  .clay .t { box-shadow:4px 4px 8px rgba(0,0,0,.10), -2px -2px 6px rgba(255,255,255,.6); }
+  .clay .t2{background:#fde9c8;color:#7a6650;} .clay .t4{background:#fdd9a8;color:#7a6650;}
+  .clay .t8{background:#ffb487;color:#fff;} .clay .t16{background:#ff9a76;color:#fff;}
+  .clay .t32{background:#ff7e8f;color:#fff;} .clay .t64{background:#9b8cff;color:#fff;}
+  .clay .t128{background:#5fd0a0;color:#fff;font-size:20px;}
+</style>
+</head>
+<body>
+  <h1>2048 — Pick a Fresh Look</h1>
+  <p class="sub">Three new directions. Tell me the number you want and I'll build it in Flutter and hot-reload it live.</p>
+
+  <div class="row">
+
+    <!-- 1 NEON DARK -->
+    <div class="opt neon">
+      <h2>1 · Neon Dark</h2>
+      <div class="tag">Dark, glowing gradient tiles, premium &amp; modern</div>
+      <div class="phone">
+        <div class="head">
+          <div class="logo">2048</div>
+          <div class="scores">
+            <div class="sbox"><div class="slabel">SCORE</div><div class="sval">1240</div></div>
+            <div class="sbox"><div class="slabel">BEST</div><div class="sval">3580</div></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+          <div class="empty"></div><div class="t t16">16</div><div class="t t32">32</div><div class="t t4">4</div>
+          <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="empty"></div>
+          <div class="t t2">2</div><div class="t t8">8</div><div class="empty"></div><div class="empty"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px;"><button class="btn">New Game</button></div>
+      </div>
+    </div>
+
+    <!-- 2 GLASS -->
+    <div class="opt glass">
+      <h2>2 · Aurora Glass</h2>
+      <div class="tag">Vibrant gradient + frosted glass tiles</div>
+      <div class="phone">
+        <div class="head">
+          <div class="logo">2048</div>
+          <div class="scores">
+            <div class="sbox"><div class="slabel">SCORE</div><div class="sval">1240</div></div>
+            <div class="sbox"><div class="slabel">BEST</div><div class="sval">3580</div></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+          <div class="empty"></div><div class="t t16">16</div><div class="t t32">32</div><div class="t t4">4</div>
+          <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="empty"></div>
+          <div class="t t2">2</div><div class="t t8">8</div><div class="empty"></div><div class="empty"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px;"><button class="btn">New Game</button></div>
+      </div>
+    </div>
+
+    <!-- 3 CLAY -->
+    <div class="opt clay">
+      <h2>3 · Soft Clay</h2>
+      <div class="tag">Soft pastel, puffy “claymorphism”, friendly</div>
+      <div class="phone">
+        <div class="head">
+          <div class="logo">2048</div>
+          <div class="scores">
+            <div class="sbox"><div class="slabel">SCORE</div><div class="sval">1240</div></div>
+            <div class="sbox"><div class="slabel">BEST</div><div class="sval">3580</div></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+          <div class="empty"></div><div class="t t16">16</div><div class="t t32">32</div><div class="t t4">4</div>
+          <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="empty"></div>
+          <div class="t t2">2</div><div class="t t8">8</div><div class="empty"></div><div class="empty"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:14px;"><button class="btn">New Game</button></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

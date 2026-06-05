@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Game Screen with Banner Ad</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#222; padding:30px 16px 60px; display:flex; justify-content:center; }
+  .wrap { width:380px; max-width:100%; }
+  .caption { color:#bbb; text-align:center; font-size:13px; margin-bottom:16px; }
+
+  /* phone screen */
+  .screen {
+    border-radius:28px; overflow:hidden;
+    background:linear-gradient(135deg,#5b3df5,#a23df5 55%,#f53d9e);
+    display:flex; flex-direction:column; height:760px;
+  }
+  .content { flex:1; padding:20px; color:#fff; overflow:hidden; }
+
+  /* header */
+  .head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .logo { font-size:40px; font-weight:800; text-shadow:0 3px 12px rgba(0,0,0,.5); }
+  .scores { display:flex; gap:8px; }
+  .sbox { background:rgba(255,255,255,.18); border:1.2px solid rgba(255,255,255,.35); border-radius:12px; padding:8px 14px; text-align:center; min-width:66px; }
+  .slabel { font-size:10px; letter-spacing:1px; font-weight:700; color:#ffffffcc; }
+  .sval { font-size:20px; font-weight:800; }
+
+  .subrow { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .tag { flex:1; font-size:12px; }
+  .ic { width:40px; height:40px; border-radius:8px; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .new { background:#fff; color:#6a2dbf; border:none; border-radius:8px; padding:10px 14px; font-weight:700; font-size:13px; }
+
+  /* board */
+  .board { background:rgba(255,255,255,.14); border:1.4px solid rgba(255,255,255,.35); border-radius:16px; padding:9px; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); gap:9px; aspect-ratio:1/1; }
+  .t { border-radius:14px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:22px; box-shadow:0 4px 8px rgba(0,0,0,.22); }
+  .t2{background:#d9dbf7;color:#1e2a4a;} .t4{background:#7fe0d2;color:#1e2a4a;}
+  .t8{background:#ffb23f;color:#fff;} .t16{background:#ff5b5b;color:#fff;}
+  .t32{background:#ff4d9d;color:#fff;} .t64{background:#ff6a3d;color:#fff;}
+  .t128{background:#ffc93c;color:#fff;font-size:18px;} .empty{background:rgba(255,255,255,.10);border-radius:14px;}
+  .hint { text-align:center; margin-top:14px; font-size:12px; color:#ffffffb0; }
+
+  /* ===== BANNER AD ===== */
+  .ad {
+    height:64px; background:#ffffff; display:flex; align-items:center; gap:10px; padding:0 12px;
+    border-top:1px solid #e2e2e2; position:relative;
+  }
+  .ad .badge { position:absolute; top:4px; left:6px; background:#f4c20d; color:#222; font-size:8px; font-weight:800; padding:1px 4px; border-radius:3px; letter-spacing:.5px; }
+  .ad .icon { width:42px; height:42px; border-radius:9px; background:linear-gradient(135deg,#3ddc97,#1aa179); flex-shrink:0; }
+  .ad .body { flex:1; min-width:0; }
+  .ad .title { font-size:13px; font-weight:700; color:#202124; }
+  .ad .desc { font-size:11px; color:#5f6368; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ad .cta { background:#1a73e8; color:#fff; border:none; border-radius:6px; padding:8px 14px; font-size:12px; font-weight:700; flex-shrink:0; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="caption">MOCKUP — Game screen with a banner ad pinned to the bottom (standard 320×50–ish AdMob banner)</div>
+    <div class="screen">
+
+      <div class="content">
+        <div class="head">
+          <div class="logo">2048</div>
+          <div class="scores">
+            <div class="sbox"><div class="slabel">SCORE</div><div class="sval">1240</div></div>
+            <div class="sbox"><div class="slabel">BEST</div><div class="sval">3580</div></div>
+          </div>
+        </div>
+
+        <div class="subrow">
+          <div class="tag">Join the tiles, get to <b>2048!</b></div>
+          <div class="ic">🔊</div>
+          <div class="ic">?</div>
+          <button class="new">New Game</button>
+        </div>
+
+        <div class="board">
+          <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+          <div class="empty"></div><div class="t t16">16</div><div class="t t32">32</div><div class="t t4">4</div>
+          <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="empty"></div>
+          <div class="t t2">2</div><div class="t t8">8</div><div class="empty"></div><div class="empty"></div>
+        </div>
+
+        <div class="hint">Swipe ← ↑ → ↓ to move</div>
+      </div>
+
+      <!-- Banner ad anchored at the bottom -->
+      <div class="ad">
+        <span class="badge">AD</span>
+        <div class="icon"></div>
+        <div class="body">
+          <div class="title">Cool Puzzle Game</div>
+          <div class="desc">Free • 4.6 ★ • Play now and relax</div>
+        </div>
+        <button class="cta">Install</button>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

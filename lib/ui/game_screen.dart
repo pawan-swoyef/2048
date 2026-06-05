@@ -1,0 +1,302 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../ads/banner_ad_box.dart';
+import '../game/board.dart';
+import '../game/game_state.dart';
+import '../game/score_store.dart';
+import '../game/sound_service.dart';
+import 'animated_board.dart';
+import 'dialogs.dart';
+import 'game_buttons.dart';
+import 'overlays.dart';
+import 'score_header.dart';
+import 'tile_style.dart';
+
+/// The single screen of the game.
+class GameScreen extends StatefulWidget {
+  const GameScreen({super.key});
+
+  @override
+  State<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends State<GameScreen> {
+  final Random _rng = Random();
+  final ScoreStore _store = ScoreStore();
+  final SoundService _sound = SoundService();
+
+  late GameState _state;
+  List<TileMove> _moves = const [];
+  Set<int> _popCells = const {};
+  int _tick = 0;
+  bool _busy = false;
+  bool _soundOn = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _state = GameState.newGame(_rng);
+    _popCells = _allTileCells(_state.board);
+    _loadPrefs();
+  }
+
+  @override
+  void dispose() {
+    _sound.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadPrefs() async {
+    final best = await _store.loadBest();
+    final soundOn = await _store.loadSoundEnabled();
+    if (!mounted) return;
+    setState(() {
+      _soundOn = soundOn;
+      _sound.enabled = soundOn;
+      if (best > _state.best) {
+        _state =
+            GameState(board: _state.board, score: _state.score, best: best);
+      }
+    });
+  }
+
+  void _toggleSound() {
+    setState(() {
+      _soundOn = !_soundOn;
+      _sound.enabled = _soundOn;
+    });
+    _store.saveSoundEnabled(_soundOn);
+  }
+
+  void _move(Direction dir) {
+    if (_busy) return;
+    final previous = _state.board;
+    final wasWon = _state.won;
+    final next = _state.move(dir, _rng);
+    if (identical(next, _state)) return; // no-op move
+
+    final moves = planMove(previous, dir);
+    final preSpawn = applyMove(previous, dir).board;
+    final hasMerge = moves.any((m) => m.merged);
+
+    final pop = <int>{};
+    for (final m in moves) {
+      if (m.merged) pop.add(m.toRow * kBoardSize + m.toCol);
+    }
+    // The spawned tile: the cell that filled in only after the slide resolved.
+    for (var r = 0; r < kBoardSize; r++) {
+      for (var c = 0; c < kBoardSize; c++) {
+        if (preSpawn[r][c] == 0 && next.board[r][c] != 0) {
+          pop.add(r * kBoardSize + c);
+        }
+      }
+    }
+
+    setState(() {
+      _state = next;
+      _moves = moves;
+      _popCells = pop;
+      _tick++;
+      _busy = true;
+    });
+
+    if (next.best > 0) _store.saveBest(next.best);
+
+    if (next.over) {
+      _sound.gameOver();
+    } else if (next.won && !wasWon) {
+      _sound.win();
+    } else if (hasMerge) {
+      _sound.merge();
+    } else {
+      _sound.move();
+    }
+
+    Future.delayed(const Duration(milliseconds: 170), () {
+      if (mounted) setState(() => _busy = false);
+    });
+  }
+
+  Future<void> _onNewGamePressed() async {
+    if (_state.score > 0 && !_state.over) {
+      final confirmed = await confirmNewGame(context);
+      if (!confirmed) return;
+    }
+    _startNewGame();
+  }
+
+  void _startNewGame() {
+    setState(() {
+      _state = GameState.newGame(_rng, best: _state.best);
+      _moves = const [];
+      _popCells = _allTileCells(_state.board);
+      _tick++;
+      _busy = false;
+    });
+  }
+
+  void _keepGoing() => setState(() => _state = _state.keepPlaying());
+
+  Set<int> _allTileCells(List<List<int>> board) {
+    final cells = <int>{};
+    for (var r = 0; r < kBoardSize; r++) {
+      for (var c = 0; c < kBoardSize; c++) {
+        if (board[r][c] != 0) cells.add(r * kBoardSize + c);
+      }
+    }
+    return cells;
+  }
+
+  bool _handleKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.arrowLeft:
+        _move(Direction.left);
+      case LogicalKeyboardKey.arrowRight:
+        _move(Direction.right);
+      case LogicalKeyboardKey.arrowUp:
+        _move(Direction.up);
+      case LogicalKeyboardKey.arrowDown:
+        _move(Direction.down);
+      default:
+        return false;
+    }
+    return true;
+  }
+
+  Widget? _overlay() {
+    if (_state.over) {
+      return GameOverOverlay(score: _state.score, onTryAgain: _startNewGame);
+    }
+    if (_state.won && !_state.keepGoing) {
+      return WinOverlay(onKeepGoing: _keepGoing, onNewGame: _startNewGame);
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final overlay = _overlay();
+
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              GameColors.gradientTop,
+              GameColors.gradientMid,
+              GameColors.gradientBottom,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Focus(
+                autofocus: true,
+                onKeyEvent: (node, event) => _handleKey(event)
+                    ? KeyEventResult.handled
+                    : KeyEventResult.ignored,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ScoreHeader(score: _state.score, best: _state.best),
+                      const SizedBox(height: 18),
+                      _subRow(),
+                      const SizedBox(height: 16),
+                      GestureDetector(
+                        onHorizontalDragEnd: (d) {
+                          final v = d.primaryVelocity ?? 0;
+                          if (v > 0) _move(Direction.right);
+                          if (v < 0) _move(Direction.left);
+                        },
+                        onVerticalDragEnd: (d) {
+                          final v = d.primaryVelocity ?? 0;
+                          if (v > 0) _move(Direction.down);
+                          if (v < 0) _move(Direction.up);
+                        },
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Stack(
+                            children: [
+                              AnimatedBoard(
+                                board: _state.board,
+                                moves: _moves,
+                                popCells: _popCells,
+                                tick: _tick,
+                              ),
+                              if (overlay != null)
+                                Positioned.fill(child: overlay),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      const Text(
+                        'Swipe  ←  ↑  →  ↓  to move',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+                ),
+              ),
+              const BannerAdBox(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _subRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Expanded(
+          child: Text.rich(
+            TextSpan(
+              text: 'Join the tiles, get to ',
+              style: TextStyle(fontSize: 13, color: GameColors.darkText),
+              children: [
+                TextSpan(
+                  text: '2048!',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconActionButton(
+          icon: _soundOn ? Icons.volume_up : Icons.volume_off,
+          onPressed: _toggleSound,
+        ),
+        const SizedBox(width: 8),
+        IconActionButton(
+          icon: Icons.help_outline,
+          onPressed: () => showHowToPlay(context),
+        ),
+        const SizedBox(width: 8),
+        PrimaryButton(label: 'New Game', onPressed: _onNewGamePressed),
+      ],
+    );
+  }
+}
