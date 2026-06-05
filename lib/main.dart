@@ -16,7 +16,7 @@ class Game2048App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '2048',
+      title: '2048 Blocks: Merge Puzzle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: GameColors.gradientTop,
