@@ -69,6 +69,17 @@ class GameState {
     );
   }
 
+  /// Returns this state with [best] raised to at least the given value
+  /// (used when undoing, so the best score never decreases).
+  GameState withBest(int best) => GameState(
+        board: board,
+        score: score,
+        best: best > this.best ? best : this.best,
+        won: won,
+        keepGoing: keepGoing,
+        over: over,
+      );
+
   /// Continues play after a win (dismisses the win overlay).
   GameState keepPlaying() => GameState(
         board: board,

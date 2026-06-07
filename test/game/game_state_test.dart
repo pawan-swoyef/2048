@@ -127,6 +127,33 @@ void main() {
     });
   });
 
+  group('GameState.withBest', () {
+    test('raises best when the given value is higher', () {
+      const state = GameState(board: [
+        [2, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+      ], score: 10, best: 50);
+
+      final result = state.withBest(80);
+      expect(result.best, 80);
+      expect(result.score, 10);
+      expect(result.board, state.board);
+    });
+
+    test('keeps the current best when the given value is lower', () {
+      const state = GameState(board: [
+        [2, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+      ], score: 10, best: 50);
+
+      expect(state.withBest(30).best, 50);
+    });
+  });
+
   group('GameState.keepPlaying', () {
     test('marks the game as continued after a win', () {
       final state = GameState(

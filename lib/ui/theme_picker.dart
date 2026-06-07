@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'paywall.dart';
 import 'theme_controller.dart';
 
 /// A grid for browsing and selecting themes. Premium themes show a lock until
@@ -68,22 +69,31 @@ class ThemePickerScreen extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // TEMP test toggle so themes can be tried before billing is wired up.
-          TextButton.icon(
-            onPressed: () =>
-                controller.setPremiumUnlocked(!controller.premiumUnlocked),
-            icon: Icon(
-              controller.premiumUnlocked ? Icons.lock_open : Icons.lock,
-              color: Colors.white,
-              size: 18,
+          if (controller.premiumUnlocked)
+            const Row(
+              children: [
+                Icon(Icons.workspace_premium, color: Color(0xFFFFD23F), size: 18),
+                SizedBox(width: 4),
+                Text('Premium',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              ],
+            )
+          else
+            TextButton.icon(
+              onPressed: () => _openPaywall(context),
+              icon: const Icon(Icons.workspace_premium,
+                  color: Color(0xFFFFD23F), size: 18),
+              label: const Text('Go Premium',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
             ),
-            label: Text(
-              controller.premiumUnlocked ? 'Premium ON' : 'Unlock (test)',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-            ),
-          ),
         ],
       ),
+    );
+  }
+
+  void _openPaywall(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const PaywallScreen()),
     );
   }
 
@@ -134,18 +144,16 @@ class ThemePickerScreen extends StatelessWidget {
                         style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w700)),
                   ),
                   const SizedBox(width: 8),
-                  // TEMP: simulates a successful purchase until billing is added.
                   FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: theme.primaryButtonText,
                     ),
                     onPressed: () {
-                      controller.setPremiumUnlocked(true);
-                      controller.select(theme.id);
                       Navigator.of(dialogContext).pop();
+                      _openPaywall(context);
                     },
-                    child: const Text('Unlock (test)',
+                    child: const Text('Go Premium',
                         style: TextStyle(fontWeight: FontWeight.w800)),
                   ),
                 ],

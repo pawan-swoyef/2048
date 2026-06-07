@@ -13,6 +13,7 @@ import 'animated_board.dart';
 import 'dialogs.dart';
 import 'game_buttons.dart';
 import 'overlays.dart';
+import 'paywall.dart';
 import 'score_header.dart';
 import 'theme_controller.dart';
 import 'theme_picker.dart';
@@ -32,11 +33,14 @@ class _GameScreenState extends State<GameScreen> {
   final InterstitialController _interstitial = InterstitialController();
 
   late GameState _state;
+  final List<GameState> _history = []; // for undo (premium)
   List<TileMove> _moves = const [];
   Set<int> _popCells = const {};
   int _tick = 0;
   bool _busy = false;
   bool _soundOn = true;
+
+  static const int _maxUndoHistory = 50;
 
   @override
   void initState() {
@@ -87,6 +91,10 @@ class _GameScreenState extends State<GameScreen> {
     final wasWon = _state.won;
     final next = _state.move(dir, _rng);
     if (identical(next, _state)) return; // no-op move
+
+    // Save the pre-move state for undo (capped to bound memory).
+    _history.add(_state);
+    if (_history.length > _maxUndoHistory) _history.removeAt(0);
 
     final moves = planMove(previous, dir);
     final preSpawn = applyMove(previous, dir).board;
@@ -143,10 +151,30 @@ class _GameScreenState extends State<GameScreen> {
   void _startNewGame() {
     setState(() {
       _state = GameState.newGame(_rng, best: _state.best);
+      _history.clear();
       _moves = const [];
       _popCells = _allTileCells(_state.board);
       _tick++;
       _busy = false;
+    });
+  }
+
+  void _undo() {
+    final controller = ThemeScope.controllerOf(context);
+    if (!controller.premiumUnlocked) {
+      // Undo is a premium feature — send free users to the paywall.
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PaywallScreen()),
+      );
+      return;
+    }
+    if (_history.isEmpty || _busy) return;
+    final previous = _history.removeLast();
+    setState(() {
+      _state = previous.withBest(_state.best); // never lower the best score
+      _moves = const [];
+      _popCells = const {};
+      _tick++;
     });
   }
 
@@ -193,6 +221,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     final overlay = _overlay();
     final theme = ThemeScope.of(context);
+    final premium = ThemeScope.controllerOf(context).premiumUnlocked;
 
     return Scaffold(
       body: Container(
@@ -251,7 +280,9 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 14),
+                      _undoButton(theme, premium),
+                      const SizedBox(height: 14),
                       Text(
                         'Swipe  ←  ↑  →  ↓  to move',
                         style: TextStyle(
@@ -267,8 +298,47 @@ class _GameScreenState extends State<GameScreen> {
             ),
                 ),
               ),
-              const BannerAdBox(),
+              if (!premium) const BannerAdBox(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _undoButton(GameTheme theme, bool premium) {
+    final enabled = premium ? _history.isNotEmpty : true;
+    return Opacity(
+      opacity: enabled ? 1 : 0.5,
+      child: Material(
+        color: theme.ghostButton,
+        borderRadius: BorderRadius.circular(10),
+        elevation: 3,
+        shadowColor: Colors.black.withValues(alpha: 0.4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: enabled ? _undo : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.undo, size: 18, color: theme.onBackground),
+                const SizedBox(width: 8),
+                Text(
+                  'Undo',
+                  style: TextStyle(
+                    color: theme.onBackground,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+                if (!premium) ...[
+                  const SizedBox(width: 6),
+                  const Icon(Icons.lock, size: 14, color: Color(0xFFFFD23F)),
+                ],
+              ],
+            ),
           ),
         ),
       ),

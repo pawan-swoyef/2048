@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Premium Paywall</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#222; padding:30px 16px 60px; display:flex; gap:30px; flex-wrap:wrap; justify-content:center; }
+  .caption { color:#bbb; text-align:center; font-size:13px; margin-bottom:14px; }
+  .col { width:380px; max-width:100%; }
+
+  .screen {
+    border-radius:28px; overflow:hidden; min-height:760px;
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    color:#fff; padding:22px 20px 28px; position:relative;
+  }
+  .close { position:absolute; top:18px; right:18px; width:32px; height:32px; border-radius:50%;
+           background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:18px; }
+
+  .crown { text-align:center; font-size:46px; margin:14px 0 6px; }
+  .title { text-align:center; font-size:28px; font-weight:800; }
+  .subtitle { text-align:center; font-size:14px; color:#ffffffcc; margin-top:6px; margin-bottom:22px; }
+
+  .benefits { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:18px; padding:16px 16px; margin-bottom:22px; }
+  .benefit { display:flex; align-items:center; gap:12px; padding:9px 0; }
+  .benefit .ic { width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .benefit .txt b { font-size:15px; }
+  .benefit .txt div { font-size:12px; color:#ffffffbb; }
+
+  .plans { display:flex; flex-direction:column; gap:12px; margin-bottom:18px; }
+  .plan { background:rgba(255,255,255,.10); border:2px solid rgba(255,255,255,.25); border-radius:16px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; position:relative; }
+  .plan.best { border-color:#ffd23f; background:rgba(255,210,63,.15); }
+  .plan .left .name { font-size:16px; font-weight:800; }
+  .plan .left .sub { font-size:12px; color:#ffffffbb; }
+  .plan .price { text-align:right; }
+  .plan .price .amt { font-size:18px; font-weight:800; }
+  .plan .price .per { font-size:11px; color:#ffffffbb; }
+  .badge { position:absolute; top:-10px; left:16px; background:#ffd23f; color:#5a4500; font-size:10px; font-weight:800; padding:2px 8px; border-radius:20px; letter-spacing:.5px; }
+  .radio { width:20px; height:20px; border-radius:50%; border:2px solid #fff; margin-right:12px; flex-shrink:0; position:relative; }
+  .plan.sel .radio { border-color:#ffd23f; }
+  .plan.sel .radio::after { content:""; position:absolute; inset:3px; border-radius:50%; background:#ffd23f; }
+
+  .cta { width:100%; background:#fff; color:#6a2dbf; border:none; border-radius:14px; padding:16px; font-size:17px; font-weight:800; cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,.3); }
+  .restore { text-align:center; margin-top:14px; font-size:13px; color:#ffffffcc; text-decoration:underline; }
+  .legal { text-align:center; margin-top:14px; font-size:10px; color:#ffffff99; line-height:1.5; }
+</style>
+</head>
+<body>
+  <!-- VARIANT A: 3 plans -->
+  <div class="col">
+    <div class="caption">PAYWALL — Variant A (Monthly / Yearly / Lifetime)</div>
+    <div class="screen">
+      <div class="close">✕</div>
+      <div class="crown">👑</div>
+      <div class="title">Go Premium</div>
+      <div class="subtitle">Unlock the full experience</div>
+
+      <div class="benefits">
+        <div class="benefit"><div class="ic">🚫</div><div class="txt"><b>Remove all ads</b><div>No banners, no interruptions</div></div></div>
+        <div class="benefit"><div class="ic">↩️</div><div class="txt"><b>Unlimited Undo</b><div>Take back any move, anytime</div></div></div>
+        <div class="benefit"><div class="ic">🎨</div><div class="txt"><b>All 7 themes</b><div>Neon, Ocean, Gold &amp; more</div></div></div>
+      </div>
+
+      <div class="plans">
+        <div class="plan"><div style="display:flex;align-items:center"><div class="radio"></div><div class="left"><div class="name">Monthly</div><div class="sub">Billed monthly</div></div></div><div class="price"><div class="amt">$1.99</div><div class="per">/month</div></div></div>
+        <div class="plan best sel"><span class="badge">BEST VALUE · SAVE 67%</span><div style="display:flex;align-items:center"><div class="radio"></div><div class="left"><div class="name">Yearly</div><div class="sub">$0.67 / month</div></div></div><div class="price"><div class="amt">$7.99</div><div class="per">/year</div></div></div>
+        <div class="plan"><div style="display:flex;align-items:center"><div class="radio"></div><div class="left"><div class="name">Lifetime</div><div class="sub">One-time, forever</div></div></div><div class="price"><div class="amt">$9.99</div><div class="per">once</div></div></div>
+      </div>
+
+      <button class="cta">Continue</button>
+      <div class="restore">Restore purchase</div>
+      <div class="legal">Subscriptions auto-renew until cancelled. Cancel anytime in Google Play.<br>Terms of Service · Privacy Policy</div>
+    </div>
+  </div>
+
+  <!-- VARIANT B: simple one-time + lifetime focus -->
+  <div class="col">
+    <div class="caption">PAYWALL — Variant B (simpler: Yearly + Lifetime only)</div>
+    <div class="screen" style="background:linear-gradient(160deg,#2a2417,#0d0d0d);">
+      <div class="close">✕</div>
+      <div class="crown" style="color:#ffd23f">👑</div>
+      <div class="title">2048 Premium</div>
+      <div class="subtitle">One upgrade. Everything unlocked.</div>
+
+      <div class="benefits" style="background:rgba(212,175,55,.12);border-color:rgba(212,175,55,.4)">
+        <div class="benefit"><div class="ic" style="background:rgba(212,175,55,.25)">🚫</div><div class="txt"><b>Remove all ads</b><div>Pure, uninterrupted play</div></div></div>
+        <div class="benefit"><div class="ic" style="background:rgba(212,175,55,.25)">↩️</div><div class="txt"><b>Unlimited Undo</b><div>Never lose to a misswipe</div></div></div>
+        <div class="benefit"><div class="ic" style="background:rgba(212,175,55,.25)">🎨</div><div class="txt"><b>All premium themes</b><div>6 exclusive looks</div></div></div>
+      </div>
+
+      <div class="plans">
+        <div class="plan best sel" style="border-color:#ffd23f;background:rgba(255,210,63,.15)"><span class="badge">MOST POPULAR</span><div style="display:flex;align-items:center"><div class="radio"></div><div class="left"><div class="name">Yearly</div><div class="sub">$0.67 / month, billed yearly</div></div></div><div class="price"><div class="amt">$7.99</div><div class="per">/year</div></div></div>
+        <div class="plan"><div style="display:flex;align-items:center"><div class="radio"></div><div class="left"><div class="name">Lifetime</div><div class="sub">Pay once, yours forever</div></div></div><div class="price"><div class="amt">$9.99</div><div class="per">once</div></div></div>
+      </div>
+
+      <button class="cta" style="background:#ffd23f;color:#5a4500">Unlock Premium</button>
+      <div class="restore">Restore purchase</div>
+      <div class="legal">Auto-renews until cancelled. Manage in Google Play.<br>Terms · Privacy Policy</div>
+    </div>
+  </div>
+</body>
+</html>
