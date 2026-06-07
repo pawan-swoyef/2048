@@ -1,0 +1,15 @@
+name: play_publish
+description: >-
+  One-off CLI to push the Google Play Store listing (title + short/full
+  description) from docs/store-listing.md via the Play Developer API.
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  args: ^2.5.0
+  googleapis: ^14.0.0
+  googleapis_auth: ^1.6.0
+  image: ^4.1.0

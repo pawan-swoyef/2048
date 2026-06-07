@@ -1,6 +1,13 @@
 # Node.js (not used by this Flutter app — guards against stray installs)
 node_modules/
 
+# Secrets — service-account keys, signing keys, etc. NEVER commit these.
+secretandstunts-*.json
+*-service-account*.json
+*.keystore
+*.jks
+key.properties
+
 # Miscellaneous
 *.class
 *.log
