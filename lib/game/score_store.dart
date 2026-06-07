@@ -25,4 +25,23 @@ class ScoreStore {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_soundKey, enabled);
   }
+
+  static const _themeKey = 'theme_id';
+  static const _premiumKey = 'premium_unlocked';
+
+  Future<String> loadThemeId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_themeKey) ?? 'aurora';
+  }
+
+  Future<bool> loadPremiumUnlocked() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_premiumKey) ?? false;
+  }
+
+  Future<void> saveTheme(String themeId, bool premiumUnlocked) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_themeKey, themeId);
+    await prefs.setBool(_premiumKey, premiumUnlocked);
+  }
 }

@@ -13,7 +13,8 @@ import 'dialogs.dart';
 import 'game_buttons.dart';
 import 'overlays.dart';
 import 'score_header.dart';
-import 'tile_style.dart';
+import 'theme_controller.dart';
+import 'theme_picker.dart';
 
 /// The single screen of the game.
 class GameScreen extends StatefulWidget {
@@ -69,6 +70,12 @@ class _GameScreenState extends State<GameScreen> {
       _sound.enabled = _soundOn;
     });
     _store.saveSoundEnabled(_soundOn);
+  }
+
+  void _openThemePicker() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ThemePickerScreen()),
+    );
   }
 
   void _move(Direction dir) {
@@ -180,18 +187,15 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final overlay = _overlay();
+    final theme = ThemeScope.of(context);
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              GameColors.gradientTop,
-              GameColors.gradientMid,
-              GameColors.gradientBottom,
-            ],
+            colors: theme.backgroundGradient,
           ),
         ),
         child: SafeArea(
@@ -243,11 +247,11 @@ class _GameScreenState extends State<GameScreen> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const Text(
+                      Text(
                         'Swipe  ←  ↑  →  ↓  to move',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white70,
+                          color: theme.onBackground.withValues(alpha: 0.75),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -267,15 +271,16 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _subRow() {
+    final theme = ThemeScope.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Expanded(
+        Expanded(
           child: Text.rich(
             TextSpan(
               text: 'Join the tiles, get to ',
-              style: TextStyle(fontSize: 13, color: GameColors.darkText),
-              children: [
+              style: TextStyle(fontSize: 13, color: theme.onBackground),
+              children: const [
                 TextSpan(
                   text: '2048!',
                   style: TextStyle(fontWeight: FontWeight.w800),
@@ -283,6 +288,11 @@ class _GameScreenState extends State<GameScreen> {
               ],
             ),
           ),
+        ),
+        const SizedBox(width: 8),
+        IconActionButton(
+          icon: Icons.palette_outlined,
+          onPressed: _openThemePicker,
         ),
         const SizedBox(width: 8),
         IconActionButton(

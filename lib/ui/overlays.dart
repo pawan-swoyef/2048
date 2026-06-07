@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'game_buttons.dart';
-import 'tile_style.dart';
+import 'theme_controller.dart';
 
 /// Overlay shown over the board when the player reaches 2048.
 class WinOverlay extends StatelessWidget {
@@ -18,7 +18,7 @@ class WinOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return _BoardOverlay(
       title: 'You Win! 🎉',
-      titleColor: GameColors.win,
+      titleColor: ThemeScope.of(context).win,
       message: 'You reached 2048. Keep going for a higher score?',
       actions: [
         GhostButton(label: 'New Game', onPressed: onNewGame),
@@ -43,7 +43,7 @@ class GameOverOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     return _BoardOverlay(
       title: 'Game Over!',
-      titleColor: GameColors.darkText,
+      titleColor: Colors.white,
       message: 'No more moves. Final score: $score',
       actions: [
         PrimaryButton(label: 'Try Again', onPressed: onTryAgain),
@@ -73,7 +73,7 @@ class _BoardOverlay extends StatelessWidget {
       builder: (context, t, child) => Opacity(opacity: t, child: child),
       child: Container(
         decoration: BoxDecoration(
-          color: GameColors.overlayScrim,
+          color: ThemeScope.of(context).overlayScrim,
           borderRadius: BorderRadius.circular(10),
         ),
         alignment: Alignment.center,
@@ -95,7 +95,7 @@ class _BoardOverlay extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 14,
-                color: GameColors.darkText,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 18),

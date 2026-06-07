@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'game_buttons.dart';
-import 'tile_style.dart';
+import 'theme_controller.dart';
 
 /// Asks the player to confirm starting a new game (losing current progress).
 /// Resolves to true if they confirm.
@@ -13,7 +13,7 @@ Future<bool> confirmNewGame(BuildContext context) async {
       body: const Text(
         'Your current game will be lost. Your best score stays saved.',
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 14, color: GameColors.primaryButton, height: 1.4),
+        style: TextStyle(fontSize: 14, color: Colors.white70, height: 1.4),
       ),
       actions: [
         GhostButton(label: 'Cancel', onPressed: () => Navigator.pop(context, false)),
@@ -58,11 +58,11 @@ class _Rule extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('•  ', style: TextStyle(color: GameColors.darkText, fontSize: 14)),
+          const Text('•  ', style: TextStyle(color: Colors.white, fontSize: 14)),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: GameColors.darkText, fontSize: 14, height: 1.4),
+              style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
             ),
           ),
         ],
@@ -86,7 +86,7 @@ class _GameDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: GameColors.dialogCard,
+      backgroundColor: ThemeScope.of(context).dialogCard,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
@@ -98,7 +98,7 @@ class _GameDialog extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: GameColors.darkText,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 14),

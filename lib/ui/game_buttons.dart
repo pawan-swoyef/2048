@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'tile_style.dart';
+import 'theme_controller.dart';
 
 /// Filled primary action button (e.g. "New Game", "Keep Going").
 class PrimaryButton extends StatelessWidget {
@@ -11,16 +11,17 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeScope.of(context);
     return _BaseButton(
       label: label,
       onPressed: onPressed,
-      background: GameColors.primaryButton,
-      textColor: GameColors.buttonText,
+      background: theme.primaryButton,
+      textColor: theme.primaryButtonText,
     );
   }
 }
 
-/// Secondary "ghost" button (e.g. "Cancel").
+/// Secondary "ghost" button (e.g. "Cancel"); used over dark dialog/overlay surfaces.
 class GhostButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -29,11 +30,12 @@ class GhostButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeScope.of(context);
     return _BaseButton(
       label: label,
       onPressed: onPressed,
-      background: GameColors.ghostButton,
-      textColor: GameColors.darkText,
+      background: theme.ghostButton,
+      textColor: Colors.white,
     );
   }
 }
@@ -77,7 +79,7 @@ class _BaseButton extends StatelessWidget {
   }
 }
 
-/// Small round icon button used for "How to play" (the "?").
+/// Small icon button used for the toolbar actions (sound, help, theme).
 class IconActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -86,8 +88,9 @@ class IconActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeScope.of(context);
     return Material(
-      color: GameColors.ghostButton,
+      color: theme.ghostButton,
       borderRadius: BorderRadius.circular(8),
       elevation: 3,
       shadowColor: Colors.black.withValues(alpha: 0.4),
@@ -96,7 +99,7 @@ class IconActionButton extends StatelessWidget {
         onTap: onPressed,
         child: Padding(
           padding: const EdgeInsets.all(12),
-          child: Icon(icon, size: 18, color: GameColors.darkText),
+          child: Icon(icon, size: 18, color: theme.onBackground),
         ),
       ),
     );

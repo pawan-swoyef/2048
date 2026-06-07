@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Premium Themes</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#15161c; color:#fff; padding:30px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin-bottom:36px; font-size:14px; }
+  .grid { display:flex; flex-wrap:wrap; gap:26px; justify-content:center; align-items:flex-start; }
+
+  .card { width:300px; border-radius:22px; padding:18px; position:relative; }
+  .name { text-align:center; font-size:15px; font-weight:800; margin-bottom:3px; }
+  .desc { text-align:center; font-size:11px; opacity:.8; margin-bottom:14px; }
+  .pill { position:absolute; top:12px; right:12px; font-size:9px; font-weight:800; letter-spacing:.5px;
+          background:rgba(255,255,255,.25); padding:2px 7px; border-radius:20px; }
+  .pill.free { background:rgba(255,255,255,.3); }
+
+  .board { border-radius:14px; padding:8px; display:grid; grid-template-columns:repeat(4,1fr);
+           grid-template-rows:repeat(4,1fr); gap:8px; aspect-ratio:1/1; }
+  .cell { border-radius:10px; }
+  .t { border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800;
+       font-size:20px; box-shadow:0 3px 6px rgba(0,0,0,.25); position:relative; overflow:hidden; }
+  .t::after { content:""; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.35),rgba(255,255,255,0) 55%); }
+  .t.s { font-size:15px; }
+
+  /* ============ AURORA (current / free default) ============ */
+  .aurora { background:linear-gradient(135deg,#5b3df5,#a23df5 55%,#f53d9e); }
+  .aurora .name,.aurora .desc{color:#fff;}
+  .aurora .board{background:rgba(255,255,255,.14);}
+  .aurora .cell{background:rgba(255,255,255,.10);}
+  .aurora .t2{background:#d9dbf7;color:#1e2a4a;} .aurora .t4{background:#7fe0d2;color:#1e2a4a;}
+  .aurora .t8{background:#ffb23f;color:#fff;} .aurora .t16{background:#ff5b5b;color:#fff;}
+  .aurora .t32{background:#ff4d9d;color:#fff;} .aurora .t64{background:#ff6a3d;color:#fff;}
+  .aurora .t128{background:#ffc93c;color:#fff;} .aurora .t256{background:#54cc57;color:#fff;}
+  .aurora .t512{background:#3fa3f0;color:#fff;} .aurora .t1024{background:#b14cff;color:#fff;}
+  .aurora .t2048{background:#ffc12e;color:#fff;}
+
+  /* ============ 1. MIDNIGHT NEON ============ */
+  .neon { background:radial-gradient(circle at 30% 20%,#1c1140,#0c0d18 70%); }
+  .neon .board{background:rgba(255,255,255,.05);} .neon .cell{background:rgba(255,255,255,.04);}
+  .neon .t{box-shadow:0 0 12px rgba(0,0,0,.4);}
+  .neon .t2{background:#222a4d;color:#8fa3ff;} .neon .t4{background:#2b2360;color:#c0a3ff;}
+  .neon .t8{background:#00d4ff;color:#04222b;} .neon .t16{background:#7b5cff;color:#fff;}
+  .neon .t32{background:#ff4dd2;color:#fff;} .neon .t64{background:#00e5a0;color:#04241a;}
+  .neon .t128{background:#ffd166;color:#3a2a00;} .neon .t256{background:#ff6a3d;color:#fff;}
+  .neon .t512{background:#26c6ff;color:#04222b;} .neon .t1024{background:#b14cff;color:#fff;}
+  .neon .t2048{background:#ffe14d;color:#3a2a00;}
+
+  /* ============ 2. OCEAN BREEZE ============ */
+  .ocean { background:linear-gradient(160deg,#0277bd,#26c6da 60%,#80deea); }
+  .ocean .name,.ocean .desc{color:#fff;}
+  .ocean .board{background:rgba(255,255,255,.18);} .ocean .cell{background:rgba(255,255,255,.14);}
+  .ocean .t2{background:#e0f7fa;color:#006064;} .ocean .t4{background:#b2ebf2;color:#006064;}
+  .ocean .t8{background:#4dd0e1;color:#00363a;} .ocean .t16{background:#26c6da;color:#fff;}
+  .ocean .t32{background:#00acc1;color:#fff;} .ocean .t64{background:#0097a7;color:#fff;}
+  .ocean .t128{background:#00838f;color:#fff;} .ocean .t256{background:#006064;color:#fff;}
+  .ocean .t512{background:#004d6e;color:#fff;} .ocean .t1024{background:#1de9b6;color:#003d33;}
+  .ocean .t2048{background:#00e5ff;color:#00363a;}
+
+  /* ============ 3. SUNSET GLOW ============ */
+  .sunset { background:linear-gradient(160deg,#2b1055,#7d2a6b 45%,#ff8a5c); }
+  .sunset .name,.sunset .desc{color:#fff;}
+  .sunset .board{background:rgba(255,255,255,.13);} .sunset .cell{background:rgba(255,255,255,.10);}
+  .sunset .t2{background:#ffe0b2;color:#5d4037;} .sunset .t4{background:#ffcc80;color:#5d4037;}
+  .sunset .t8{background:#ffb74d;color:#fff;} .sunset .t16{background:#ff8a65;color:#fff;}
+  .sunset .t32{background:#ff7043;color:#fff;} .sunset .t64{background:#f4511e;color:#fff;}
+  .sunset .t128{background:#e64a19;color:#fff;} .sunset .t256{background:#d81b60;color:#fff;}
+  .sunset .t512{background:#8e24aa;color:#fff;} .sunset .t1024{background:#ffca28;color:#5d4037;}
+  .sunset .t2048{background:#ff5e62;color:#fff;}
+
+  /* ============ 4. EMERALD FOREST ============ */
+  .forest { background:linear-gradient(160deg,#0f3d2e,#1d6b4f 55%,#5fc28c); }
+  .forest .name,.forest .desc{color:#fff;}
+  .forest .board{background:rgba(255,255,255,.12);} .forest .cell{background:rgba(255,255,255,.09);}
+  .forest .t2{background:#e8f5e9;color:#1b5e20;} .forest .t4{background:#c8e6c9;color:#1b5e20;}
+  .forest .t8{background:#a5d6a7;color:#1b5e20;} .forest .t16{background:#66bb6a;color:#fff;}
+  .forest .t32{background:#43a047;color:#fff;} .forest .t64{background:#2e7d32;color:#fff;}
+  .forest .t128{background:#1b5e20;color:#fff;} .forest .t256{background:#00c853;color:#06351b;}
+  .forest .t512{background:#00bfa5;color:#fff;} .forest .t1024{background:#aeea00;color:#33420a;}
+  .forest .t2048{background:#ffd54f;color:#3a2a00;}
+
+  /* ============ 5. ROYAL GOLD ============ */
+  .gold { background:radial-gradient(circle at 50% 25%,#2a2417,#0d0d0d 75%); }
+  .gold .name{color:#e6c34d;} .gold .desc{color:#cbb87a;}
+  .gold .board{background:rgba(212,175,55,.10);} .gold .cell{background:rgba(212,175,55,.06);}
+  .gold .t2{background:#2c2c2c;color:#d4af37;} .gold .t4{background:#3a3a3a;color:#f0d77b;}
+  .gold .t8{background:#d4af37;color:#1a1a1a;} .gold .t16{background:#e6c34d;color:#1a1a1a;}
+  .gold .t32{background:#caa92e;color:#1a1a1a;} .gold .t64{background:#b8860b;color:#fff;}
+  .gold .t128{background:#ffd700;color:#1a1a1a;} .gold .t256{background:#fff3b0;color:#5a4500;}
+  .gold .t512{background:#9e7b0a;color:#fff;} .gold .t1024{background:#fbe27a;color:#4a3800;}
+  .gold .t2048{background:#ffdf3d;color:#3a2a00;}
+
+  /* ============ 6. CANDY POP ============ */
+  .candy { background:linear-gradient(160deg,#a18cd1,#c197e8 45%,#fbc2eb); }
+  .candy .name,.candy .desc{color:#4a2a5e;}
+  .candy .board{background:rgba(255,255,255,.30);} .candy .cell{background:rgba(255,255,255,.45);}
+  .candy .t2{background:#fff0f6;color:#7a2e5d;} .candy .t4{background:#ffd6ec;color:#7a2e5d;}
+  .candy .t8{background:#ff9ecb;color:#fff;} .candy .t16{background:#ff6fa5;color:#fff;}
+  .candy .t32{background:#c98bff;color:#fff;} .candy .t64{background:#8a6bff;color:#fff;}
+  .candy .t128{background:#5ec8ff;color:#063047;} .candy .t256{background:#5ed6a8;color:#06351f;}
+  .candy .t512{background:#ffd166;color:#6a3b00;} .candy .t1024{background:#ff8fab;color:#fff;}
+  .candy .t2048{background:#ffb3c6;color:#7a002e;}
+</style>
+</head>
+<body>
+  <h1>2048 — Premium Themes</h1>
+  <p class="sub">Aurora stays the free default. The 6 below would be unlocked by the subscription. Each card is a real board preview.</p>
+
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const themes = [
+      ["aurora","Aurora","Current free default","FREE","free"],
+      ["neon","Midnight Neon","Dark with glowing tiles","PREMIUM",""],
+      ["ocean","Ocean Breeze","Cool blues & aqua","PREMIUM",""],
+      ["sunset","Sunset Glow","Warm dusk gradient","PREMIUM",""],
+      ["forest","Emerald Forest","Fresh greens","PREMIUM",""],
+      ["gold","Royal Gold","Black & gold luxury","PREMIUM",""],
+      ["candy","Candy Pop","Playful pastels","PREMIUM",""],
+    ];
+    // board layout showing the full value progression
+    const layout = [2,4,8,16, 32,64,128,256, 512,1024,2048,0, 2,4,0,0];
+    const grid = document.getElementById('grid');
+    for (const [cls,name,desc,pill,pillCls] of themes) {
+      const card = document.createElement('div');
+      card.className = 'card ' + cls;
+      let cells = '';
+      for (const v of layout) {
+        if (v === 0) cells += '<div class="cell"></div>';
+        else cells += `<div class="t t${v} ${v>=512?'s':''}">${v}</div>`;
+      }
+      card.innerHTML =
+        `<div class="pill ${pillCls}">${pill}</div>`+
+        `<div class="name">${name}</div>`+
+        `<div class="desc">${desc}</div>`+
+        `<div class="board">${cells}</div>`;
+      grid.appendChild(card);
+    }
+  </script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'tile_style.dart';
+import 'theme_controller.dart';
 
-/// A single number tile with a soft gradient and shadow. Tiles flagged with
+/// A single number tile, styled by the active theme. Tiles flagged with
 /// [animateIn] (spawns and merge results) pop in with a scale animation.
 class TileWidget extends StatelessWidget {
   final int value;
@@ -18,11 +18,12 @@ class TileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = TileStyle.of(value);
+    final theme = ThemeScope.of(context);
+    final colors = theme.tileColors(value);
     final radius = size * 0.18;
-    final highlight = Color.lerp(style.background, Colors.white, 0.30)!;
-    final shade = Color.lerp(style.background, Colors.black, 0.06)!;
-    final whiteNumber = style.textColor == Colors.white;
+    final highlight = Color.lerp(colors.background, Colors.white, 0.30)!;
+    final shade = Color.lerp(colors.background, Colors.black, 0.06)!;
+    final whiteNumber = colors.text == Colors.white;
 
     final tile = Container(
       width: size,
@@ -31,7 +32,7 @@ class TileWidget extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [highlight, style.background, shade],
+          colors: [highlight, colors.background, shade],
           stops: const [0.0, 0.55, 1.0],
         ),
         borderRadius: BorderRadius.circular(radius),
@@ -43,7 +44,7 @@ class TileWidget extends StatelessWidget {
           ),
           if (value >= 2048)
             BoxShadow(
-              color: style.background.withValues(alpha: 0.75),
+              color: colors.background.withValues(alpha: 0.75),
               blurRadius: 22,
               spreadRadius: -2,
             ),
@@ -53,9 +54,9 @@ class TileWidget extends StatelessWidget {
       child: Text(
         '$value',
         style: TextStyle(
-          color: style.textColor,
+          color: colors.text,
           fontWeight: FontWeight.w800,
-          fontSize: TileStyle.fontSizeFor(value, size),
+          fontSize: GameTheme.tileFontSize(value, size),
           shadows: whiteNumber
               ? const [
                   Shadow(

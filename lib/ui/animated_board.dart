@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../game/board.dart';
 import '../game/game_state.dart';
-import 'tile_style.dart';
+import 'theme_controller.dart';
 import 'tile_widget.dart';
 
 /// The board with true sliding animation: tiles glide from their source cells
@@ -79,6 +79,7 @@ class _AnimatedBoardState extends State<AnimatedBoard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeScope.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final side = constraints.maxWidth;
@@ -91,9 +92,9 @@ class _AnimatedBoardState extends State<AnimatedBoard>
           width: side,
           height: side,
           decoration: BoxDecoration(
-            color: GameColors.boardBackground,
+            color: theme.boardBackground,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: GameColors.glassStroke, width: 1.4),
+            border: Border.all(color: theme.glassStroke, width: 1.4),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.18),
@@ -104,7 +105,7 @@ class _AnimatedBoardState extends State<AnimatedBoard>
           ),
           child: Stack(
             children: [
-              ..._backgroundCells(cell, leftOf, topOf),
+              ..._backgroundCells(theme, cell, leftOf, topOf),
               Positioned.fill(
                 child: _sliding
                     ? AnimatedBuilder(
@@ -122,8 +123,8 @@ class _AnimatedBoardState extends State<AnimatedBoard>
     );
   }
 
-  List<Widget> _backgroundCells(
-      double cell, double Function(int) leftOf, double Function(int) topOf) {
+  List<Widget> _backgroundCells(GameTheme theme, double cell,
+      double Function(int) leftOf, double Function(int) topOf) {
     final cells = <Widget>[];
     for (var r = 0; r < kBoardSize; r++) {
       for (var c = 0; c < kBoardSize; c++) {
@@ -134,7 +135,7 @@ class _AnimatedBoardState extends State<AnimatedBoard>
           height: cell,
           child: Container(
             decoration: BoxDecoration(
-              color: GameColors.emptyCell,
+              color: theme.emptyCell,
               borderRadius: BorderRadius.circular(cell * 0.13),
             ),
           ),

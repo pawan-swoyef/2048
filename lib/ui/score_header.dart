@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'tile_style.dart';
+import 'theme_controller.dart';
 
-/// The top row: the "2048" logo badge and the Score / Best boxes.
+/// The top row: the "2048" logo and the Score / Best boxes, styled by theme.
 class ScoreHeader extends StatelessWidget {
   final int score;
   final int best;
@@ -11,34 +11,31 @@ class ScoreHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeScope.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _logo(),
+        Text(
+          '2048',
+          style: TextStyle(
+            fontSize: 44,
+            fontWeight: FontWeight.w800,
+            color: theme.onBackground,
+            letterSpacing: 1,
+            shadows: const [
+              Shadow(color: Color(0x55000000), blurRadius: 12, offset: Offset(0, 3)),
+            ],
+          ),
+        ),
         Row(
           children: [
-            _ScoreBox(label: 'SCORE', value: score),
+            _ScoreBox(label: 'SCORE', value: score, theme: theme),
             const SizedBox(width: 8),
-            _ScoreBox(label: 'BEST', value: best),
+            _ScoreBox(label: 'BEST', value: best, theme: theme),
           ],
         ),
       ],
-    );
-  }
-
-  Widget _logo() {
-    return const Text(
-      '2048',
-      style: TextStyle(
-        fontSize: 44,
-        fontWeight: FontWeight.w800,
-        color: Colors.white,
-        letterSpacing: 1,
-        shadows: [
-          Shadow(color: Color(0x80000000), blurRadius: 12, offset: Offset(0, 3)),
-        ],
-      ),
     );
   }
 }
@@ -46,8 +43,9 @@ class ScoreHeader extends StatelessWidget {
 class _ScoreBox extends StatelessWidget {
   final String label;
   final int value;
+  final GameTheme theme;
 
-  const _ScoreBox({required this.label, required this.value});
+  const _ScoreBox({required this.label, required this.value, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +53,9 @@ class _ScoreBox extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 76),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: GameColors.scoreBox,
+        color: theme.scoreBox,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: GameColors.glassStroke, width: 1.2),
+        border: Border.all(color: theme.glassStroke, width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.12),
@@ -70,20 +68,20 @@ class _ScoreBox extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 1,
-              color: GameColors.scoreLabel,
+              color: theme.scoreLabel,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             '$value',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: GameColors.lightText,
+              color: theme.onBackground,
             ),
           ),
         ],
