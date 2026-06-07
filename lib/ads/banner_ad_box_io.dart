@@ -16,8 +16,9 @@ class BannerAdBox extends StatefulWidget {
 }
 
 class _BannerAdBoxState extends State<BannerAdBox> {
-  // TODO: replace with your real AdMob ad unit IDs before release.
-  static const _androidTestUnit = 'ca-app-pub-3940256099942544/6300978111';
+  // Real AdMob banner ad unit (Android). iOS still uses Google's test unit
+  // until a real iOS ad unit is provided.
+  static const _androidBannerUnit = 'ca-app-pub-9535862781635221/6393745465';
   static const _iosTestUnit = 'ca-app-pub-3940256099942544/2934735716';
 
   BannerAd? _ad;
@@ -31,7 +32,7 @@ class _BannerAdBoxState extends State<BannerAdBox> {
 
   void _load() {
     if (!(Platform.isAndroid || Platform.isIOS)) return; // desktop: skip
-    final adUnitId = Platform.isAndroid ? _androidTestUnit : _iosTestUnit;
+    final adUnitId = Platform.isAndroid ? _androidBannerUnit : _iosTestUnit;
     final ad = BannerAd(
       adUnitId: adUnitId,
       size: AdSize.banner,

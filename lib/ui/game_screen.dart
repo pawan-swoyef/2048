@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../ads/banner_ad_box.dart';
+import '../ads/interstitial_ad.dart';
 import '../game/board.dart';
 import '../game/game_state.dart';
 import '../game/score_store.dart';
@@ -28,6 +29,7 @@ class _GameScreenState extends State<GameScreen> {
   final Random _rng = Random();
   final ScoreStore _store = ScoreStore();
   final SoundService _sound = SoundService();
+  final InterstitialController _interstitial = InterstitialController();
 
   late GameState _state;
   List<TileMove> _moves = const [];
@@ -47,6 +49,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void dispose() {
     _sound.dispose();
+    _interstitial.dispose();
     super.dispose();
   }
 
@@ -114,6 +117,8 @@ class _GameScreenState extends State<GameScreen> {
 
     if (next.over) {
       _sound.gameOver();
+      _interstitial.setPremium(ThemeScope.controllerOf(context).premiumUnlocked);
+      _interstitial.onGameOver();
     } else if (next.won && !wasWon) {
       _sound.win();
     } else if (hasMerge) {
