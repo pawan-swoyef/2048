@@ -23,6 +23,7 @@ import 'game_buttons.dart';
 import 'overlays.dart';
 import 'paywall.dart';
 import 'score_header.dart';
+import 'swipe.dart';
 import 'theme_controller.dart';
 import 'theme_picker.dart';
 
@@ -50,6 +51,12 @@ class _GameScreenState extends State<GameScreen> {
   int _tick = 0;
   bool _busy = false;
   bool _soundOn = true;
+
+  // Mid-gesture swipe detection: fire a move as soon as the drag crosses a
+  // small distance, instead of waiting for the finger to lift.
+  Offset _swipeAccum = Offset.zero;
+  bool _swipeFired = false;
+  static const double _swipeThreshold = 22;
 
   static const int _maxUndoHistory = 50;
 
@@ -135,6 +142,23 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  void _onSwipeStart() {
+    _swipeAccum = Offset.zero;
+    _swipeFired = false;
+  }
+
+  void _onSwipeUpdate(Offset delta) {
+    if (_swipeFired) return;
+    _swipeAccum += delta;
+    final dir = swipeDirection(_swipeAccum, threshold: _swipeThreshold);
+    if (dir != null) {
+      _swipeFired = true;
+      _move(dir);
+    }
+  }
+
+  void _onSwipeEnd() => _swipeFired = false;
+
   void _move(Direction dir) {
     if (_busy) return;
     final previous = _state.board;
@@ -185,7 +209,7 @@ class _GameScreenState extends State<GameScreen> {
       _sound.move();
     }
 
-    Future.delayed(const Duration(milliseconds: 170), () {
+    Future.delayed(const Duration(milliseconds: 110), () {
       if (mounted) setState(() => _busy = false);
     });
   }
@@ -308,16 +332,14 @@ class _GameScreenState extends State<GameScreen> {
                       _subRow(),
                       const SizedBox(height: 16),
                       GestureDetector(
-                        onHorizontalDragEnd: (d) {
-                          final v = d.primaryVelocity ?? 0;
-                          if (v > 0) _move(Direction.right);
-                          if (v < 0) _move(Direction.left);
-                        },
-                        onVerticalDragEnd: (d) {
-                          final v = d.primaryVelocity ?? 0;
-                          if (v > 0) _move(Direction.down);
-                          if (v < 0) _move(Direction.up);
-                        },
+                        onHorizontalDragStart: (_) => _onSwipeStart(),
+                        onHorizontalDragUpdate: (d) =>
+                            _onSwipeUpdate(Offset(d.delta.dx, 0)),
+                        onHorizontalDragEnd: (_) => _onSwipeEnd(),
+                        onVerticalDragStart: (_) => _onSwipeStart(),
+                        onVerticalDragUpdate: (d) =>
+                            _onSwipeUpdate(Offset(0, d.delta.dy)),
+                        onVerticalDragEnd: (_) => _onSwipeEnd(),
                         child: AspectRatio(
                           aspectRatio: 1,
                           child: Stack(
