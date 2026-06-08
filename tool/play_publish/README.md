@@ -2,7 +2,7 @@
 
 Reads the listing copy from [`docs/store-listing.md`](../../docs/store-listing.md)
 and uploads the **title + short description + full description** to the Google
-Play Console for `com.dashain.game2048`, using the service-account key
+Play Console for `com.number.twofoureight`, using the service-account key
 `secretandstunts-e3a3e3c488d4.json` at the repo root.
 
 ## Run
@@ -25,7 +25,7 @@ Options: `--key`, `--listing`, `--package`, `--language` (default `en-US`).
 The service account alone is **not** enough. All of these must be true:
 
 1. **The app already exists in Play Console.** You cannot create an app via the
-   API. Create `com.dashain.game2048` in the console first.
+   API. Create `com.number.twofoureight` in the console first.
 2. **Enable the API.** In Google Cloud console (project `secretandstunts`),
    enable *Google Play Android Developer API*.
 3. **Grant the service account access in Play Console.**

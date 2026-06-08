@@ -59,7 +59,7 @@ Future<void> main(List<String> argv) async {
         help: 'Folder with listing graphics.',
         defaultsTo: '../../docs/store-assets')
     ..addOption('package',
-        help: 'Android applicationId.', defaultsTo: 'com.dashain.game2048')
+        help: 'Android applicationId.', defaultsTo: 'com.number.twofoureight')
     ..addOption('language',
         help: 'BCP-47 listing language.', defaultsTo: 'en-US')
     ..addFlag('commit',

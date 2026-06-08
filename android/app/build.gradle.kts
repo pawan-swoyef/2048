@@ -29,8 +29,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.dashain.game2048"
+        // Published Play Store package name. (Kotlin source namespace stays
+        // com.dashain.game2048 — applicationId and namespace are allowed to differ.)
+        applicationId = "com.number.twofoureight"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = maxOf(flutter.minSdkVersion, 23) // google_mobile_ads needs 23+
