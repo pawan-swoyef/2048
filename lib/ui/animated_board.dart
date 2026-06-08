@@ -44,7 +44,7 @@ class _AnimatedBoardState extends State<AnimatedBoard>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 120),
     )..addStatusListener((status) {
         if (status == AnimationStatus.completed && mounted) {
           setState(() => _sliding = false);

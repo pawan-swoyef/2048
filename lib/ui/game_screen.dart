@@ -6,15 +6,24 @@ import 'package:flutter/services.dart';
 import '../ads/banner_ad_box.dart';
 import '../ads/interstitial_ad.dart';
 import '../game/board.dart';
+import '../game/daily_engagement.dart';
 import '../game/game_state.dart';
+import '../game/progress_store.dart';
 import '../game/score_store.dart';
 import '../game/sound_service.dart';
 import 'animated_board.dart';
 import 'dialogs.dart';
+import 'engagement/coin_pill.dart';
+import 'engagement/daily_gift_button.dart';
+import 'engagement/daily_gift_dialog.dart';
+import 'engagement/reward_toast.dart';
+import 'engagement/streak_pill.dart';
+import 'engagement/streak_sheet.dart';
 import 'game_buttons.dart';
 import 'overlays.dart';
 import 'paywall.dart';
 import 'score_header.dart';
+import 'swipe.dart';
 import 'theme_controller.dart';
 import 'theme_picker.dart';
 
@@ -29,8 +38,11 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   final Random _rng = Random();
   final ScoreStore _store = ScoreStore();
+  final ProgressStore _progressStore = ProgressStore();
   final SoundService _sound = SoundService();
   final InterstitialController _interstitial = InterstitialController();
+
+  PlayerProgress _progress = const PlayerProgress();
 
   late GameState _state;
   final List<GameState> _history = []; // for undo (premium)
@@ -40,6 +52,12 @@ class _GameScreenState extends State<GameScreen> {
   bool _busy = false;
   bool _soundOn = true;
 
+  // Mid-gesture swipe detection: fire a move as soon as the drag crosses a
+  // small distance, instead of waiting for the finger to lift.
+  Offset _swipeAccum = Offset.zero;
+  bool _swipeFired = false;
+  static const double _swipeThreshold = 22;
+
   static const int _maxUndoHistory = 50;
 
   @override
@@ -48,6 +66,7 @@ class _GameScreenState extends State<GameScreen> {
     _state = GameState.newGame(_rng);
     _popCells = _allTileCells(_state.board);
     _loadPrefs();
+    _loadEngagement();
   }
 
   @override
@@ -71,6 +90,44 @@ class _GameScreenState extends State<GameScreen> {
     });
   }
 
+  Future<void> _loadEngagement() async {
+    final loaded = await _progressStore.load();
+    final result = applyDailyOpen(loaded, DateTime.now());
+    await _progressStore.save(result.progress);
+    if (!mounted) return;
+    setState(() => _progress = result.progress);
+  }
+
+  void _openStreakSheet() {
+    showDialog<void>(
+      context: context,
+      builder: (_) => StreakSheet(progress: _progress),
+    );
+  }
+
+  void _openDailyGift() {
+    final today = DateTime.now();
+    showDialog<void>(
+      context: context,
+      builder: (_) => DailyGiftDialog(
+        progress: _progress,
+        today: today,
+        onClaim: () => _claimDailyGift(today),
+      ),
+    );
+  }
+
+  Future<void> _claimDailyGift(DateTime today) async {
+    if (!giftAvailable(_progress, today)) return;
+    final updated = claimGift(_progress, today);
+    final earned = updated.coins - _progress.coins;
+    await _progressStore.save(updated);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    setState(() => _progress = updated);
+    showCoinToast(context, earned);
+  }
+
   void _toggleSound() {
     setState(() {
       _soundOn = !_soundOn;
@@ -84,6 +141,23 @@ class _GameScreenState extends State<GameScreen> {
       MaterialPageRoute(builder: (_) => const ThemePickerScreen()),
     );
   }
+
+  void _onSwipeStart() {
+    _swipeAccum = Offset.zero;
+    _swipeFired = false;
+  }
+
+  void _onSwipeUpdate(Offset delta) {
+    if (_swipeFired) return;
+    _swipeAccum += delta;
+    final dir = swipeDirection(_swipeAccum, threshold: _swipeThreshold);
+    if (dir != null) {
+      _swipeFired = true;
+      _move(dir);
+    }
+  }
+
+  void _onSwipeEnd() => _swipeFired = false;
 
   void _move(Direction dir) {
     if (_busy) return;
@@ -135,7 +209,7 @@ class _GameScreenState extends State<GameScreen> {
       _sound.move();
     }
 
-    Future.delayed(const Duration(milliseconds: 170), () {
+    Future.delayed(const Duration(milliseconds: 110), () {
       if (mounted) setState(() => _busy = false);
     });
   }
@@ -250,20 +324,22 @@ class _GameScreenState extends State<GameScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ScoreHeader(score: _state.score, best: _state.best),
+                      if (_progress.streakCurrent > 0) ...[
+                        const SizedBox(height: 14),
+                        _statRow(),
+                      ],
                       const SizedBox(height: 18),
                       _subRow(),
                       const SizedBox(height: 16),
                       GestureDetector(
-                        onHorizontalDragEnd: (d) {
-                          final v = d.primaryVelocity ?? 0;
-                          if (v > 0) _move(Direction.right);
-                          if (v < 0) _move(Direction.left);
-                        },
-                        onVerticalDragEnd: (d) {
-                          final v = d.primaryVelocity ?? 0;
-                          if (v > 0) _move(Direction.down);
-                          if (v < 0) _move(Direction.up);
-                        },
+                        onHorizontalDragStart: (_) => _onSwipeStart(),
+                        onHorizontalDragUpdate: (d) =>
+                            _onSwipeUpdate(Offset(d.delta.dx, 0)),
+                        onHorizontalDragEnd: (_) => _onSwipeEnd(),
+                        onVerticalDragStart: (_) => _onSwipeStart(),
+                        onVerticalDragUpdate: (d) =>
+                            _onSwipeUpdate(Offset(0, d.delta.dy)),
+                        onVerticalDragEnd: (_) => _onSwipeEnd(),
                         child: AspectRatio(
                           aspectRatio: 1,
                           child: Stack(
@@ -342,6 +418,21 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _statRow() {
+    return Row(
+      children: [
+        StreakPill(streak: _progress.streakCurrent, onTap: _openStreakSheet),
+        const SizedBox(width: 8),
+        CoinPill(coins: _progress.coins),
+        const Spacer(),
+        DailyGiftButton(
+          available: giftAvailable(_progress, DateTime.now()),
+          onTap: _openDailyGift,
+        ),
+      ],
     );
   }
 

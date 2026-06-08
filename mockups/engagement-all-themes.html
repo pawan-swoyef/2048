@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Engagement Features in All Themes</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#15121f; color:#fff; }
+  .page-head { text-align:center; padding:30px 16px 8px; }
+  .page-head h1 { font-size:24px; }
+  .page-head p { color:#ffffffaa; font-size:14px; margin-top:6px; max-width:640px; margin-inline:auto; line-height:1.5; }
+
+  /* one band per theme, painted in that theme's gradient */
+  .band { background:var(--bg); padding:26px 18px 34px; }
+  .band-head { display:flex; align-items:center; gap:10px; max-width:1180px; margin:0 auto 18px; }
+  .band-name { font-size:20px; font-weight:900; color:var(--text); }
+  .band-tag { font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+              padding:4px 9px; border-radius:20px; background:var(--glassBg); border:1px solid var(--glassBorder); color:var(--text); }
+
+  .row { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; align-items:flex-start; max-width:1180px; margin:0 auto; }
+  .col { width:270px; }
+  .col > .cap { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--textDim); margin-bottom:10px; text-align:center; }
+
+  .glass { background:var(--glassBg); border:1.4px solid var(--glassBorder); border-radius:16px; }
+  .btn { border:none; border-radius:8px; padding:11px 16px; font-weight:800; font-size:13px; cursor:pointer; width:100%; }
+  .btn-primary { background:#fff; color:var(--btnText); box-shadow:0 4px 10px rgba(0,0,0,.28); }
+
+  .pill { display:inline-flex; align-items:center; gap:6px; background:var(--glassBg);
+          border:1px solid var(--glassBorder); border-radius:22px; padding:6px 12px; font-weight:800; font-size:13px; color:var(--text); }
+  .coin { width:18px; height:18px; border-radius:50%;
+          background:radial-gradient(circle at 35% 30%, #ffe9a8, #f5c542 58%, #d99e1e);
+          box-shadow:inset 0 0 0 1.5px #c98a14; display:flex; align-items:center; justify-content:center;
+          font-size:9px; color:#8a5a06; }
+  .flame { font-size:16px; filter:drop-shadow(0 0 5px #ff8a3d); }
+
+  /* header */
+  .phonebar { padding:16px; }
+  .topline { display:flex; justify-content:space-between; align-items:flex-start; }
+  .title { font-size:40px; font-weight:900; line-height:1; color:var(--text); }
+  .scores { display:flex; gap:7px; }
+  .score-box { background:var(--glassBg); border:1px solid var(--glassBorder); border-radius:9px; padding:5px 11px; text-align:center; min-width:58px; }
+  .score-label { font-size:9px; font-weight:800; letter-spacing:.8px; color:var(--textDim); }
+  .score-value { font-size:17px; font-weight:900; color:var(--text); }
+  .statbar { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+
+  /* chest */
+  .chest-card { padding:16px; display:flex; align-items:center; gap:13px; position:relative; overflow:hidden; }
+  .chest-glow { position:absolute; inset:0; background:radial-gradient(circle at 16% 50%, var(--accentGlow), transparent 60%); pointer-events:none; }
+  .chest { font-size:40px; filter:drop-shadow(0 0 9px var(--accent)); position:relative; }
+  .chest-txt h4 { font-size:15px; font-weight:800; color:var(--text); }
+  .chest-txt p { font-size:11.5px; color:var(--textDim); margin-top:2px; }
+  .ready-dot { position:absolute; top:12px; right:12px; width:11px; height:11px; border-radius:50%; background:#ff4d6d; box-shadow:0 0 0 3px rgba(255,77,109,.35); }
+
+  /* modal cards (always dark card -> white text) */
+  .card { background:var(--card); color:#fff; border-radius:16px; padding:18px 16px; text-align:center; box-shadow:0 12px 26px rgba(0,0,0,.4); }
+  .card h3 { font-size:17px; font-weight:900; }
+  .card .small { font-size:11.5px; color:#ffffffbb; margin-top:3px; }
+  .reward-hero .big { font-size:46px; filter:drop-shadow(0 0 12px var(--accent)); margin-top:10px; }
+  .reward-amt { display:inline-flex; align-items:center; gap:7px; font-size:22px; font-weight:900; margin-top:4px; }
+
+  .cal { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:12px 0 16px; }
+  .day { background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); border-radius:9px; padding:6px 3px; }
+  .day .d { font-size:9px; font-weight:800; color:#ffffff9a; letter-spacing:.4px; }
+  .day .ic { font-size:15px; margin:2px 0; }
+  .day .amt { font-size:10px; font-weight:800; }
+  .day.claimed .check { color:#7CFFB0; font-size:15px; }
+  .day.today { background:#fff; color:var(--btnText); border-color:#fff; box-shadow:0 0 14px rgba(255,255,255,.55); }
+  .day.today .d { color:var(--btnText); opacity:.8; }
+  .day.day7 { background:linear-gradient(135deg,#ffd23f,#ff8a3d); color:#5a3a00; border:none; }
+  .day.day7 .d { color:#7a5200; }
+
+  /* streak */
+  .streak-hero { font-size:50px; filter:drop-shadow(0 0 14px #ff8a3d); margin:2px 0; }
+  .streak-num { font-size:34px; font-weight:900; margin-top:-4px; }
+  .streak-sub { font-size:12px; color:#ffffffc0; margin-bottom:13px; }
+  .track { background:rgba(255,255,255,.14); border-radius:20px; height:10px; position:relative; margin:5px 0; overflow:hidden; }
+  .track .fill { position:absolute; inset:0 38% 0 0; border-radius:20px; background:linear-gradient(90deg,#ffd23f,#ff8a3d); }
+  .miles { display:flex; justify-content:space-between; font-size:10px; color:#ffffffb0; font-weight:700; margin-bottom:13px; }
+  .miles .hit { color:#ffd23f; }
+  .freeze { display:flex; align-items:center; gap:7px; justify-content:center; font-size:11px; color:#ffffffcc;
+            background:rgba(255,255,255,.10); border-radius:9px; padding:8px; margin-bottom:13px; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>Engagement Pack — Streak · Daily Gift · Coins</h1>
+    <p>The same screens rendered in every theme, using each theme's real colors. Coins (gold) and the streak flame stay constant across themes — they're brand/currency elements. Tell me any color or copy changes.</p>
+  </div>
+  <div id="root"></div>
+
+<script>
+  // Theme palettes pulled from lib/ui/game_theme.dart
+  const THEMES = [
+    { name:'Aurora', tag:'Free',
+      bg:'linear-gradient(135deg,#5b3df5,#a23df5 55%,#f53d9e)', text:'#ffffff', textDim:'rgba(255,255,255,.78)',
+      glassBg:'rgba(255,255,255,.14)', glassBorder:'rgba(255,255,255,.35)', card:'#4a2fb0', btnText:'#6a2dbf',
+      accent:'#ffc12e', accentGlow:'rgba(255,210,90,.35)' },
+    { name:'Midnight Neon', tag:'Premium',
+      bg:'linear-gradient(160deg,#1c1140,#0c0d18)', text:'#ffffff', textDim:'rgba(255,255,255,.7)',
+      glassBg:'rgba(255,255,255,.08)', glassBorder:'rgba(255,255,255,.22)', card:'#1c1140', btnText:'#3a2a8c',
+      accent:'#00e5ff', accentGlow:'rgba(0,212,255,.30)' },
+    { name:'Ocean Breeze', tag:'Premium',
+      bg:'linear-gradient(135deg,#0277bd,#26c6da 55%,#80deea)', text:'#ffffff', textDim:'rgba(255,255,255,.85)',
+      glassBg:'rgba(255,255,255,.16)', glassBorder:'rgba(255,255,255,.4)', card:'#006064', btnText:'#006064',
+      accent:'#00e5ff', accentGlow:'rgba(0,229,255,.32)' },
+    { name:'Sunset Glow', tag:'Premium',
+      bg:'linear-gradient(135deg,#2b1055,#7d2a6b 50%,#ff8a5c)', text:'#ffffff', textDim:'rgba(255,255,255,.82)',
+      glassBg:'rgba(255,255,255,.14)', glassBorder:'rgba(255,255,255,.34)', card:'#5a1e54', btnText:'#8e2a6b',
+      accent:'#ffca28', accentGlow:'rgba(255,202,40,.32)' },
+    { name:'Emerald Forest', tag:'Premium',
+      bg:'linear-gradient(135deg,#0f3d2e,#1d6b4f 55%,#5fc28c)', text:'#ffffff', textDim:'rgba(255,255,255,.82)',
+      glassBg:'rgba(255,255,255,.14)', glassBorder:'rgba(255,255,255,.34)', card:'#14503a', btnText:'#1b5e20',
+      accent:'#ffd54f', accentGlow:'rgba(255,213,79,.32)' },
+    { name:'Royal Gold', tag:'Premium',
+      bg:'linear-gradient(160deg,#2a2417,#0d0d0d)', text:'#ffffff', textDim:'rgba(255,255,255,.7)',
+      glassBg:'rgba(212,175,55,.10)', glassBorder:'rgba(212,175,55,.4)', card:'#1a1a1a', btnText:'#5a4500',
+      accent:'#d4af37', accentGlow:'rgba(212,175,55,.30)' },
+    { name:'Candy Pop', tag:'Premium',
+      bg:'linear-gradient(135deg,#a18cd1,#c197e8 50%,#fbc2eb)', text:'#4a2a5e', textDim:'rgba(74,42,94,.7)',
+      glassBg:'rgba(255,255,255,.35)', glassBorder:'rgba(255,255,255,.7)', card:'#7a4e9e', btnText:'#7a2e5d',
+      accent:'#ff6fa5', accentGlow:'rgba(255,111,165,.32)' },
+  ];
+
+  const coin = '<span class="coin">★</span>';
+
+  function header() {
+    return `<div class="col"><div class="cap">Home header</div>
+      <div class="phonebar glass">
+        <div class="topline">
+          <div class="title">2048</div>
+          <div class="scores">
+            <div class="score-box"><div class="score-label">SCORE</div><div class="score-value">2860</div></div>
+            <div class="score-box"><div class="score-label">BEST</div><div class="score-value">5120</div></div>
+          </div>
+        </div>
+        <div class="statbar">
+          <span class="pill"><span class="flame">🔥</span> 5 day</span>
+          <span class="pill">${coin} 480</span>
+        </div>
+      </div></div>`;
+  }
+
+  function chest() {
+    return `<div class="col"><div class="cap">Daily gift ready</div>
+      <div class="chest-card glass">
+        <div class="chest-glow"></div><div class="ready-dot"></div>
+        <div class="chest">🎁</div>
+        <div class="chest-txt"><h4>Daily Gift ready!</h4><p>Come back daily for more.</p></div>
+      </div></div>`;
+  }
+
+  function gift() {
+    return `<div class="col"><div class="cap">Gift claim popup</div>
+      <div class="card">
+        <h3>Day 5 Reward 🎉</h3><div class="small">5-day streak — keep going!</div>
+        <div class="reward-hero"><div class="big">🎁</div><div class="reward-amt">${coin} +60</div></div>
+        <div class="cal">
+          <div class="day claimed"><div class="d">D1</div><div class="ic check">✓</div><div class="amt">10</div></div>
+          <div class="day claimed"><div class="d">D2</div><div class="ic check">✓</div><div class="amt">20</div></div>
+          <div class="day claimed"><div class="d">D3</div><div class="ic check">✓</div><div class="amt">30</div></div>
+          <div class="day claimed"><div class="d">D4</div><div class="ic check">✓</div><div class="amt">40</div></div>
+          <div class="day today"><div class="d">D5</div><div class="ic">★</div><div class="amt">60</div></div>
+          <div class="day"><div class="d">D6</div><div class="ic">★</div><div class="amt">80</div></div>
+          <div class="day"><div class="d">D7</div><div class="ic">🎨</div><div class="amt">THEME</div></div>
+          <div class="day day7"><div class="d">D7+</div><div class="ic">💎</div><div class="amt">150</div></div>
+        </div>
+        <button class="btn btn-primary">Claim Reward</button>
+      </div></div>`;
+  }
+
+  function streak() {
+    return `<div class="col"><div class="cap">Streak details</div>
+      <div class="card">
+        <div class="streak-hero">🔥</div>
+        <div class="streak-num">5</div>
+        <div class="streak-sub">day streak · best: 12</div>
+        <div class="track"><div class="fill"></div></div>
+        <div class="miles"><span class="hit">3</span><span class="hit">5</span><span>7</span><span>14</span><span>30</span></div>
+        <div class="freeze">❄️ Streak Freeze ready — 1 left</div>
+        <button class="btn btn-primary">Play to keep your streak</button>
+      </div></div>`;
+  }
+
+  const root = document.getElementById('root');
+  root.innerHTML = THEMES.map(t => {
+    const vars = `--bg:${t.bg};--text:${t.text};--textDim:${t.textDim};--glassBg:${t.glassBg};`
+      + `--glassBorder:${t.glassBorder};--card:${t.card};--btnText:${t.btnText};--accent:${t.accent};--accentGlow:${t.accentGlow};`;
+    return `<section class="band" style="${vars}">
+      <div class="band-head"><span class="band-name">${t.name}</span><span class="band-tag">${t.tag}</span></div>
+      <div class="row">${header()}${chest()}${gift()}${streak()}</div>
+    </section>`;
+  }).join('');
+</script>
+</body>
+</html>
