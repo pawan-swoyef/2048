@@ -19,7 +19,9 @@ class StreakSheet extends StatelessWidget {
         _milestones.firstWhere((m) => m > progress.streakCurrent, orElse: () => _milestones.last);
     final progressFrac = (progress.streakCurrent / nextMilestone).clamp(0.0, 1.0);
 
-    return Center(
+    return Material(
+      type: MaterialType.transparency,
+      child: Center(
       child: Container(
         width: 320,
         margin: const EdgeInsets.all(16),
@@ -89,6 +91,7 @@ class StreakSheet extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

@@ -28,7 +28,9 @@ class DailyGiftDialog extends StatelessWidget {
     // Days strictly before today's are already claimed; today's too if claimed.
     final claimedThrough = available ? day - 1 : day;
 
-    return Center(
+    return Material(
+      type: MaterialType.transparency,
+      child: Center(
       child: SingleChildScrollView(
         child: Container(
           width: 320,
@@ -93,6 +95,7 @@ class DailyGiftDialog extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 
