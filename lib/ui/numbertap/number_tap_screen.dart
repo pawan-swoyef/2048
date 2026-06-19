@@ -10,14 +10,10 @@ import '../theme_picker.dart';
 
 const _gold = Color(0xFFFFC93C);
 
-// Tile gradients (blue / indigo / purple / magenta), assigned per cell.
-const _tilePalette = <List<Color>>[
-  [Color(0xFF4A6CF7), Color(0xFF3B4FD6)],
-  [Color(0xFF7B5CFF), Color(0xFF5B3DF5)],
-  [Color(0xFFA64CFF), Color(0xFF7B2FF7)],
-  [Color(0xFFC74CCB), Color(0xFF9C27B0)],
-  [Color(0xFF5C7CFF), Color(0xFF4458D0)],
-];
+// Tiles take their colors from the active theme's tile palette (the same
+// colors 2048 uses), so all 7 themes recolor this game too. These 2048 tile
+// values give a varied, theme-appropriate spread.
+const _themeSamples = [8, 16, 32, 64, 128, 256, 512];
 const _greenGrad = [Color(0xFF7BE86B), Color(0xFF34C759)];
 
 /// Number Tap Challenge: tap 1..25 in order as fast as you can. Best time
@@ -329,11 +325,13 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
       );
     }
 
+    final tc = theme.tileColors(_themeSamples[index % _themeSamples.length]);
     final grad = flashing
         ? const [Color(0xFFFF6B6B), Color(0xFFE53935)]
         : isNext
             ? _greenGrad
-            : _tilePalette[index % _tilePalette.length];
+            : [tc.background, Color.lerp(tc.background, Colors.black, 0.22)!];
+    final textColor = (flashing || isNext) ? Colors.white : tc.text;
 
     return Padding(
       padding: const EdgeInsets.all(4),
@@ -363,11 +361,13 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
           child: Center(
             child: Text(
               '$number',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w900,
-                color: Colors.white,
-                shadows: [Shadow(color: Color(0x55000000), blurRadius: 3, offset: Offset(0, 1))],
+                color: textColor,
+                shadows: const [
+                  Shadow(color: Color(0x55000000), blurRadius: 3, offset: Offset(0, 1))
+                ],
               ),
             ),
           ),
