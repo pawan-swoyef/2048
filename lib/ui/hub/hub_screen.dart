@@ -9,6 +9,7 @@ import '../engagement/reward_toast.dart';
 import '../engagement/streak_sheet.dart';
 import '../theme_controller.dart';
 import '../theme_picker.dart';
+import 'all_games_screen.dart';
 import 'game_registry.dart';
 
 // Text colors used on the white cards (kept readable across themes).
@@ -93,6 +94,12 @@ class _HubScreenState extends State<HubScreen> {
     _loadBests();
   }
 
+  Future<void> _openAllGames() async {
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const AllGamesScreen()));
+    _loadBests();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = ThemeScope.of(context);
@@ -123,10 +130,6 @@ class _HubScreenState extends State<HubScreen> {
                             _gamesHeader(theme),
                             const SizedBox(height: 12),
                             _featuredCard(theme, kGames.first),
-                            for (final g in kGames.skip(1)) ...[
-                              const SizedBox(height: 12),
-                              _compactCard(theme, g),
-                            ],
                             const SizedBox(height: 20),
                             _whyCard(theme),
                           ],
@@ -284,16 +287,20 @@ class _HubScreenState extends State<HubScreen> {
                 fontWeight: FontWeight.w900,
                 color: theme.onBackground)),
         const Spacer(),
-        Row(
-          children: [
-            Text('See all',
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: theme.onBackground.withValues(alpha: 0.85))),
-            Icon(Icons.chevron_right,
-                size: 18, color: theme.onBackground.withValues(alpha: 0.85)),
-          ],
+        GestureDetector(
+          onTap: _openAllGames,
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            children: [
+              Text('See all',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: theme.onBackground.withValues(alpha: 0.85))),
+              Icon(Icons.chevron_right,
+                  size: 18, color: theme.onBackground.withValues(alpha: 0.85)),
+            ],
+          ),
         ),
       ],
     );
@@ -348,59 +355,6 @@ class _HubScreenState extends State<HubScreen> {
             ),
             const SizedBox(width: 14),
             Expanded(child: _boardPreview(theme)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _compactCard(GameTheme theme, GameInfo game) {
-    return GestureDetector(
-      onTap: () => _openGame(game),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 14,
-                offset: const Offset(0, 6)),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: game.accent.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(game.icon, color: game.accent, size: 26),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(game.title,
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                          color: _cardTitle)),
-                  Text(game.subtitle,
-                      style: const TextStyle(fontSize: 12.5, color: _cardSub)),
-                  const SizedBox(height: 2),
-                  Text(game.bestText(_bests[game.id] ?? 0),
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w800, color: _accent)),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: _cardSub),
           ],
         ),
       ),

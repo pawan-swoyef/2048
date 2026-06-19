@@ -29,10 +29,13 @@ void main() {
     expect(find.text('Coins'), findsOneWidget);
   });
 
-  testWidgets('hub lists additional games as compact cards', (tester) async {
+  testWidgets('hub shows only the featured game, with a See all link',
+      (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
-    expect(find.text('Number Tap'), findsOneWidget);
-    expect(find.text('Daily Challenge'), findsOneWidget);
+    expect(find.text('See all'), findsOneWidget);
+    // Other games are not listed inline on the hub.
+    expect(find.text('Number Tap'), findsNothing);
+    expect(find.text('Daily Challenge'), findsNothing);
   });
 }
