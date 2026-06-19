@@ -28,4 +28,10 @@ void main() {
     expect(find.text('Streak'), findsOneWidget);
     expect(find.text('Coins'), findsOneWidget);
   });
+
+  testWidgets('hub lists additional games as compact cards', (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+    expect(find.text('Number Tap'), findsOneWidget);
+  });
 }
