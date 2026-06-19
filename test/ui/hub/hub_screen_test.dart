@@ -33,5 +33,6 @@ void main() {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
     expect(find.text('Number Tap'), findsOneWidget);
+    expect(find.text('Daily Challenge'), findsOneWidget);
   });
 }

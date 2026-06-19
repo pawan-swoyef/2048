@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../daily/daily_screen.dart';
 import '../game_screen.dart';
 import '../numbertap/number_tap_screen.dart';
 
@@ -49,5 +50,14 @@ final List<GameInfo> kGames = [
     builder: () => const NumberTapScreen(),
     bestLabel: (deci) =>
         deci <= 0 ? 'Best: —' : 'Best: ${(deci / 10).toStringAsFixed(1)}s',
+  ),
+  GameInfo(
+    id: 'daily',
+    title: 'Daily Challenge',
+    subtitle: 'Reach 512 in fewest moves',
+    icon: Icons.calendar_today_rounded,
+    accent: const Color(0xFFFF6FA5),
+    builder: () => const DailyScreen(),
+    bestLabel: (_) => 'New puzzle every day',
   ),
 ];
