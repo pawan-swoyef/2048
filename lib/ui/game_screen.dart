@@ -6,19 +6,11 @@ import 'package:flutter/services.dart';
 import '../ads/banner_ad_box.dart';
 import '../ads/interstitial_ad.dart';
 import '../game/board.dart';
-import '../game/daily_engagement.dart';
 import '../game/game_state.dart';
-import '../game/progress_store.dart';
 import '../game/score_store.dart';
 import '../game/sound_service.dart';
 import 'animated_board.dart';
 import 'dialogs.dart';
-import 'engagement/coin_pill.dart';
-import 'engagement/daily_gift_button.dart';
-import 'engagement/daily_gift_dialog.dart';
-import 'engagement/reward_toast.dart';
-import 'engagement/streak_pill.dart';
-import 'engagement/streak_sheet.dart';
 import 'game_buttons.dart';
 import 'overlays.dart';
 import 'paywall.dart';
@@ -38,11 +30,8 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   final Random _rng = Random();
   final ScoreStore _store = ScoreStore();
-  final ProgressStore _progressStore = ProgressStore();
   final SoundService _sound = SoundService();
   final InterstitialController _interstitial = InterstitialController();
-
-  PlayerProgress _progress = const PlayerProgress();
 
   late GameState _state;
   final List<GameState> _history = []; // for undo (premium)
@@ -66,7 +55,6 @@ class _GameScreenState extends State<GameScreen> {
     _state = GameState.newGame(_rng);
     _popCells = _allTileCells(_state.board);
     _loadPrefs();
-    _loadEngagement();
   }
 
   @override
@@ -77,7 +65,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _loadPrefs() async {
-    final best = await _store.loadBest();
+    final best = await _store.bestFor('2048');
     final soundOn = await _store.loadSoundEnabled();
     if (!mounted) return;
     setState(() {
@@ -88,44 +76,6 @@ class _GameScreenState extends State<GameScreen> {
             GameState(board: _state.board, score: _state.score, best: best);
       }
     });
-  }
-
-  Future<void> _loadEngagement() async {
-    final loaded = await _progressStore.load();
-    final result = applyDailyOpen(loaded, DateTime.now());
-    await _progressStore.save(result.progress);
-    if (!mounted) return;
-    setState(() => _progress = result.progress);
-  }
-
-  void _openStreakSheet() {
-    showDialog<void>(
-      context: context,
-      builder: (_) => StreakSheet(progress: _progress),
-    );
-  }
-
-  void _openDailyGift() {
-    final today = DateTime.now();
-    showDialog<void>(
-      context: context,
-      builder: (_) => DailyGiftDialog(
-        progress: _progress,
-        today: today,
-        onClaim: () => _claimDailyGift(today),
-      ),
-    );
-  }
-
-  Future<void> _claimDailyGift(DateTime today) async {
-    if (!giftAvailable(_progress, today)) return;
-    final updated = claimGift(_progress, today);
-    final earned = updated.coins - _progress.coins;
-    await _progressStore.save(updated);
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    setState(() => _progress = updated);
-    showCoinToast(context, earned);
   }
 
   void _toggleSound() {
@@ -195,7 +145,7 @@ class _GameScreenState extends State<GameScreen> {
       _busy = true;
     });
 
-    if (next.best > 0) _store.saveBest(next.best);
+    if (next.best > 0) _store.saveBestFor('2048', next.best);
 
     if (next.over) {
       _sound.gameOver();
@@ -324,10 +274,6 @@ class _GameScreenState extends State<GameScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ScoreHeader(score: _state.score, best: _state.best),
-                      if (_progress.streakCurrent > 0) ...[
-                        const SizedBox(height: 14),
-                        _statRow(),
-                      ],
                       const SizedBox(height: 18),
                       _subRow(),
                       const SizedBox(height: 16),
@@ -418,21 +364,6 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _statRow() {
-    return Row(
-      children: [
-        StreakPill(streak: _progress.streakCurrent, onTap: _openStreakSheet),
-        const SizedBox(width: 8),
-        CoinPill(coins: _progress.coins),
-        const Spacer(),
-        DailyGiftButton(
-          available: giftAvailable(_progress, DateTime.now()),
-          onTap: _openDailyGift,
-        ),
-      ],
     );
   }
 

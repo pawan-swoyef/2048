@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'ads/ads_init.dart';
 import 'game/score_store.dart';
 import 'iap/iap_service.dart';
-import 'ui/game_screen.dart';
+import 'ui/hub/hub_screen.dart';
 import 'ui/theme_controller.dart';
 
 Future<void> main() async {
@@ -61,7 +61,7 @@ class _Game2048AppState extends State<Game2048App> {
             scaffoldBackgroundColor: kThemes.first.backgroundGradient.first,
             useMaterial3: true,
           ),
-          home: const GameScreen(),
+          home: const HubScreen(),
         ),
       ),
     );

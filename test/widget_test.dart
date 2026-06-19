@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:game2048/main.dart';
+import 'package:game2048/ui/game_screen.dart';
+import 'package:game2048/ui/theme_controller.dart';
+
+// The app opens to the hub now; these test the 2048 game screen directly.
+// ThemeScope sits above MaterialApp (like main.dart) so dialogs can find it.
+Widget _gameScreen() => ThemeScope(
+      controller: ThemeController(),
+      child: const MaterialApp(home: GameScreen()),
+    );
 
 void main() {
   setUp(() {
@@ -11,7 +19,7 @@ void main() {
   });
 
   testWidgets('renders the title, score header, and New Game button', (tester) async {
-    await tester.pumpWidget(const Game2048App());
+    await tester.pumpWidget(_gameScreen());
     await tester.pumpAndSettle();
 
     expect(find.text('2048'), findsOneWidget);
@@ -21,7 +29,7 @@ void main() {
   });
 
   testWidgets('opens the How to Play dialog from the help button', (tester) async {
-    await tester.pumpWidget(const Game2048App());
+    await tester.pumpWidget(_gameScreen());
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.help_outline));
@@ -32,7 +40,7 @@ void main() {
   });
 
   testWidgets('starts with exactly two tiles on the board', (tester) async {
-    await tester.pumpWidget(const Game2048App());
+    await tester.pumpWidget(_gameScreen());
     await tester.pumpAndSettle();
 
     // Starting tiles are 2s and/or 4s — there should be exactly two of them.
