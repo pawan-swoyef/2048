@@ -32,6 +32,10 @@ class NumberTapScreen extends StatefulWidget {
 class _NumberTapScreenState extends State<NumberTapScreen> {
   static const _gameId = 'numbertap';
 
+  /// Highlight the next tile green only for the first numbers, then stop
+  /// guiding so the rest is a real challenge.
+  static const _guideUpTo = 10;
+
   final ScoreStore _store = ScoreStore();
   final Stopwatch _watch = Stopwatch();
 
@@ -310,7 +314,8 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     final number = _game.board[index];
     final cleared = _game.isCleared(number);
     final flashing = index == _flashCell;
-    final isNext = !_game.isComplete && number == _game.next;
+    final isNext =
+        !_game.isComplete && number == _game.next && _game.next <= _guideUpTo;
 
     if (cleared) {
       return Padding(
