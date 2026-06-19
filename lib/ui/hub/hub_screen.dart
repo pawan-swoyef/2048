@@ -10,6 +10,7 @@ import '../engagement/streak_sheet.dart';
 import '../theme_controller.dart';
 import '../theme_picker.dart';
 import 'all_games_screen.dart';
+import 'game_card.dart';
 import 'game_registry.dart';
 
 // Text colors used on the white cards (kept readable across themes).
@@ -130,8 +131,8 @@ class _HubScreenState extends State<HubScreen> {
                             _gamesHeader(theme),
                             const SizedBox(height: 12),
                             _featuredCard(theme, kGames.first),
-                            const SizedBox(height: 20),
-                            _whyCard(theme),
+                            const SizedBox(height: 14),
+                            _dailyCard(theme),
                           ],
                         ),
                       ),
@@ -495,63 +496,16 @@ class _HubScreenState extends State<HubScreen> {
     );
   }
 
-  // ---------- why-play card + bottom nav ----------
+  // ---------- daily challenge card + bottom nav ----------
 
-  Widget _whyCard(GameTheme theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.glassStroke, width: 1),
-      ),
-      child: Column(
-        children: [
-          Text('Why play number games?',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: theme.onBackground)),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _why(theme, '🧠', 'Improve', 'your brain'),
-              _whyDivider(theme),
-              _why(theme, '⚡', 'Sharpen', 'your skills'),
-              _whyDivider(theme),
-              _why(theme, '🎯', 'Challenge', 'yourself'),
-            ],
-          ),
-        ],
-      ),
+  Widget _dailyCard(GameTheme theme) {
+    final daily = kGames.firstWhere((g) => g.id == 'daily');
+    return GameCompactCard(
+      game: daily,
+      best: _bests[daily.id] ?? 0,
+      onTap: () => _openGame(daily),
     );
   }
-
-  Widget _why(GameTheme theme, String emoji, String l1, String l2) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 30)),
-          const SizedBox(height: 8),
-          Text(l1,
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: theme.onBackground)),
-          Text(l2,
-              style: TextStyle(
-                  fontSize: 13,
-                  color: theme.onBackground.withValues(alpha: 0.85))),
-        ],
-      ),
-    );
-  }
-
-  Widget _whyDivider(GameTheme theme) => Container(
-        width: 1,
-        height: 42,
-        color: theme.onBackground.withValues(alpha: 0.18),
-      );
 
   Widget _bottomNav(GameTheme theme) {
     return Padding(
