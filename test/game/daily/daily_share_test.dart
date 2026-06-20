@@ -2,29 +2,38 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:game2048/game/daily/daily_share.dart';
 
 void main() {
-  test('a win includes puzzle number, target, moves and streak', () {
+  test('includes game title, puzzle number, result and streak', () {
     final text = dailyShareText(
-        puzzleNumber: 128, target: 512, success: true, moves: 47, dailyStreak: 5);
-    expect(text, contains('#128'));
+      gameTitle: '2048',
+      puzzleNumber: 128,
+      result: '🎯512 in 47 moves',
+      dailyStreak: 5,
+    );
+    expect(text, contains('2048 Daily #128'));
     expect(text, contains('512'));
     expect(text, contains('47'));
     expect(text, contains('🔥5'));
   });
 
-  test('a DNF reads as "didn\'t make it"', () {
+  test('works for a time-based game', () {
     final text = dailyShareText(
-        puzzleNumber: 128, target: 512, success: false, moves: 0, dailyStreak: 0);
-    expect(text.toLowerCase(), contains("didn't make it"));
+      gameTitle: 'Magic Square',
+      puzzleNumber: 4,
+      result: '⏱️ 20.1s',
+      dailyStreak: 8,
+    );
+    expect(text, contains('Magic Square Daily #4'));
+    expect(text, contains('20.1s'));
   });
 
   test('appends the link on its own line when provided', () {
     final text = dailyShareText(
-        puzzleNumber: 1,
-        target: 512,
-        success: true,
-        moves: 30,
-        dailyStreak: 1,
-        link: 'https://example.com');
+      gameTitle: '2048',
+      puzzleNumber: 1,
+      result: '🎯512 in 30 moves',
+      dailyStreak: 1,
+      link: 'https://example.com',
+    );
     expect(text, contains('\nhttps://example.com'));
   });
 }
