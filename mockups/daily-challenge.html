@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Daily Challenge — Design Directions</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#15171c; color:#eee; padding:32px 16px 90px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin:0 auto 18px; font-size:14px; max-width:720px; line-height:1.5; }
+  .sub b { color:#ffd166; }
+  .pickline { text-align:center; color:#7be86b; font-size:13px; font-weight:700; margin-bottom:34px; }
+
+  .row { display:flex; flex-wrap:wrap; gap:46px; justify-content:center; align-items:flex-start; }
+  .opt { width:320px; }
+  .opt > h2 { text-align:center; font-size:16px; margin-bottom:3px; }
+  .opt > .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:16px; min-height:32px; }
+
+  .phone {
+    border-radius:32px; padding:18px 15px 20px; position:relative; min-height:560px;
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  .phone.neon { background:linear-gradient(165deg,#1c1140,#0c0d18); box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 0 0 1px #2a2350; }
+
+  .iconbtn {
+    width:34px; height:34px; border-radius:50%; flex:none;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:17px;
+  }
+  .streak {
+    display:flex; align-items:center; gap:4px; padding:5px 11px; border-radius:20px;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.30);
+    color:#fff; font-size:13px; font-weight:900;
+  }
+  .boardBox { border-radius:18px; padding:10px; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.18); }
+  .foot { text-align:center; color:rgba(255,255,255,.85); font-size:11.5px; margin-top:12px; font-weight:700; }
+
+  /* ===== mini boards (shared) ===== */
+  .m2048 { display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:6px; aspect-ratio:1; }
+  .m2048 span { border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; color:#fff; }
+  .m2048 .e { background:rgba(255,255,255,.10); }
+  .m2048 .c2{background:#d9dbf7;color:#1e2a4a;} .m2048 .c4{background:#7fe0d2;color:#1e2a4a;}
+  .m2048 .c8{background:#ffb23f;} .m2048 .c16{background:#ff8a5c;} .m2048 .c32{background:#ff5b5b;}
+  .m2048 .c64{background:#ff6a3d;} .m2048 .c128{background:#7c5cff;font-size:14px;}
+
+  .mtap { display:grid; grid-template-columns:repeat(5,1fr); grid-auto-rows:1fr; gap:5px; aspect-ratio:1; }
+  .mtap span { background:linear-gradient(150deg,#ffd27a,#ff9d3d); color:#5b2a00; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; }
+  .mtap .done { background:rgba(255,255,255,.08); color:transparent; }
+  .mtap .nx { background:linear-gradient(135deg,#7be86b,#34c759); color:#fff; box-shadow:0 0 12px rgba(52,199,89,.8), inset 0 0 0 2px #b6ff6b; }
+
+  .msort { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:end; height:160px; padding:4px 2px; }
+  .msort .col { display:flex; flex-direction:column; justify-content:flex-end; gap:5px; height:100%;
+                background:rgba(255,255,255,.07); border-radius:10px; padding:5px; border:1px solid rgba(255,255,255,.12); }
+  .msort .col.guide { border-color:#b6ff6b; box-shadow:0 0 12px rgba(52,199,89,.6); }
+  .msort b { border-radius:7px; text-align:center; font-size:15px; font-weight:900; color:#fff; padding:7px 0; }
+  .msort .s1{background:#ffb23f;} .msort .s2{background:#ff4d9d;} .msort .s3{background:#3fa3f0;}
+
+  .msq { display:grid; grid-template-columns:26px repeat(3,1fr); gap:5px; }
+  .msq .corner { font-size:10px; font-weight:900; color:#ffd166; display:flex; align-items:center; justify-content:center; }
+  .msq .csum { font-size:13px; font-weight:900; color:#fff; display:flex; align-items:center; justify-content:center; }
+  .msq .csum.ok { color:#34c759; } .msq .csum.bad { color:#ff8a5c; }
+  .msq .cell { aspect-ratio:1; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#fff; }
+  .msq .clue { background:#3a2a66; box-shadow:inset 0 0 0 2px rgba(255,255,255,.55); }
+  .msq .filled { background:linear-gradient(150deg,#c07bff,#8a3df5); }
+  .msq .empty { background:rgba(255,255,255,.10); }
+  .msq .guidecell { background:rgba(255,255,255,.10); box-shadow:0 0 12px rgba(52,199,89,.7), inset 0 0 0 2px #b6ff6b; }
+  .diagRow { display:flex; gap:8px; justify-content:center; margin-top:8px; }
+  .diag { font-size:11px; font-weight:800; color:rgba(255,255,255,.85); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); padding:3px 9px; border-radius:9px; }
+
+  /* =========================================================
+     A — HERO BANNER (2048)
+     ========================================================= */
+  .a-top { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .a-top .t { flex:1; color:rgba(255,255,255,.85); font-size:13px; font-weight:800; letter-spacing:.4px; }
+  .hero {
+    border-radius:22px; padding:18px; margin-bottom:14px; position:relative; overflow:hidden; color:#fff;
+    background:linear-gradient(135deg,#ffce5c,#ff9d3d); box-shadow:0 12px 26px rgba(255,140,40,.35);
+  }
+  .hero .deco { position:absolute; right:-8px; top:-12px; font-size:96px; opacity:.22; }
+  .hero .kick { font-size:11px; font-weight:900; letter-spacing:.6px; opacity:.95; }
+  .hero h3 { font-size:30px; font-weight:900; margin:2px 0 4px; }
+  .hero p { font-size:13px; opacity:.95; font-weight:600; }
+  .a-metrics { display:flex; gap:10px; margin-top:12px; }
+  .a-metrics .mb { background:rgba(0,0,0,.20); border-radius:12px; padding:7px 12px; font-size:13px; font-weight:900; color:#fff; }
+
+  /* =========================================================
+     B — DAILY TICKET (Number Tap)
+     ========================================================= */
+  .ticket { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.26); border-radius:20px; padding:0; overflow:hidden; backdrop-filter:blur(8px); }
+  .ticket .stub { padding:13px 15px; display:flex; align-items:center; justify-content:space-between; }
+  .ticket .stub .lab { color:#fff; font-size:11px; font-weight:900; letter-spacing:1px; }
+  .ticket .stub .date { color:#fff; font-size:13px; font-weight:900; }
+  .perf { border-top:2px dashed rgba(255,255,255,.45); position:relative; }
+  .perf::before,.perf::after { content:""; position:absolute; top:-9px; width:16px; height:16px; border-radius:50%; background:#7a2fd0; }
+  .perf::before { left:-8px; } .perf::after { right:-8px; }
+  .ticket .body { padding:14px 15px 16px; }
+  .ticket .gline { display:flex; align-items:center; gap:9px; margin-bottom:4px; }
+  .ticket .gline .em { font-size:24px; }
+  .ticket .gline .nm { color:#fff; font-size:22px; font-weight:900; }
+  .ticket .goal { color:rgba(255,255,255,.8); font-size:12.5px; font-weight:700; margin-bottom:12px; }
+  .dots { display:flex; gap:6px; justify-content:center; margin:0 0 12px; }
+  .dots i { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.35); }
+  .dots i.on { width:20px; border-radius:4px; background:#fff; }
+
+  /* =========================================================
+     C — DASHBOARD / SEGMENTED TRACKER (Number Sort)
+     ========================================================= */
+  .c-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .c-top .ttl { flex:1; color:#fff; font-size:18px; font-weight:900; }
+  .segbar { display:flex; gap:4px; margin-bottom:14px; }
+  .seg { flex:1; text-align:center; padding:8px 2px; border-radius:11px; font-size:11px; font-weight:900;
+         background:rgba(255,255,255,.10); color:rgba(255,255,255,.6); border:1px solid rgba(255,255,255,.12); }
+  .seg.active { background:#fff; color:#8a3df5; box-shadow:0 4px 12px rgba(0,0,0,.2); }
+  .seg.passed { color:rgba(255,255,255,.85); background:rgba(255,255,255,.20); }
+  .chips { display:flex; gap:10px; margin-bottom:14px; }
+  .chip2 { flex:1; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.18); border-radius:14px; padding:9px 12px; }
+  .chip2 .k { font-size:10px; color:rgba(255,255,255,.7); font-weight:700; }
+  .chip2 .v { font-size:15px; color:#fff; font-weight:900; }
+
+  /* =========================================================
+     D — NEON FOCUS (Magic Square)
+     ========================================================= */
+  .d-top { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .d-top .ttl { flex:1; text-align:center; color:#fff; font-size:13px; font-weight:900; letter-spacing:2px; }
+  .neon .iconbtn,.neon .streak { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.16); }
+  .d-game { text-align:center; color:#c9b6ff; font-size:18px; font-weight:900; margin:6px 0 4px; }
+  .d-goal { text-align:center; color:rgba(255,255,255,.55); font-size:12px; font-weight:700; margin-bottom:16px; }
+  .neon .boardBox { background:rgba(255,255,255,.03); border-color:rgba(176,76,255,.4); box-shadow:0 0 30px -6px rgba(176,76,255,.5); }
+  .neon .foot { color:rgba(255,255,255,.5); }
+
+  .note { max-width:760px; margin:46px auto 0; color:#9aa0aa; font-size:13px; line-height:1.6; background:#23262d; border:1px solid #2e323b; border-radius:14px; padding:18px 20px; }
+  .note h4 { color:#fff; font-size:14px; margin-bottom:8px; }
+  .note b { color:#ffd166; }
+</style>
+</head>
+<body>
+  <h1>Daily Challenge — 4 Design Directions</h1>
+  <p class="sub">All use the agreed <b>unified daily chrome</b> over a game that <b>rotates each day</b>
+    (2048 → Number Tap → Number Sort → Magic Square → repeat). Each option below shows a different game so you can
+    see the style on all four. Aurora free theme (recolors with every theme).</p>
+  <p class="pickline">Tell me a letter (A / B / C / D) — or mix-and-match elements — and I'll lock the design.</p>
+
+  <div class="row">
+
+    <!-- ============ A — HERO BANNER ============ -->
+    <div class="opt">
+      <h2>A · Hero Banner</h2>
+      <div class="tag">Today's game is a big featured card; board sits below</div>
+      <div class="phone">
+        <div class="a-top">
+          <div class="iconbtn">‹</div>
+          <div class="t">DAILY #171</div>
+          <div class="streak">🔥 5</div>
+        </div>
+        <div class="hero">
+          <div class="deco">🔢</div>
+          <div class="kick">⭐ TODAY'S CHALLENGE</div>
+          <h3>2048</h3>
+          <p>Reach 512 in the fewest moves</p>
+          <div class="a-metrics"><div class="mb">🎯 512</div><div class="mb">Moves 8</div></div>
+        </div>
+        <div class="boardBox">
+          <div class="m2048">
+            <span class="c8">8</span><span class="c2">2</span><span class="c4">4</span><span class="e"></span>
+            <span class="c2">2</span><span class="c16">16</span><span class="c128">128</span><span class="c4">4</span>
+            <span class="c64">64</span><span class="c4">4</span><span class="c32">32</span><span class="e"></span>
+            <span class="c8">8</span><span class="c2">2</span><span class="c4">4</span><span class="c2">2</span>
+          </div>
+        </div>
+        <div class="foot">Swipe to merge · next puzzle in 7h 12m</div>
+      </div>
+    </div>
+
+    <!-- ============ B — DAILY TICKET ============ -->
+    <div class="opt">
+      <h2>B · Daily Ticket</h2>
+      <div class="tag">A dated "ticket" with rotation dots — feels collectible</div>
+      <div class="phone">
+        <div class="a-top">
+          <div class="iconbtn">‹</div>
+          <div class="t"></div>
+          <div class="streak">🔥 6</div>
+        </div>
+        <div class="ticket">
+          <div class="stub"><div class="lab">🎟 DAILY CHALLENGE</div><div class="date">Jun 21 · #172</div></div>
+          <div class="perf"></div>
+          <div class="body">
+            <div class="gline"><span class="em">⏱️</span><span class="nm">Number Tap</span></div>
+            <div class="goal">Tap 1 → 25 as fast as you can · Time 12.4s</div>
+            <div class="dots"><i></i><i class="on"></i><i></i><i></i></div>
+            <div class="boardBox">
+              <div class="mtap">
+                <span class="done">1</span><span>17</span><span>9</span><span>22</span><span>13</span>
+                <span>20</span><span class="nx">5</span><span>11</span><span class="done">2</span><span>25</span>
+                <span>8</span><span class="done">3</span><span>19</span><span>14</span><span>6</span>
+                <span>23</span><span>10</span><span class="done">4</span><span>16</span><span>21</span>
+                <span>12</span><span>18</span><span>7</span><span>24</span><span>15</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="foot">Tap the green tile next · next puzzle in 7h 12m</div>
+      </div>
+    </div>
+
+    <!-- ============ C — DASHBOARD / SEGMENTED ============ -->
+    <div class="opt">
+      <h2>C · Segmented Tracker</h2>
+      <div class="tag">A 4-step rotation bar shows where today sits in the loop</div>
+      <div class="phone">
+        <div class="c-top">
+          <div class="iconbtn">‹</div>
+          <div class="ttl">Daily #173</div>
+          <div class="streak">🔥 7</div>
+        </div>
+        <div class="segbar">
+          <div class="seg passed">2048</div>
+          <div class="seg passed">Tap</div>
+          <div class="seg active">Sort</div>
+          <div class="seg">Square</div>
+        </div>
+        <div class="chips">
+          <div class="chip2"><div class="k">🎯 Goal</div><div class="v">Sort all</div></div>
+          <div class="chip2"><div class="k">Moves</div><div class="v">6</div></div>
+        </div>
+        <div class="boardBox">
+          <div class="msort">
+            <div class="col"><b class="s1">1</b><b class="s3">3</b><b class="s2">2</b></div>
+            <div class="col"><b class="s2">2</b><b class="s1">1</b><b class="s3">3</b></div>
+            <div class="col guide"><b class="s3">3</b><b class="s2">2</b></div>
+            <div class="col"><b class="s1">1</b></div>
+          </div>
+        </div>
+        <div class="foot">Drag onto a match · next puzzle in 7h 12m</div>
+      </div>
+    </div>
+
+    <!-- ============ D — NEON FOCUS ============ -->
+    <div class="opt">
+      <h2>D · Neon Focus</h2>
+      <div class="tag">Minimal, board-is-hero; glows with the accent color</div>
+      <div class="phone neon">
+        <div class="d-top">
+          <div class="iconbtn">‹</div>
+          <div class="ttl">DAILY #174</div>
+          <div class="streak">🔥 8</div>
+        </div>
+        <div class="d-game">🔠 Magic Square</div>
+        <div class="d-goal">Make every line sum to 15 · 20.1s</div>
+        <div class="boardBox">
+          <div class="msq">
+            <div class="corner">=15</div><div class="csum">15</div><div class="csum bad">14</div><div class="csum">—</div>
+            <div class="csum ok">15</div><div class="cell filled">2</div><div class="cell clue">7</div><div class="cell filled">6</div>
+            <div class="csum">10</div><div class="cell clue">9</div><div class="cell filled">5</div><div class="guidecell"></div>
+            <div class="csum">—</div><div class="cell filled">4</div><div class="cell empty"></div><div class="cell clue">8</div>
+          </div>
+          <div class="diagRow"><div class="diag">↘ 15</div><div class="diag">↙ 11</div></div>
+        </div>
+        <div class="foot">Drag 1–9 into the grid · next puzzle in 7h 12m</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <h4>Shared across every direction</h4>
+    <p>• <b>Rotation:</b> <code>game = (puzzleNumber − 1) mod 4</code> over <code>kGames</code> order — same date, same game for everyone, no backend.<br>
+    • <b>Per-day seed:</b> each game builds a date-seeded board from the existing <code>dailySeed(today)</code>.<br>
+    • <b>Goal &amp; metric:</b> 2048 → reach 512 / moves · Number Tap → tap 1–25 / time · Number Sort → sort all / moves · Magic Square → lines = 15 / time.<br>
+    • <b>Streak, resume, share:</b> reuse the existing <code>DailyStore</code> keyed by puzzle number, plus the shared win/result card with a "next daily (game) in …" countdown.<br>
+    • Directions differ only in <b>chrome</b> (how the header / today's-game / goal are presented) — the board and result card are the same building blocks.</p>
+  </div>
+</body>
+</html>
