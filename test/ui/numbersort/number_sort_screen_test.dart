@@ -115,4 +115,32 @@ void main() {
     expect(find.byKey(const Key('sort-guide-to')), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('completing the first game persists guide-off for next games',
+      (tester) async {
+    _phoneSurface(tester);
+    await tester.pumpWidget(_wrap(NumberSortGame.fromColumns([
+      [1, 1, 1],
+      [2, 2, 2],
+      [3, 3],
+      [3],
+    ])));
+    await tester.pump(); // load guide flag (fresh -> active)
+    expect(find.byKey(const Key('sort-guide-from')), findsOneWidget);
+
+    await _drag(tester, 3, 2); // last 3 completes the board -> _finish marks seen
+    await tester.pumpAndSettle();
+
+    // A brand-new game must no longer show the guide.
+    await tester.pumpWidget(_wrap(NumberSortGame.fromColumns([
+      [1, 1, 1],
+      [2, 2, 2],
+      [3, 3],
+      [3],
+    ])));
+    await tester.pump();
+    expect(find.byKey(const Key('sort-guide-from')), findsNothing);
+    expect(find.byKey(const Key('sort-guide-to')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
 }

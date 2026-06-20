@@ -105,4 +105,25 @@ void main() {
     expect(find.text('Watch Ad'), findsNothing);
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('completing the first game persists guide-off for next games',
+      (tester) async {
+    _phoneSurface(tester);
+    // 8 clue cells; only cell 8 empty, tray holds its value (8).
+    await tester.pumpWidget(_wrap(
+        MagicSquareGame.fromSolution(_sol, {0, 1, 2, 3, 4, 5, 6, 7})));
+    await tester.pumpAndSettle(); // load guide flag (fresh -> active)
+    expect(find.byKey(const Key('ms-guide-tray')), findsOneWidget);
+
+    await _drag(tester, const Key('ms-tray-8'), const Key('ms-cell-8')); // solves
+    await tester.pumpAndSettle();
+
+    // A brand-new puzzle with empty cells must no longer show the guide.
+    await tester.pumpWidget(
+        _wrap(MagicSquareGame.fromSolution(_sol, {0, 1, 2, 3})));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('ms-guide-tray')), findsNothing);
+    expect(find.byKey(const Key('ms-guide-cell')), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
 }
