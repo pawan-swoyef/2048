@@ -1,77 +1,44 @@
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../board.dart';
-
-/// Today's saved daily-challenge state: either a finished result, or an
-/// in-progress run to resume (its move history).
+/// Today's finished daily-challenge result. A non-null instance means the day's
+/// puzzle is done; there is no mid-run resume.
 class DailySaved {
-  final bool finished;
   final bool success;
-  final int moves;
-  final List<Direction> history;
 
-  const DailySaved({
-    required this.finished,
-    this.success = false,
-    this.moves = 0,
-    this.history = const [],
-  });
+  /// The day's score: moves for move-based games, deciseconds for timed ones.
+  final int score;
+
+  const DailySaved({required this.success, required this.score});
 }
 
-/// Persists the daily challenge: the in-progress run (so one attempt resumes),
-/// today's finished result, and the daily-completion streak.
+/// Persists the daily challenge: today's finished result and the
+/// daily-completion streak. (No in-progress state — leaving restarts the day.)
 class DailyStore {
-  static const _ipPuzzle = 'daily_ip_puzzle';
-  static const _ipTarget = 'daily_ip_target';
-  static const _ipMoves = 'daily_ip_moves';
   static const _resPuzzle = 'daily_res_puzzle';
   static const _resSuccess = 'daily_res_success';
-  static const _resMoves = 'daily_res_moves';
+  static const _resScore = 'daily_res_score';
   static const _streak = 'daily_streak';
   static const _lastPuzzle = 'daily_last_puzzle';
 
-  /// Returns today's saved state, or null if there is none for [todayPuzzle].
+  /// Today's finished result for [todayPuzzle], or null if not finished.
   Future<DailySaved?> load(int todayPuzzle) async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getInt(_resPuzzle) == todayPuzzle) {
       return DailySaved(
-        finished: true,
         success: prefs.getBool(_resSuccess) ?? false,
-        moves: prefs.getInt(_resMoves) ?? 0,
+        score: prefs.getInt(_resScore) ?? 0,
       );
-    }
-    if (prefs.getInt(_ipPuzzle) == todayPuzzle) {
-      final raw = prefs.getString(_ipMoves) ?? '[]';
-      final history = (jsonDecode(raw) as List)
-          .map((i) => Direction.values[i as int])
-          .toList();
-      return DailySaved(finished: false, history: history);
     }
     return null;
   }
 
-  Future<void> saveInProgress(
-      int puzzle, int target, List<Direction> history) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_ipPuzzle, puzzle);
-    await prefs.setInt(_ipTarget, target);
-    await prefs.setString(
-        _ipMoves, jsonEncode(history.map((d) => d.index).toList()));
-  }
-
-  /// Records the finished result, clears the in-progress run, and updates the
-  /// daily-completion streak.
+  /// Records the finished result and updates the daily-completion streak.
   Future<void> saveResult(int puzzle,
-      {required bool success, required int moves}) async {
+      {required bool success, required int score}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_resPuzzle, puzzle);
     await prefs.setBool(_resSuccess, success);
-    await prefs.setInt(_resMoves, moves);
-    await prefs.remove(_ipPuzzle);
-    await prefs.remove(_ipTarget);
-    await prefs.remove(_ipMoves);
+    await prefs.setInt(_resScore, score);
 
     if (success) {
       final last = prefs.getInt(_lastPuzzle);

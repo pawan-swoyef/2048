@@ -1,57 +1,54 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:game2048/game/board.dart';
 import 'package:game2048/game/daily/daily_store.dart';
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  test('no saved state for today on a fresh install', () async {
+  test('no saved result for today on a fresh install', () async {
     expect(await DailyStore().load(100), isNull);
   });
 
-  test('saves and resumes an in-progress run for today', () async {
+  test('records and loads a finished result for the day', () async {
     final s = DailyStore();
-    await s.saveInProgress(100, 512, [Direction.left, Direction.up]);
+    await s.saveResult(100, success: true, score: 47);
     final saved = await s.load(100);
-    expect(saved!.finished, false);
-    expect(saved.history, [Direction.left, Direction.up]);
+    expect(saved, isNotNull);
+    expect(saved!.success, true);
+    expect(saved.score, 47);
   });
 
-  test('an in-progress run from a previous day is not returned', () async {
+  test('a result from a different day is not returned', () async {
     final s = DailyStore();
-    await s.saveInProgress(99, 512, [Direction.left]);
+    await s.saveResult(99, success: true, score: 30);
     expect(await s.load(100), isNull);
   });
 
-  test('records a finished result for the day', () async {
+  test('the score round-trips for time-based games too', () async {
     final s = DailyStore();
-    await s.saveResult(100, success: true, moves: 47);
-    final saved = await s.load(100);
-    expect(saved!.finished, true);
-    expect(saved.success, true);
-    expect(saved.moves, 47);
+    await s.saveResult(100, success: true, score: 124); // 12.4s as deciseconds
+    expect((await s.load(100))!.score, 124);
   });
 
   test('daily streak increments on consecutive completions', () async {
     final s = DailyStore();
-    await s.saveResult(100, success: true, moves: 40);
+    await s.saveResult(100, success: true, score: 40);
     expect(await s.dailyStreak(), 1);
-    await s.saveResult(101, success: true, moves: 42);
+    await s.saveResult(101, success: true, score: 42);
     expect(await s.dailyStreak(), 2);
   });
 
   test('a DNF resets the daily streak', () async {
     final s = DailyStore();
-    await s.saveResult(100, success: true, moves: 40);
-    await s.saveResult(101, success: false, moves: 0);
+    await s.saveResult(100, success: true, score: 40);
+    await s.saveResult(101, success: false, score: 0);
     expect(await s.dailyStreak(), 0);
   });
 
   test('a missed day resets the streak to 1', () async {
     final s = DailyStore();
-    await s.saveResult(100, success: true, moves: 40);
-    await s.saveResult(103, success: true, moves: 50);
+    await s.saveResult(100, success: true, score: 40);
+    await s.saveResult(103, success: true, score: 50);
     expect(await s.dailyStreak(), 1);
   });
 }
