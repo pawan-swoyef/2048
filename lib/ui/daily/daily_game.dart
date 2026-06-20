@@ -39,6 +39,6 @@ abstract class DailyGame {
 
 /// All daily games, keyed by id. Games are added here as they are implemented;
 /// the Daily screen falls back to '2048' for any id not yet present.
-final Map<String, DailyGame> kDailyGames = {
+final Map<String, DailyGame> kDailyGames = Map.unmodifiable({
   '2048': Game2048Daily(),
-};
+});
