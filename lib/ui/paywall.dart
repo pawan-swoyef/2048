@@ -18,7 +18,7 @@ const _plans = <_Plan>[
   _Plan('monthly', 'Monthly', 'Billed monthly', '\$1.99', '/month'),
   _Plan('yearly', 'Yearly', '\$0.67 / month', '\$7.99', '/year',
       'BEST VALUE · SAVE 67%'),
-  _Plan('lifetime', 'Lifetime', 'One-time, forever', '\$9.99', 'once'),
+  _Plan('lifetime2048', 'Lifetime', 'One-time, forever', '\$9.99', 'once'),
 ];
 
 /// Premium upgrade screen (paywall). Handles loading real store products,

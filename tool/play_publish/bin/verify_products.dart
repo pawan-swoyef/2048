@@ -10,7 +10,7 @@ const _pkg = 'com.number.twofoureight';
 const _key = '../../secretandstunts-e3a3e3c488d4.json';
 
 // The IDs the app queries (see lib/iap/iap_service.dart _kProductIds).
-const _wantManaged = {'lifetime'};
+const _wantManaged = {'lifetime2048'};
 const _wantSubs = {'monthly', 'yearly'};
 
 void main() async {

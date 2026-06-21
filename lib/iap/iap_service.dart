@@ -19,7 +19,7 @@ class IAPService extends ChangeNotifier {
   List<ProductDetails> get products => _products;
   String? get errorMessage => _errorMessage;
 
-  static const Set<String> _kProductIds = {'monthly', 'yearly', 'lifetime'};
+  static const Set<String> _kProductIds = {'monthly', 'yearly', 'lifetime2048'};
 
   IAPService(this.themeController);
 
