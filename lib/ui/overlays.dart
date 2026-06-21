@@ -3,31 +3,6 @@ import 'package:flutter/material.dart';
 import 'game_buttons.dart';
 import 'theme_controller.dart';
 
-/// Overlay shown over the board when the player reaches 2048.
-class WinOverlay extends StatelessWidget {
-  final VoidCallback onKeepGoing;
-  final VoidCallback onNewGame;
-
-  const WinOverlay({
-    super.key,
-    required this.onKeepGoing,
-    required this.onNewGame,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _BoardOverlay(
-      title: 'You Win! 🎉',
-      titleColor: ThemeScope.of(context).win,
-      message: 'You reached 2048. Keep going for a higher score?',
-      actions: [
-        GhostButton(label: 'New Game', onPressed: onNewGame),
-        PrimaryButton(label: 'Keep Going', onPressed: onKeepGoing),
-      ],
-    );
-  }
-}
-
 /// Overlay shown over the board when no moves remain.
 class GameOverOverlay extends StatelessWidget {
   final int score;

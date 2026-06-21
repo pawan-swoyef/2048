@@ -268,24 +268,39 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 children: [
                   Row(
                     children: [
-                      Text(cleanedName,
+                      Flexible(
+                        child: Text(
+                          cleanedName,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                           style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white)),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                       if (plan.badge != null) ...[
                         const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFD23F),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(plan.badge!,
-                              style: const TextStyle(
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFD23F),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                plan.badge!,
+                                style: const TextStyle(
                                   fontSize: 9,
                                   fontWeight: FontWeight.w800,
-                                  color: Color(0xFF5A4500))),
+                                  color: Color(0xFF5A4500),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ],

@@ -13,11 +13,18 @@ Widget _wrap() => MaterialApp(
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('lists every game in the collection', (tester) async {
+  testWidgets('features the Daily Challenge with a Play button', (tester) async {
+    await tester.pumpWidget(_wrap());
+    await tester.pumpAndSettle();
+    expect(find.text('Daily Challenge'), findsOneWidget);
+    expect(find.text('Play Now'), findsOneWidget);
+  });
+
+  testWidgets('lists the other games as cards', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
     expect(find.text('2048'), findsOneWidget);
     expect(find.text('Number Tap'), findsOneWidget);
-    expect(find.text('Daily Challenge'), findsOneWidget);
+    expect(find.text('Number Sort'), findsOneWidget);
   });
 }

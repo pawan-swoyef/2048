@@ -4,7 +4,7 @@ import 'package:game2048/game/daily_engagement.dart';
 import 'package:game2048/ui/engagement/coin_pill.dart';
 import 'package:game2048/ui/engagement/streak_pill.dart';
 import 'package:game2048/ui/engagement/daily_gift_button.dart';
-import 'package:game2048/ui/engagement/daily_gift_dialog.dart';
+import 'package:game2048/ui/engagement/daily_reward_screen.dart';
 import 'package:game2048/ui/engagement/streak_sheet.dart';
 import 'package:game2048/ui/theme_controller.dart';
 
@@ -13,6 +13,11 @@ Widget _wrap(Widget child) => MaterialApp(
         controller: ThemeController(),
         child: Scaffold(body: Center(child: child)),
       ),
+    );
+
+// The reward screen brings its own Scaffold, so wrap it without an extra one.
+Widget _wrapScreen(Widget child) => MaterialApp(
+      home: ThemeScope(controller: ThemeController(), child: child),
     );
 
 void main() {
@@ -30,33 +35,53 @@ void main() {
     expect(tapped, true);
   });
 
-  testWidgets('DailyGiftDialog shows the day reward and claims it', (tester) async {
+  testWidgets('DailyRewardScreen shows the day reward and claims it',
+      (tester) async {
     var claimed = false;
     const progress = PlayerProgress(streakCurrent: 5, giftClaimedDate: '2026-06-07');
-    await tester.pumpWidget(_wrap(DailyGiftDialog(
+    await tester.pumpWidget(_wrapScreen(DailyRewardScreen(
       progress: progress,
       today: DateTime(2026, 6, 8),
       onClaim: () => claimed = true,
     )));
 
     expect(find.text('+60'), findsOneWidget); // day-5 gift
-    await tester.tap(find.text('Claim Reward'));
+    await tester.tap(find.text('Claim +60 Reward'));
     expect(claimed, true);
   });
 
-  testWidgets('DailyGiftDialog shows a claimed state when already claimed today',
+  testWidgets('DailyRewardScreen shows a claimed state when already claimed today',
       (tester) async {
     var claimed = false;
     const progress = PlayerProgress(streakCurrent: 5, giftClaimedDate: '2026-06-08');
-    await tester.pumpWidget(_wrap(DailyGiftDialog(
+    await tester.pumpWidget(_wrapScreen(DailyRewardScreen(
       progress: progress,
       today: DateTime(2026, 6, 8),
       onClaim: () => claimed = true,
     )));
 
-    expect(find.text('Claim Reward'), findsNothing);
-    expect(find.textContaining('Come back'), findsOneWidget);
+    expect(find.textContaining('Claim'), findsNothing);
+    expect(find.textContaining('Come back'), findsWidgets);
     expect(claimed, false);
+  });
+
+  testWidgets('DailyRewardScreen shows the 7-day strip with the jackpot day',
+      (tester) async {
+    const progress = PlayerProgress(streakCurrent: 5, giftClaimedDate: '2026-06-07');
+    await tester.pumpWidget(_wrapScreen(DailyRewardScreen(
+      progress: progress,
+      today: DateTime(2026, 6, 8),
+      onClaim: () {},
+    )));
+
+    // Scroll down to build off-screen items in the lazy ListView
+    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.pumpAndSettle();
+
+    expect(find.text('This week'), findsOneWidget);
+    expect(find.text('DAY 1'), findsOneWidget);
+    expect(find.text('DAY 7'), findsOneWidget);
+    expect(find.text('150'), findsOneWidget); // day-7 jackpot coins
   });
 
   testWidgets('StreakSheet shows current and best streak', (tester) async {

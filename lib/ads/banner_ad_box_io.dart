@@ -33,15 +33,20 @@ class _BannerAdBoxState extends State<BannerAdBox> {
   void _load() {
     if (!(Platform.isAndroid || Platform.isIOS)) return; // desktop: skip
     final adUnitId = Platform.isAndroid ? _androidBannerUnit : _iosTestUnit;
+    debugPrint('AdMob: Loading Banner Ad...');
     final ad = BannerAd(
       adUnitId: adUnitId,
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (_) {
+          debugPrint('AdMob: Banner Ad loaded successfully.');
           if (mounted) setState(() => _loaded = true);
         },
-        onAdFailedToLoad: (ad, error) => ad.dispose(),
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('AdMob: Banner Ad failed to load: $error');
+          ad.dispose();
+        },
       ),
     );
     _ad = ad;

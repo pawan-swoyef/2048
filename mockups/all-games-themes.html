@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Games Screen — Every Theme</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#15161a; color:#eee; padding:32px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin-bottom:40px; font-size:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:34px; justify-content:center; align-items:flex-start; }
+  .opt { width:320px; }
+  .opt h2 { text-align:center; font-size:15px; margin-bottom:14px; color:#cfd3da; }
+
+  /* Theme-driven phone frame. Each theme sets the CSS variables below. */
+  .phone {
+    border-radius:30px; padding:18px 15px 22px;
+    background:var(--bg);
+    box-shadow:0 16px 44px rgba(0,0,0,.45);
+  }
+  .top { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .iconbtn {
+    width:36px; height:36px; border-radius:50%; flex:none;
+    background:var(--pill); border:1px solid var(--stroke);
+    display:flex; align-items:center; justify-content:center; color:var(--txt); font-size:18px;
+  }
+  .title { color:var(--txt); font-size:21px; font-weight:900; flex:1; }
+  .pill {
+    display:flex; align-items:center; gap:5px; padding:5px 11px; border-radius:20px;
+    background:var(--pill); border:1px solid var(--stroke); color:var(--txt); font-size:12px; font-weight:800;
+  }
+
+  .card {
+    display:flex; align-items:center; gap:13px; padding:13px; border-radius:18px; margin-bottom:11px;
+    background:var(--glass); border:1px solid var(--stroke); backdrop-filter:blur(8px);
+    box-shadow:0 6px 16px rgba(0,0,0,.14);
+  }
+  .chip {
+    width:48px; height:48px; flex:none; border-radius:15px;
+    display:flex; align-items:center; justify-content:center; font-size:23px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);
+  }
+  .meta { flex:1; min-width:0; }
+  .name { color:var(--txt); font-size:16px; font-weight:900; }
+  .desc { color:var(--sub); font-size:11.5px; margin:1px 0 4px; }
+  .best { color:var(--best); font-size:11.5px; font-weight:800; }
+  .chev { color:var(--sub); font-size:21px; }
+
+  /* fixed per-game accent chips (same in every theme, like the real app) */
+  .g2048 { background:rgba(255,193,46,.28); }
+  .gtap  { background:rgba(79,195,247,.28); }
+  .gsort { background:rgba(123,232,107,.28); }
+  .gdaily{ background:rgba(255,111,165,.28); }
+
+  /* ===================== THEME PALETTES ===================== */
+  .aurora { --bg:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    --txt:#fff; --sub:rgba(255,255,255,.78); --glass:rgba(255,255,255,.16); --stroke:rgba(255,255,255,.30);
+    --best:#ffe27a; --pill:rgba(255,255,255,.18); }
+  .neon { --bg:linear-gradient(165deg,#1c1140,#0c0d18);
+    --txt:#fff; --sub:rgba(255,255,255,.55); --glass:rgba(255,255,255,.05); --stroke:rgba(255,255,255,.13);
+    --best:#ffd166; --pill:rgba(255,255,255,.08); }
+  .ocean { --bg:linear-gradient(160deg,#0277bd,#26c6da 55%,#80deea);
+    --txt:#fff; --sub:rgba(255,255,255,.82); --glass:rgba(255,255,255,.18); --stroke:rgba(255,255,255,.34);
+    --best:#fff3b0; --pill:rgba(255,255,255,.20); }
+  .sunset { --bg:linear-gradient(160deg,#2b1055,#7d2a6b 50%,#ff8a5c);
+    --txt:#fff; --sub:rgba(255,255,255,.80); --glass:rgba(255,255,255,.16); --stroke:rgba(255,255,255,.30);
+    --best:#ffe27a; --pill:rgba(255,255,255,.18); }
+  .forest { --bg:linear-gradient(160deg,#0f3d2e,#1d6b4f 55%,#5fc28c);
+    --txt:#fff; --sub:rgba(255,255,255,.80); --glass:rgba(255,255,255,.15); --stroke:rgba(255,255,255,.28);
+    --best:#ffe08a; --pill:rgba(255,255,255,.16); }
+  .gold { --bg:linear-gradient(165deg,#2a2417,#0d0d0d);
+    --txt:#fff; --sub:rgba(212,175,55,.70); --glass:rgba(212,175,55,.10); --stroke:rgba(212,175,55,.32);
+    --best:#f0d77b; --pill:rgba(212,175,55,.14); }
+  .candy { --bg:linear-gradient(160deg,#a18cd1,#c197e8 50%,#fbc2eb);
+    --txt:#4a2a5e; --sub:#6a4a7e; --glass:rgba(255,255,255,.45); --stroke:rgba(255,255,255,.75);
+    --best:#c8336e; --pill:rgba(255,255,255,.55); }
+</style>
+</head>
+<body>
+  <h1>All Games — In Every Theme</h1>
+  <p class="sub">The same screen recolored by all 7 themes (Aurora is free; the rest are premium). Game-icon colors stay fixed per game, just like the live app.</p>
+
+  <div class="row" id="grid"></div>
+
+<script>
+  const THEMES = [
+    ['aurora','Aurora · free','🔥 5'],
+    ['neon','Midnight Neon','🪙 240'],
+    ['ocean','Ocean Breeze','🔥 5'],
+    ['sunset','Sunset Glow','🪙 240'],
+    ['forest','Emerald Forest','🔥 5'],
+    ['gold','Royal Gold','🪙 240'],
+    ['candy','Candy Pop','🔥 5'],
+  ];
+  const GAMES = [
+    ['g2048','🔢','2048','Classic merge puzzle','👑 Best 12,480'],
+    ['gtap','⏱️','Number Tap','Tap 1–25, beat the clock','👑 Best 18.4s'],
+    ['gsort','🧩','Number Sort','Sort the columns, fewest moves','👑 Best 14 moves'],
+    ['gdaily','📅','Daily Challenge','New puzzle every day','🔥 5 day streak'],
+  ];
+  const cards = GAMES.map(([cls,ic,nm,ds,bs]) => `
+    <div class="card">
+      <div class="chip ${cls}">${ic}</div>
+      <div class="meta">
+        <div class="name">${nm}</div>
+        <div class="desc">${ds}</div>
+        <div class="best">${bs}</div>
+      </div>
+      <div class="chev">›</div>
+    </div>`).join('');
+  document.getElementById('grid').innerHTML = THEMES.map(([cls,label,pill]) => `
+    <div class="opt">
+      <h2>${label}</h2>
+      <div class="phone ${cls}">
+        <div class="top">
+          <div class="iconbtn">‹</div>
+          <div class="title">All Games</div>
+          <div class="pill">${pill}</div>
+        </div>
+        ${cards}
+      </div>
+    </div>`).join('');
+</script>
+</body>
+</html>

@@ -4,7 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:game2048/main.dart';
 
 void main() {
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() => SharedPreferences.setMockInitialValues({
+        'last_active_date': '2026-06-18',
+      }));
 
   testWidgets('home hub shows the streak after the daily rollover',
       (tester) async {
@@ -22,12 +24,13 @@ void main() {
 
     expect(find.text('Coins'), findsOneWidget);
 
-    // Tap the glowing gift on the hub.
+    // Tap the glowing gift on the hub — it now opens the Daily Reward screen.
     await tester.tap(find.text('🎁'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Claim Reward'), findsOneWidget);
-    await tester.tap(find.text('Claim Reward'));
+    // Day-1 gift pays 10 coins.
+    expect(find.text('Claim +10 Reward'), findsOneWidget);
+    await tester.tap(find.text('Claim +10 Reward'));
     await tester.pumpAndSettle();
 
     // Day-1 gift pays 10 coins -> the coins stat shows 10.

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Magic Square — Screen Redesign Options</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#1b1d22; color:#eee; padding:32px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin:0 auto 40px; font-size:14px; max-width:780px; }
+  .sub b { color:#ffd166; }
+  .row { display:flex; flex-wrap:wrap; gap:48px; justify-content:center; align-items:flex-start; }
+  .opt { width:330px; }
+  .opt h2 { text-align:center; font-size:16px; margin-bottom:4px; }
+  .opt .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:18px; min-height:48px; }
+
+  /* number colors = real Aurora tile palette for 1..9 */
+  :root {
+    --m1:#D9DBF7; --m1t:#1E2A4A; --m2:#7FE0D2; --m2t:#1E2A4A; --m3:#FFB23F;
+    --m4:#FF5B5B; --m5:#FF4D9D; --m6:#FF6A3D; --m7:#FFC93C; --m8:#54CC57; --m9:#3FA3F0;
+    --gold:#FFC93C; --green:#34C759; --orange:#FF8A5C;
+  }
+
+  .phone {
+    border-radius:32px; padding:16px 14px 20px; min-height:600px; position:relative; overflow:hidden;
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    box-shadow:0 18px 50px rgba(0,0,0,.45); display:flex; flex-direction:column;
+  }
+  .phone.neon { background:linear-gradient(165deg,#1c1140,#0c0d18); box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 0 0 1px #2a2350; }
+  .phone.candy { background:linear-gradient(160deg,#a18cd1,#c197e8 55%,#fbc2eb); }
+
+  /* header */
+  .top { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .cbtn { width:38px; height:38px; border-radius:50%; flex:none; background:rgba(255,255,255,.18);
+          border:1px solid rgba(255,255,255,.30); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; }
+  .ttl { flex:1; text-align:center; font-size:22px; font-weight:900; letter-spacing:1px; color:#fff; }
+  .ttl b { color:var(--gold); }
+  .candy .cbtn { color:#4a2a5e; border-color:rgba(255,255,255,.6); background:rgba(255,255,255,.4); }
+  .candy .ttl { color:#4a2a5e; } .candy .ttl b { color:#c8336e; }
+  .neon .cbtn { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); }
+
+  /* stat cards */
+  .stats { display:flex; gap:12px; margin-bottom:16px; }
+  .stat { flex:1; display:flex; align-items:center; gap:11px; padding:11px 14px; border-radius:16px;
+          background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.26); }
+  .stat .ic { font-size:22px; }
+  .stat .lbl { font-size:11px; color:rgba(255,255,255,.75); }
+  .stat .val { font-size:18px; font-weight:900; color:#fff; }
+  .candy .stat { background:rgba(255,255,255,.45); } .candy .lbl{color:#6a4a7e;} .candy .val{color:#4a2a5e;}
+  .neon .stat { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.12); }
+
+  /* number tiles */
+  .t { border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:25px; font-weight:900;
+       color:#fff; box-shadow:0 3px 5px rgba(0,0,0,.22); position:relative; }
+  .t1{background:var(--m1);color:var(--m1t);} .t2{background:var(--m2);color:var(--m2t);} .t3{background:var(--m3);}
+  .t4{background:var(--m4);} .t5{background:var(--m5);} .t6{background:var(--m6);} .t7{background:var(--m7);}
+  .t8{background:var(--m8);} .t9{background:var(--m9);}
+  .t.clue { box-shadow:0 0 0 2px rgba(255,255,255,.65), 0 3px 5px rgba(0,0,0,.22); }
+  .t .lk { position:absolute; top:3px; right:4px; font-size:9px; opacity:.75; }
+  .empty { border-radius:11px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.22); }
+  .empty.drop { border:2.5px solid var(--gold); }
+
+  /* sum chips */
+  .sum { display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; color:#fff;
+         border-radius:9px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25); }
+  .sum.ok { background:var(--green); border-color:var(--green); }
+  .sum.bad { background:var(--orange); border-color:var(--orange); }
+
+  /* tray */
+  .tray { margin-top:14px; padding:10px; border-radius:16px; background:rgba(255,255,255,.14);
+          border:1px solid rgba(255,255,255,.26); display:flex; gap:8px; justify-content:center; flex-wrap:wrap; min-height:74px; align-items:center; }
+  .tray .t { width:50px; height:50px; }
+  .candy .tray { background:rgba(255,255,255,.45); }
+  .neon .tray { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.12); }
+
+  /* controls */
+  .ctrls { display:flex; gap:12px; margin-top:16px; }
+  .pill { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; border-radius:24px;
+          background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.26); color:#fff; font-weight:800; font-size:14px; }
+  .candy .pill { color:#4a2a5e; background:rgba(255,255,255,.5); }
+  .neon .pill { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.14); }
+
+  /* ===== OPT 1 — Refined Glass grid (rows+col/diag sum chips) ===== */
+  .grid1 { display:grid; grid-template-columns:1fr 1fr 1fr 0.7fr; gap:6px; padding:12px; border-radius:18px;
+           background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.22); }
+  .grid1 .t,.grid1 .empty { aspect-ratio:1; }
+  .grid1 .sum { aspect-ratio:1; }
+
+  /* ===== OPT 2 — Crossword frame ===== */
+  .frame { padding:0; border-radius:18px; overflow:hidden; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.2); }
+  .frame .gw { display:grid; grid-template-columns:34px 1fr 1fr 1fr; grid-template-rows:34px 1fr 1fr 1fr; gap:7px; padding:12px; }
+  .frame .corner { }
+  .frame .htop,.frame .hleft { display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; color:rgba(255,255,255,.85); }
+  .frame .t,.frame .empty { aspect-ratio:1; font-size:24px; }
+  .frame .target { grid-column:1/2; grid-row:1/2; display:flex; align-items:center; justify-content:center;
+                   font-size:11px; font-weight:900; color:var(--gold); }
+
+  /* ===== OPT 3 — Big grid + bottom dock ===== */
+  .biggrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:14px; border-radius:20px;
+             background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.22); position:relative; }
+  .biggrid .t,.biggrid .empty { aspect-ratio:1; font-size:30px; }
+  .rowsum { position:absolute; right:-30px; font-size:12px; font-weight:900; color:#fff; }
+  .dock { margin-top:auto; padding:12px 10px; border-radius:20px 20px 0 0; background:rgba(0,0,0,.22);
+          border-top:2px solid rgba(255,255,255,.25); display:flex; gap:7px; justify-content:center; }
+  .dock .t { width:46px; height:46px; font-size:22px; }
+  .docklbl { text-align:center; font-size:11px; color:rgba(255,255,255,.8); margin:12px 0 6px; font-weight:700; }
+
+  /* ===== OPT 4 — Neon lines ===== */
+  .neongrid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; padding:14px; border-radius:18px;
+              background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.12); }
+  .neongrid .t,.neongrid .empty { aspect-ratio:1; }
+  .neongrid .t { box-shadow:0 0 14px -3px var(--g), inset 0 0 0 1px rgba(255,255,255,.16); }
+  .linebar { display:flex; gap:5px; justify-content:center; margin:14px 0 2px; }
+  .linebar i { width:26px; height:6px; border-radius:4px; background:rgba(255,255,255,.18); }
+  .linebar i.on { background:var(--green); box-shadow:0 0 8px var(--green); }
+  .linecap { text-align:center; font-size:11.5px; color:rgba(255,255,255,.8); }
+
+  /* ===== OPT 5 — Playful coins ===== */
+  .candy .t { border-radius:50%; box-shadow:0 4px 0 rgba(0,0,0,.18); }
+  .candy .t.clue { box-shadow:0 0 0 3px #fff, 0 4px 0 rgba(0,0,0,.18); }
+  .candy .empty { border-radius:50%; border:2px dashed rgba(255,255,255,.7); background:rgba(255,255,255,.25); }
+  .candy .sum { border-radius:50%; aspect-ratio:1; }
+  .candy .grid1 { background:rgba(255,255,255,.3); }
+  .candy .tray .t { border-radius:50%; }
+  .mascot { text-align:center; font-size:13px; color:#4a2a5e; font-weight:700; margin-top:13px; }
+</style>
+</head>
+<body>
+  <h1>Magic Square — Screen Redesign</h1>
+  <p class="sub">Same gameplay (drag 1–9 so every row, column &amp; diagonal sums to <b>15</b>; locked clues stay put). Numbers use the real Aurora palette. Sample state: 4 clues locked 🔒, a few placed, green chips = a line already sums 15. Tell me a number (or mix) and I'll build it.</p>
+
+  <div class="row">
+
+    <!-- ===== OPTION 1 — Refined Glass ===== -->
+    <div class="opt">
+      <h2>1 · Refined Glass</h2>
+      <div class="tag">A polished version of today's screen — sum chips beside each row/column, clues outlined</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="ttl">MAGIC <b>SQUARE</b></div><div class="cbtn">⚙</div></div>
+        <div class="stats">
+          <div class="stat"><span class="ic">👑</span><div><div class="lbl">Best Time</div><div class="val">22.4s</div></div></div>
+          <div class="stat"><span class="ic">⏱</span><div><div class="lbl">Time</div><div class="val">14.2s</div></div></div>
+        </div>
+        <div class="grid1">
+          <div class="t t2 clue">2<span class="lk">🔒</span></div><div class="t t7">7</div><div class="t t6">6</div><div class="sum ok">15</div>
+          <div class="t t9 clue">9<span class="lk">🔒</span></div><div class="t t5 clue">5<span class="lk">🔒</span></div><div class="t t1">1</div><div class="sum ok">15</div>
+          <div class="t t4 clue">4<span class="lk">🔒</span></div><div class="empty drop"></div><div class="empty"></div><div class="sum">7</div>
+          <div class="sum ok">15</div><div class="sum">12</div><div class="sum">7</div><div class="sum" style="background:transparent;border:none;color:var(--gold);font-size:11px;">↘7 ↙15</div>
+        </div>
+        <div class="tray"><div class="t t3">3</div><div class="t t8">8</div></div>
+        <div class="ctrls"><div class="pill">💡 Hint · 1</div><div class="pill">⟳ New</div></div>
+      </div>
+    </div>
+
+    <!-- ===== OPTION 2 — Crossword Frame ===== -->
+    <div class="opt">
+      <h2>2 · Crossword Frame</h2>
+      <div class="tag">Sums live on a dark frame around the grid, like a crossword — big bold cells inside</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="ttl">MAGIC <b>SQUARE</b></div><div class="cbtn">⚙</div></div>
+        <div class="stats">
+          <div class="stat"><span class="ic">👑</span><div><div class="lbl">Best Time</div><div class="val">22.4s</div></div></div>
+          <div class="stat"><span class="ic">⏱</span><div><div class="lbl">Time</div><div class="val">14.2s</div></div></div>
+        </div>
+        <div class="frame">
+          <div class="gw">
+            <div class="target">=15</div>
+            <div class="htop sum ok" style="background:transparent;border:none;">15</div>
+            <div class="htop sum" style="background:transparent;border:none;">12</div>
+            <div class="htop sum" style="background:transparent;border:none;">7</div>
+
+            <div class="hleft sum ok" style="background:transparent;border:none;">15</div>
+            <div class="t t2 clue">2<span class="lk">🔒</span></div><div class="t t7">7</div><div class="t t6">6</div>
+
+            <div class="hleft sum ok" style="background:transparent;border:none;">15</div>
+            <div class="t t9 clue">9<span class="lk">🔒</span></div><div class="t t5 clue">5<span class="lk">🔒</span></div><div class="t t1">1</div>
+
+            <div class="hleft sum" style="background:transparent;border:none;">7</div>
+            <div class="t t4 clue">4<span class="lk">🔒</span></div><div class="empty drop"></div><div class="empty"></div>
+          </div>
+        </div>
+        <div class="tray"><div class="t t3">3</div><div class="t t8">8</div></div>
+        <div class="ctrls"><div class="pill">💡 Hint · 1</div><div class="pill">⟳ New</div></div>
+      </div>
+    </div>
+
+    <!-- ===== OPTION 3 — Big Grid + Dock ===== -->
+    <div class="opt">
+      <h2>3 · Big Grid + Dock</h2>
+      <div class="tag">A large central grid with row sums at the edge; the tray becomes a keyboard-style bottom dock</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="ttl">MAGIC <b>SQUARE</b></div><div class="cbtn">⚙</div></div>
+        <div class="stats">
+          <div class="stat"><span class="ic">👑</span><div><div class="lbl">Best Time</div><div class="val">22.4s</div></div></div>
+          <div class="stat"><span class="ic">⏱</span><div><div class="lbl">Time</div><div class="val">14.2s</div></div></div>
+        </div>
+        <div class="biggrid">
+          <div class="t t2 clue">2<span class="lk">🔒</span></div><div class="t t7">7</div><div class="t t6">6</div>
+          <div class="t t9 clue">9<span class="lk">🔒</span></div><div class="t t5 clue">5<span class="lk">🔒</span></div><div class="t t1">1</div>
+          <div class="t t4 clue">4<span class="lk">🔒</span></div><div class="empty drop"></div><div class="empty"></div>
+        </div>
+        <div class="docklbl">Drag a number up into the grid · drop one back here to remove</div>
+        <div class="dock">
+          <div class="t t3">3</div><div class="t t8">8</div>
+        </div>
+        <div class="ctrls"><div class="pill">💡 Hint · 1</div><div class="pill">⟳ New</div></div>
+      </div>
+    </div>
+
+    <!-- ===== OPTION 4 — Neon Lines ===== -->
+    <div class="opt">
+      <h2>4 · Neon Lines</h2>
+      <div class="tag">For Midnight Neon — glowing tiles and an 8-line tracker that lights green as lines hit 15</div>
+      <div class="phone neon">
+        <div class="top"><div class="cbtn">‹</div><div class="ttl">MAGIC <b>SQUARE</b></div><div class="cbtn">⚙</div></div>
+        <div class="stats">
+          <div class="stat"><span class="ic">👑</span><div><div class="lbl">Best Time</div><div class="val">22.4s</div></div></div>
+          <div class="stat"><span class="ic">⏱</span><div><div class="lbl">Time</div><div class="val">14.2s</div></div></div>
+        </div>
+        <div class="linebar">
+          <i class="on"></i><i class="on"></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="on"></i>
+        </div>
+        <div class="linecap">4 / 8 lines magic ✨</div>
+        <div class="neongrid" style="margin-top:12px;">
+          <div class="t t2 clue" style="--g:var(--m2);">2<span class="lk">🔒</span></div><div class="t t7" style="--g:var(--m7);">7</div><div class="t t6" style="--g:var(--m6);">6</div>
+          <div class="t t9 clue" style="--g:var(--m9);">9<span class="lk">🔒</span></div><div class="t t5 clue" style="--g:var(--m5);">5<span class="lk">🔒</span></div><div class="t t1" style="--g:var(--m1);">1</div>
+          <div class="t t4 clue" style="--g:var(--m4);">4<span class="lk">🔒</span></div><div class="empty drop"></div><div class="empty"></div>
+        </div>
+        <div class="tray"><div class="t t3" style="--g:var(--m3);">3</div><div class="t t8" style="--g:var(--m8);">8</div></div>
+        <div class="ctrls"><div class="pill">💡 Hint · 1</div><div class="pill">⟳ New</div></div>
+      </div>
+    </div>
+
+    <!-- ===== OPTION 5 — Playful Coins ===== -->
+    <div class="opt">
+      <h2>5 · Playful Coins</h2>
+      <div class="tag">Kid-first — numbers as round coins, dashed empty holes, sum bubbles, a friendly hint line</div>
+      <div class="phone candy">
+        <div class="top"><div class="cbtn">‹</div><div class="ttl">MAGIC <b>SQUARE</b></div><div class="cbtn">⚙</div></div>
+        <div class="stats">
+          <div class="stat"><span class="ic">👑</span><div><div class="lbl">Best Time</div><div class="val">22.4s</div></div></div>
+          <div class="stat"><span class="ic">⏱</span><div><div class="lbl">Time</div><div class="val">14.2s</div></div></div>
+        </div>
+        <div class="grid1">
+          <div class="t t2 clue">2<span class="lk">🔒</span></div><div class="t t7">7</div><div class="t t6">6</div><div class="sum ok">15</div>
+          <div class="t t9 clue">9<span class="lk">🔒</span></div><div class="t t5 clue">5<span class="lk">🔒</span></div><div class="t t1">1</div><div class="sum ok">15</div>
+          <div class="t t4 clue">4<span class="lk">🔒</span></div><div class="empty drop"></div><div class="empty"></div><div class="sum">7</div>
+          <div class="sum ok">15</div><div class="sum">12</div><div class="sum">7</div><div class="sum" style="background:transparent;border:none;color:#c8336e;font-size:11px;">↘ ↙</div>
+        </div>
+        <div class="tray"><div class="t t3">3</div><div class="t t8">8</div></div>
+        <div class="mascot">🦉 Make every line add up to 15!</div>
+        <div class="ctrls"><div class="pill">💡 Hint · 1</div><div class="pill">⟳ New</div></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

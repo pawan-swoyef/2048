@@ -2,12 +2,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../ads/banner_ad_box.dart';
+import '../../ads/interstitial_ad.dart';
 import '../../ads/rewarded_ad.dart';
 import '../../game/guide_store.dart';
 import '../../game/numbersort/number_sort_game.dart';
 import '../../game/numbersort/undo_allowance.dart';
 import '../../game/numbersort/undo_store.dart';
 import '../../game/score_store.dart';
+import '../../game/sound_service.dart';
 import '../paywall.dart';
 import '../share_card.dart';
 import '../theme_controller.dart';
@@ -41,13 +44,16 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
   final ScoreStore _store = ScoreStore();
   final UndoStore _undoStore = UndoStore();
   final RewardedController _rewarded = RewardedController();
+  final InterstitialController _interstitial = InterstitialController();
   final GlobalKey _shareKey = GlobalKey();
+  final SoundService _sound = SoundService();
 
   late NumberSortGame _game;
   int? _bestMoves;
   UndoAllowance? _allowance;
   final GuideStore _guideStore = GuideStore();
   bool _guideActive = false;
+  bool _soundOn = true;
 
   @override
   void initState() {
@@ -55,6 +61,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
     _game = widget.initialGame ?? NumberSortGame(Random());
     _loadBest();
     _loadGuide();
+    _loadSound();
   }
 
   @override
@@ -67,7 +74,26 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
   @override
   void dispose() {
     _rewarded.dispose();
+    _interstitial.dispose();
+    _sound.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSound() async {
+    final on = await _store.loadSoundEnabled();
+    if (!mounted) return;
+    setState(() {
+      _soundOn = on;
+      _sound.enabled = on;
+    });
+  }
+
+  void _toggleSound() {
+    setState(() {
+      _soundOn = !_soundOn;
+      _sound.enabled = _soundOn;
+    });
+    _store.saveSoundEnabled(_soundOn);
   }
 
   bool get _premium => ThemeScope.controllerOf(context).premiumUnlocked;
@@ -96,10 +122,15 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
   void _move(int from, int to) {
     if (!_game.move(from, to)) return;
     setState(() {});
-    if (_game.isComplete) _finish();
+    if (_game.isComplete) {
+      _finish();
+    } else {
+      _sound.move();
+    }
   }
 
   Future<void> _finish() async {
+    _sound.win();
     final m = _game.moves;
     if (_bestMoves == null || m < _bestMoves!) {
       await _store.saveBestFor(_gameId, m);
@@ -111,6 +142,8 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
       await _guideStore.markGuideSeen(_gameId);
       if (mounted) setState(() => _guideActive = false);
     }
+    _interstitial.setPremium(_premium);
+    _interstitial.onGameOver();
   }
 
   void _restart() {
@@ -123,6 +156,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
     if (!_game.canUndo) return;
     if (_premium) {
       setState(() => _game.undo());
+      _sound.move();
       return;
     }
     final allowance = _allowance;
@@ -134,6 +168,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
     _rewarded.show(() async {
       if (!mounted) return;
       setState(() => _game.undo());
+      _sound.move();
       await _undoStore.recordUndo(today: _todayStr());
       await _refreshAllowance();
     });
@@ -179,32 +214,39 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
           ),
         ),
         child: SafeArea(
-          child: Stack(
-            clipBehavior: Clip.none,
+          child: Column(
             children: [
-              if (_game.isComplete) _shareCard(),
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 460),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _header(theme),
-                        const SizedBox(height: 16),
-                        _statsRow(theme),
-                        const SizedBox(height: 18),
-                        _board(theme, guide),
-                        const SizedBox(height: 18),
-                        _controls(theme),
-                        const SizedBox(height: 14),
-                        _hint(theme),
-                      ],
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    if (_game.isComplete) _shareCard(),
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 460),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              _header(theme),
+                              const SizedBox(height: 16),
+                              _statsRow(theme),
+                              const SizedBox(height: 18),
+                              _board(theme, guide),
+                              const SizedBox(height: 18),
+                              _controls(theme),
+                              const SizedBox(height: 14),
+                              _hint(theme),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    if (_game.isComplete) _resultOverlay(theme),
+                  ],
                 ),
               ),
-              if (_game.isComplete) _resultOverlay(theme),
+              if (!_premium) const BannerAdBox(),
             ],
           ),
         ),
@@ -233,6 +275,9 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
             ),
           ),
         ),
+        _circleButton(theme,
+            _soundOn ? Icons.volume_up : Icons.volume_off, _toggleSound),
+        const SizedBox(width: 8),
         _circleButton(theme, Icons.settings, _openSettings),
       ],
     );

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'interstitial_policy.dart';
@@ -13,15 +14,19 @@ class InterstitialController {
   static const _androidUnit = 'ca-app-pub-9535862781635221/5080663797';
   static const _iosUnit = 'ca-app-pub-3940256099942544/4411468910'; // TEST
 
+  static final InterstitialController _instance = InterstitialController._internal();
+
+  factory InterstitialController() => _instance;
+
+  InterstitialController._internal() {
+    _preload();
+  }
+
   InterstitialAd? _ad;
   bool _loading = false;
   bool _premium = false;
   int _gameOverCount = 0;
   DateTime? _lastShown;
-
-  InterstitialController() {
-    _preload();
-  }
 
   bool get _supported => Platform.isAndroid || Platform.isIOS;
 
@@ -30,15 +35,18 @@ class InterstitialController {
   void _preload() {
     if (!_supported || _premium || _ad != null || _loading) return;
     _loading = true;
+    debugPrint('AdMob: Preloading Interstitial Ad...');
     InterstitialAd.load(
       adUnitId: Platform.isAndroid ? _androidUnit : _iosUnit,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
+          debugPrint('AdMob: Interstitial Ad loaded successfully.');
           _ad = ad;
           _loading = false;
         },
-        onAdFailedToLoad: (_) {
+        onAdFailedToLoad: (error) {
+          debugPrint('AdMob: Interstitial Ad failed to load: $error');
           _ad = null;
           _loading = false;
         },
@@ -57,21 +65,25 @@ class InterstitialController {
       now: DateTime.now(),
       premium: _premium,
     );
+    debugPrint('AdMob: Game Over $_gameOverCount. Interstitial allowed: $allowed');
     if (!allowed) return;
 
     final ad = _ad;
     if (ad == null) {
+      debugPrint('AdMob: Interstitial ad not ready yet.');
       _preload(); // not ready this time; have one ready for next time
       return;
     }
 
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
+        debugPrint('AdMob: Interstitial Ad dismissed.');
         ad.dispose();
         _ad = null;
         _preload();
       },
-      onAdFailedToShowFullScreenContent: (ad, _) {
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        debugPrint('AdMob: Interstitial Ad failed to show: $error');
         ad.dispose();
         _ad = null;
         _preload();
@@ -84,7 +96,13 @@ class InterstitialController {
   }
 
   void dispose() {
+    // No-op for singleton to prevent game screens from destroying the cached ad.
+  }
+
+  /// Explicitly disposes the cached ad (e.g., when the app is shut down).
+  void destroy() {
     _ad?.dispose();
     _ad = null;
   }
 }
+

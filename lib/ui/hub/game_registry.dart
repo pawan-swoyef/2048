@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../daily/daily_screen.dart';
 import '../game_screen.dart';
+import '../magicsquare/magic_square_screen.dart';
+import '../numbersort/number_sort_screen.dart';
 import '../numbertap/number_tap_screen.dart';
 
 /// Describes one game in the collection, shown as a card on the hub.
@@ -48,6 +50,25 @@ final List<GameInfo> kGames = [
     icon: Icons.touch_app_rounded,
     accent: const Color(0xFF4FC3F7),
     builder: () => const NumberTapScreen(),
+    bestLabel: (deci) =>
+        deci <= 0 ? 'Best: —' : 'Best: ${(deci / 10).toStringAsFixed(1)}s',
+  ),
+  GameInfo(
+    id: 'numbersort',
+    title: 'Number Sort',
+    subtitle: 'Sort the columns in fewest moves',
+    icon: Icons.view_column_rounded,
+    accent: const Color(0xFF7BE86B),
+    builder: () => const NumberSortScreen(),
+    bestLabel: (m) => m <= 0 ? 'Best: —' : 'Best: $m moves',
+  ),
+  GameInfo(
+    id: 'magicsquare',
+    title: 'Magic Square',
+    subtitle: 'Make every line sum to 15',
+    icon: Icons.grid_3x3_rounded,
+    accent: const Color(0xFFB14CFF),
+    builder: () => const MagicSquareScreen(),
     bestLabel: (deci) =>
         deci <= 0 ? 'Best: —' : 'Best: ${(deci / 10).toStringAsFixed(1)}s',
   ),

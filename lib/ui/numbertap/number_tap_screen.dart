@@ -3,10 +3,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../ads/banner_ad_box.dart';
+import '../../ads/interstitial_ad.dart';
 import '../../game/numbertap/number_tap_game.dart';
 import '../../game/score_store.dart';
+import '../../game/sound_service.dart';
+import '../share_card.dart';
 import '../theme_controller.dart';
 import '../theme_picker.dart';
+import '../win_card.dart';
 
 const _gold = Color(0xFFFFC93C);
 
@@ -34,18 +39,23 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
 
   final ScoreStore _store = ScoreStore();
   final Stopwatch _watch = Stopwatch();
+  final GlobalKey _shareKey = GlobalKey();
+  final InterstitialController _interstitial = InterstitialController();
+  final SoundService _sound = SoundService();
 
   late NumberTapGame _game;
   Timer? _ticker;
   bool _started = false;
   int _flashCell = -1;
   int? _bestDeci;
+  bool _soundOn = true;
 
   @override
   void initState() {
     super.initState();
     _game = NumberTapGame(Random());
     _loadBest();
+    _loadSound();
   }
 
   Future<void> _loadBest() async {
@@ -53,9 +63,28 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     if (mounted) setState(() => _bestDeci = b > 0 ? b : null);
   }
 
+  Future<void> _loadSound() async {
+    final on = await _store.loadSoundEnabled();
+    if (!mounted) return;
+    setState(() {
+      _soundOn = on;
+      _sound.enabled = on;
+    });
+  }
+
+  void _toggleSound() {
+    setState(() {
+      _soundOn = !_soundOn;
+      _sound.enabled = _soundOn;
+    });
+    _store.saveSoundEnabled(_soundOn);
+  }
+
   @override
   void dispose() {
     _ticker?.cancel();
+    _interstitial.dispose();
+    _sound.dispose();
     super.dispose();
   }
 
@@ -74,10 +103,13 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     final wasCorrect = number == _game.next;
     setState(() => _game.tap(number));
     if (!wasCorrect) {
+      _sound.gameOver();
       setState(() => _flashCell = cellIndex);
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) setState(() => _flashCell = -1);
       });
+    } else if (!_game.isComplete) {
+      _sound.merge();
     }
     if (_game.isComplete) _finish();
   }
@@ -85,6 +117,7 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   Future<void> _finish() async {
     _watch.stop();
     _ticker?.cancel();
+    _sound.win();
     final time = _elapsedDeci;
     if (_bestDeci == null || time < _bestDeci!) {
       await _store.saveBestFor(_gameId, time);
@@ -92,6 +125,9 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     } else {
       setState(() {});
     }
+    if (!mounted) return;
+    _interstitial.setPremium(ThemeScope.controllerOf(context).premiumUnlocked);
+    _interstitial.onGameOver();
   }
 
   void _playAgain() {
@@ -105,6 +141,16 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     });
   }
 
+  void _share() {
+    final time = _fmt(_elapsedDeci);
+    final misses = _game.mistakes;
+    final missText = misses > 0 ? ' ($misses misses)' : '';
+    shareResultImage(
+      boundaryKey: _shareKey,
+      text: 'I cleared Number Tap in $time$missText! ⚡\n$kStoreLink',
+    );
+  }
+
   void _openSettings() => Navigator.of(context)
       .push(MaterialPageRoute(builder: (_) => const ThemePickerScreen()));
 
@@ -113,6 +159,7 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = ThemeScope.of(context);
+    final premium = ThemeScope.controllerOf(context).premiumUnlocked;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -123,30 +170,39 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
           ),
         ),
         child: SafeArea(
-          child: Stack(
+          child: Column(
             children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 460),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _header(theme),
-                        const SizedBox(height: 16),
-                        _statsRow(theme),
-                        const SizedBox(height: 14),
-                        _banner(theme),
-                        const SizedBox(height: 14),
-                        _grid(theme),
-                        const SizedBox(height: 14),
-                        _hint(theme),
-                      ],
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    if (_game.isComplete) _shareCard(),
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 460),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              _header(theme),
+                              const SizedBox(height: 16),
+                              _statsRow(theme),
+                              const SizedBox(height: 14),
+                              _banner(theme),
+                              const SizedBox(height: 14),
+                              _grid(theme),
+                              const SizedBox(height: 14),
+                              _hint(theme),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    if (_game.isComplete) _resultOverlay(theme),
+                  ],
                 ),
               ),
-              if (_game.isComplete) _resultOverlay(theme),
+              if (!premium) const BannerAdBox(),
             ],
           ),
         ),
@@ -174,6 +230,9 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
             ),
           ),
         ),
+        _circleButton(theme,
+            _soundOn ? Icons.volume_up : Icons.volume_off, _toggleSound),
+        const SizedBox(width: 8),
         _circleButton(theme, Icons.settings, _openSettings),
       ],
     );
@@ -412,46 +471,40 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   Widget _resultOverlay(GameTheme theme) {
     final time = _elapsedDeci;
     final isBest = _bestDeci != null && time <= _bestDeci!;
-    return Positioned.fill(
-      child: Container(
-        color: theme.overlayScrim,
-        child: Center(
-          child: Container(
-            margin: const EdgeInsets.all(28),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.dialogCard,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(isBest ? 'New Best! 🎉' : 'Done! 🎉',
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
-                const SizedBox(height: 8),
-                Text('Time: ${_fmt(time)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 18)),
-                if (_game.mistakes > 0)
-                  Text('(${_game.mistakes} misses · +${_game.penaltySeconds}s)',
-                      style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12)),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: theme.primaryButtonText,
-                    ),
-                    onPressed: _playAgain,
-                    child: const Text('Play Again',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return WinCardOverlay(
+      child: WinCard(
+        celebrate: isBest,
+        banner: isBest ? 'New Best!' : 'Done!',
+        headline: isBest ? 'New record! 🎉' : 'Great job! 🎉',
+        stat: WinStat(
+          label: 'Your time',
+          value: _fmt(time),
+          sub: _game.mistakes > 0
+              ? '${_game.mistakes} misses · +${_game.penaltySeconds}s'
+              : 'no mistakes',
         ),
+        badge: _bestDeci != null ? '👑 Best ${_fmt(_bestDeci!)}' : null,
+        primaryLabel: 'Play Again',
+        primaryIcon: Icons.refresh,
+        onPrimary: _playAgain,
+        onShare: _share,
+        onClose: () => Navigator.of(context).maybePop(),
+      ),
+    );
+  }
+
+  Widget _shareCard() {
+    final time = _fmt(_elapsedDeci);
+    return OffscreenShareCard(
+      boundaryKey: _shareKey,
+      card: ShareCard(
+        title: 'Number Tap',
+        valueLabel: 'Your time',
+        value: time,
+        valueSub: _game.mistakes > 0
+            ? '${_game.mistakes} misses · +${_game.penaltySeconds}s'
+            : 'no mistakes',
+        badge: _bestDeci != null ? '👑 Best ${_fmt(_bestDeci!)}' : null,
       ),
     );
   }

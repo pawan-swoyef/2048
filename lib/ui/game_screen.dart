@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 
 import '../ads/banner_ad_box.dart';
 import '../ads/interstitial_ad.dart';
+import '../ads/rewarded_ad.dart';
 import '../game/board.dart';
 import '../game/game_state.dart';
+import '../game/numbersort/undo_allowance.dart';
+import '../game/numbersort/undo_store.dart';
 import '../game/score_store.dart';
 import '../game/sound_service.dart';
 import 'animated_board.dart';
@@ -16,8 +19,10 @@ import 'overlays.dart';
 import 'paywall.dart';
 import 'score_header.dart';
 import 'swipe.dart';
+import 'share_card.dart';
 import 'theme_controller.dart';
 import 'theme_picker.dart';
+import 'win_card.dart';
 
 /// The single screen of the game.
 class GameScreen extends StatefulWidget {
@@ -32,6 +37,9 @@ class _GameScreenState extends State<GameScreen> {
   final ScoreStore _store = ScoreStore();
   final SoundService _sound = SoundService();
   final InterstitialController _interstitial = InterstitialController();
+  final RewardedController _rewarded = RewardedController();
+  late final UndoStore _undoStore;
+  final GlobalKey _shareKey = GlobalKey();
 
   late GameState _state;
   final List<GameState> _history = []; // for undo (premium)
@@ -40,6 +48,7 @@ class _GameScreenState extends State<GameScreen> {
   int _tick = 0;
   bool _busy = false;
   bool _soundOn = true;
+  UndoAllowance? _allowance;
 
   // Mid-gesture swipe detection: fire a move as soon as the drag crosses a
   // small distance, instead of waiting for the finger to lift.
@@ -52,16 +61,38 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
+    _undoStore = UndoStore(gameId: '2048');
     _state = GameState.newGame(_rng);
     _popCells = _allTileCells(_state.board);
     _loadPrefs();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _rewarded.setPremium(_premium);
+    _refreshAllowance();
+  }
+
+  @override
   void dispose() {
     _sound.dispose();
     _interstitial.dispose();
+    _rewarded.dispose();
     super.dispose();
+  }
+
+  bool get _premium => ThemeScope.controllerOf(context).premiumUnlocked;
+
+  String _todayStr() {
+    final n = DateTime.now();
+    return '${n.year}-${n.month.toString().padLeft(2, '0')}-'
+        '${n.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _refreshAllowance() async {
+    final a = await _undoStore.allowance(premium: _premium, today: _todayStr());
+    if (mounted) setState(() => _allowance = a);
   }
 
   Future<void> _loadPrefs() async {
@@ -184,22 +215,45 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _undo() {
-    final controller = ThemeScope.controllerOf(context);
-    if (!controller.premiumUnlocked) {
-      // Undo is a premium feature — send free users to the paywall.
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const PaywallScreen()),
-      );
+    if (_history.isEmpty || _busy) return;
+
+    if (_premium) {
+      final previous = _history.removeLast();
+      setState(() {
+        _state = previous.withBest(_state.best); // never lower the best score
+        _moves = const [];
+        _popCells = const {};
+        _tick++;
+      });
       return;
     }
-    if (_history.isEmpty || _busy) return;
-    final previous = _history.removeLast();
-    setState(() {
-      _state = previous.withBest(_state.best); // never lower the best score
-      _moves = const [];
-      _popCells = const {};
-      _tick++;
+
+    final allowance = _allowance;
+    if (allowance == null) return;
+    if (!allowance.canUndo) {
+      _openPaywall();
+      return;
+    }
+
+    _rewarded.show(() async {
+      if (!mounted) return;
+      if (_history.isEmpty) return;
+      final previous = _history.removeLast();
+      setState(() {
+        _state = previous.withBest(_state.best);
+        _moves = const [];
+        _popCells = const {};
+        _tick++;
+      });
+      await _undoStore.recordUndo(today: _todayStr());
+      await _refreshAllowance();
     });
+  }
+
+  Future<void> _openPaywall() async {
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const PaywallScreen()));
+    if (mounted) await _refreshAllowance();
   }
 
   void _keepGoing() => setState(() => _state = _state.keepPlaying());
@@ -231,24 +285,67 @@ class _GameScreenState extends State<GameScreen> {
     return true;
   }
 
+  /// Board-level overlay shown over the grid (game over only). The win is
+  /// celebrated full-screen via [_winCard] instead.
   Widget? _overlay() {
     if (_state.over) {
       return GameOverOverlay(score: _state.score, onTryAgain: _startNewGame);
     }
-    if (_state.won && !_state.keepGoing) {
-      return WinOverlay(onKeepGoing: _keepGoing, onNewGame: _startNewGame);
-    }
     return null;
+  }
+
+  void _shareWin() {
+    shareResultImage(
+      boundaryKey: _shareKey,
+      text: 'I scored ${_state.score} and reached 2048! 🎉\n$kStoreLink',
+    );
+  }
+
+  /// Full-screen celebration card when the player reaches 2048.
+  Widget? _winCard() {
+    if (!_state.won || _state.keepGoing) return null;
+    return WinCardOverlay(
+      child: WinCard(
+        banner: 'You Win!',
+        headline: 'You reached 2048! 🎉',
+        stat: WinStat(label: 'Score', value: '${_state.score}'),
+        primaryLabel: 'Keep Going',
+        primaryIcon: Icons.play_arrow_rounded,
+        onPrimary: _keepGoing,
+        secondaryLabel: 'New Game',
+        onSecondary: _startNewGame,
+        onShare: _shareWin,
+        onClose: _keepGoing,
+      ),
+    );
+  }
+
+  /// Off-screen branded image captured when the player shares their win.
+  Widget _shareCard() {
+    return OffscreenShareCard(
+      boundaryKey: _shareKey,
+      card: ShareCard(
+        title: '2048',
+        valueLabel: 'I reached',
+        value: '2048',
+        valueSub: 'Score ${_state.score}',
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final overlay = _overlay();
+    final winCard = _winCard();
     final theme = ThemeScope.of(context);
     final premium = ThemeScope.controllerOf(context).premiumUnlocked;
 
     return Scaffold(
-      body: Container(
+      body: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          if (winCard != null) _shareCard(),
+          Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -324,12 +421,23 @@ class _GameScreenState extends State<GameScreen> {
             ],
           ),
         ),
+          ),
+          ?winCard,
+        ],
       ),
     );
   }
 
+  String _undoLabel() {
+    if (_premium) return 'Undo';
+    final a = _allowance;
+    if (a == null) return 'Undo';
+    if (a.remaining <= 0) return 'Undo';
+    return 'Undo (${a.remaining})';
+  }
+
   Widget _undoButton(GameTheme theme, bool premium) {
-    final enabled = premium ? _history.isNotEmpty : true;
+    final enabled = _history.isNotEmpty;
     return Opacity(
       opacity: enabled ? 1 : 0.5,
       child: Material(
@@ -348,7 +456,7 @@ class _GameScreenState extends State<GameScreen> {
                 Icon(Icons.undo, size: 18, color: theme.onBackground),
                 const SizedBox(width: 8),
                 Text(
-                  'Undo',
+                  _undoLabel(),
                   style: TextStyle(
                     color: theme.onBackground,
                     fontWeight: FontWeight.w700,
@@ -357,7 +465,10 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 if (!premium) ...[
                   const SizedBox(width: 6),
-                  const Icon(Icons.lock, size: 14, color: Color(0xFFFFD23F)),
+                  if (_allowance != null && _allowance!.remaining <= 0)
+                    const Icon(Icons.lock, size: 14, color: Color(0xFFFFD23F))
+                  else
+                    const Icon(Icons.play_circle_outline, size: 14, color: Color(0xFFFFD23F)),
                 ],
               ],
             ),

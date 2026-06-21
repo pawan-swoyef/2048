@@ -3,12 +3,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../ads/banner_ad_box.dart';
+import '../../ads/interstitial_ad.dart';
 import '../../ads/rewarded_ad.dart';
 import '../../game/guide_store.dart';
 import '../../game/magicsquare/hint_allowance.dart';
 import '../../game/magicsquare/hint_store.dart';
 import '../../game/magicsquare/magic_square_game.dart';
 import '../../game/score_store.dart';
+import '../../game/sound_service.dart';
 import '../paywall.dart';
 import '../share_card.dart';
 import '../theme_controller.dart';
@@ -53,8 +56,10 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
   final ScoreStore _store = ScoreStore();
   final HintStore _hintStore = HintStore();
   final RewardedController _rewarded = RewardedController();
+  final InterstitialController _interstitial = InterstitialController();
   final Stopwatch _watch = Stopwatch();
   final GlobalKey _shareKey = GlobalKey();
+  final SoundService _sound = SoundService();
 
   late MagicSquareGame _game;
   Timer? _ticker;
@@ -63,6 +68,7 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
   HintAllowance? _allowance;
   final GuideStore _guideStore = GuideStore();
   bool _guideActive = false;
+  bool _soundOn = true;
 
   @override
   void initState() {
@@ -70,6 +76,7 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
     _game = widget.initialGame ?? MagicSquareGame(Random());
     _loadBest();
     _loadGuide();
+    _loadSound();
   }
 
   @override
@@ -83,7 +90,26 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
   void dispose() {
     _ticker?.cancel();
     _rewarded.dispose();
+    _interstitial.dispose();
+    _sound.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSound() async {
+    final on = await _store.loadSoundEnabled();
+    if (!mounted) return;
+    setState(() {
+      _soundOn = on;
+      _sound.enabled = on;
+    });
+  }
+
+  void _toggleSound() {
+    setState(() {
+      _soundOn = !_soundOn;
+      _sound.enabled = _soundOn;
+    });
+    _store.saveSoundEnabled(_soundOn);
   }
 
   bool get _premium => ThemeScope.controllerOf(context).premiumUnlocked;
@@ -125,7 +151,11 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
   void _afterChange() {
     _ensureStarted();
     setState(() {});
-    if (_game.isComplete) _finish();
+    if (_game.isComplete) {
+      _finish();
+    } else {
+      _sound.move();
+    }
   }
 
   void _place(int value, int cell) {
@@ -137,12 +167,16 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
   }
 
   void _removeAt(int cell) {
-    if (_game.removeAt(cell) != null) setState(() {});
+    if (_game.removeAt(cell) != null) {
+      setState(() {});
+      _sound.move();
+    }
   }
 
   Future<void> _finish() async {
     _watch.stop();
     _ticker?.cancel();
+    _sound.win();
     final time = _elapsedDeci;
     if (_bestDeci == null || time < _bestDeci!) {
       await _store.saveBestFor(_gameId, time);
@@ -154,6 +188,8 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
       await _guideStore.markGuideSeen(_gameId);
       if (mounted) setState(() => _guideActive = false);
     }
+    _interstitial.setPremium(_premium);
+    _interstitial.onGameOver();
   }
 
   void _newPuzzle() {
@@ -225,32 +261,39 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
           ),
         ),
         child: SafeArea(
-          child: Stack(
-            clipBehavior: Clip.none,
+          child: Column(
             children: [
-              if (_game.isComplete) _shareCard(),
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 460),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _header(theme),
-                        const SizedBox(height: 16),
-                        _statsRow(theme),
-                        const SizedBox(height: 16),
-                        _board(theme, guide),
-                        const SizedBox(height: 14),
-                        _tray(theme, guide),
-                        const SizedBox(height: 16),
-                        _controls(theme),
-                      ],
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    if (_game.isComplete) _shareCard(),
+                    Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 460),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              _header(theme),
+                              const SizedBox(height: 16),
+                              _statsRow(theme),
+                              const SizedBox(height: 16),
+                              _board(theme, guide),
+                              const SizedBox(height: 14),
+                              _tray(theme, guide),
+                              const SizedBox(height: 16),
+                              _controls(theme),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    if (_game.isComplete) _resultOverlay(theme),
+                  ],
                 ),
               ),
-              if (_game.isComplete) _resultOverlay(theme),
+              if (!_premium) const BannerAdBox(),
             ],
           ),
         ),
@@ -279,6 +322,9 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
             ),
           ),
         ),
+        _circleButton(theme,
+            _soundOn ? Icons.volume_up : Icons.volume_off, _toggleSound),
+        const SizedBox(width: 8),
         _circleButton(theme, Icons.settings, _openSettings),
       ],
     );

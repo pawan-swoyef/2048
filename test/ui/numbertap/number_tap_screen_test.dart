@@ -47,7 +47,7 @@ void main() {
       await tester.tap(find.text('$n'));
       await tester.pump();
     }
-    expect(find.text('Play Again'), findsOneWidget);
+    expect(find.text('PLAY AGAIN'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }

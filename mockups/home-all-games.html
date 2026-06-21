@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Home — Random Featured Game</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#1b1d22; color:#eee; padding:32px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin-bottom:8px; font-size:14px; line-height:1.55; max-width:760px; margin-left:auto; margin-right:auto; }
+  .sub b { color:#ffd166; }
+  .legend { text-align:center; color:#9aa0aa; font-size:12px; margin-bottom:36px; }
+  .row { display:flex; flex-wrap:wrap; gap:40px; justify-content:center; align-items:flex-start; }
+  .opt { width:340px; }
+  .opt .cap { text-align:center; font-size:13px; margin-bottom:14px; color:#cfd3da; }
+  .opt .cap b { color:#fff; }
+  .opt .cap .open { color:#7be86b; font-weight:700; }
+
+  /* ===== Aurora phone frame (the real Home gradient) ===== */
+  .phone {
+    border-radius:30px; padding:22px 18px 24px;
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+
+  /* ---- Top area: title, subtitle, stat pills, gift ---- */
+  .htitle { color:#fff; font-size:26px; font-weight:900; line-height:1.05; }
+  .hsubtitle { color:rgba(255,255,255,.82); font-size:12.5px; margin:6px 0 16px; }
+  .stats { display:flex; gap:10px; position:relative; }
+  .statpill {
+    display:flex; align-items:center; gap:8px; background:#fff;
+    padding:9px 13px; border-radius:15px; box-shadow:0 4px 12px rgba(0,0,0,.18);
+  }
+  .statpill .ico { font-size:19px; }
+  .statpill .v { font-size:15px; font-weight:800; color:#241139; line-height:1.05; }
+  .statpill .l { font-size:10.5px; color:#8A7CA8; }
+  .gift {
+    position:absolute; right:0; top:-2px; width:50px; height:50px; border-radius:50%;
+    background:#fff; display:flex; align-items:center; justify-content:center; font-size:24px;
+    box-shadow:0 0 18px rgba(255,200,46,.6);
+  }
+
+  /* ---- Section header ---- */
+  .ghead { display:flex; align-items:baseline; margin:22px 2px 12px; }
+  .ghead .h { color:#fff; font-size:19px; font-weight:900; flex:1; }
+  .ghead .all { color:rgba(255,255,255,.85); font-size:12.5px; font-weight:700; }
+
+  /* ===== Featured white card (matches the real hub featured card) ===== */
+  .feat {
+    background:#fff; border-radius:24px; padding:16px; box-shadow:0 10px 22px rgba(0,0,0,.22);
+    display:flex; gap:13px; position:relative; overflow:hidden;
+  }
+  .feat .left { flex:1; min-width:0; }
+  .feat .mini {
+    width:50px; height:50px; border-radius:14px; display:flex; align-items:center;
+    justify-content:center; font-size:25px; margin-bottom:11px; color:#fff;
+  }
+  .feat .name { font-size:26px; font-weight:900; color:#241139; line-height:1; }
+  .feat .desc { font-size:12.5px; color:#8A7CA8; margin-top:2px; }
+  .feat .best { font-size:12.5px; font-weight:800; color:#6A2DBF; margin-top:9px; }
+  .feat .play {
+    margin-top:13px; display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(90deg,#7C3AED,#F53D9E); color:#fff; border:none;
+    padding:10px 17px; border-radius:14px; font-weight:800; font-size:13.5px; cursor:pointer;
+    box-shadow:0 6px 12px rgba(245,61,158,.4);
+  }
+  .feat .preview {
+    width:108px; height:108px; flex:none; align-self:center; border-radius:16px;
+    background:#EDE9F7; padding:7px; display:grid; gap:4px;
+  }
+  /* little "shuffles each open" tag on the featured card */
+  .feat .shuf {
+    position:absolute; top:10px; right:10px; font-size:9.5px; font-weight:800; letter-spacing:.3px;
+    color:#8a3df5; background:#efe6ff; padding:3px 8px; border-radius:10px;
+  }
+
+  /* mini board variants for the preview */
+  .pv2048 { grid-template-columns:repeat(3,1fr); grid-auto-rows:1fr; }
+  .pv2048 span { border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; }
+  .pv2048 .e{background:rgba(255,255,255,.55);} .pv2048 .a{background:#f6d4a6;color:#7a5320;}
+  .pv2048 .b{background:#f2b179;color:#fff;} .pv2048 .c{background:#f59563;color:#fff;} .pv2048 .d{background:#f67c5f;color:#fff;}
+  .pvtap { grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; }
+  .pvtap span { background:#fff; color:#5b3df5; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
+  .pvtap .nx { background:linear-gradient(135deg,#7be86b,#34c759); color:#fff; }
+  .pvsort { grid-template-columns:repeat(4,1fr); align-items:end; }
+  .pvsort .col { display:flex; flex-direction:column; justify-content:flex-end; gap:3px; height:100%; }
+  .pvsort b { border-radius:5px; text-align:center; font-size:11px; font-weight:800; color:#fff; padding:3px 0; }
+  .pvsort .s1{background:#ffb23f;} .pvsort .s2{background:#ff4d9d;} .pvsort .s3{background:#3fa3f0;}
+  .pvmagic { grid-template-columns:repeat(3,1fr); grid-auto-rows:1fr; }
+  .pvmagic span { border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; background:#e3d2ff; color:#5b2da8; }
+
+  /* ===== Daily card (pinned below — unchanged from today) ===== */
+  .daily {
+    background:#fff; border-radius:18px; padding:13px 14px; margin-top:13px;
+    display:flex; align-items:center; gap:13px; box-shadow:0 6px 16px rgba(0,0,0,.15);
+  }
+  .daily .chip { width:46px; height:46px; border-radius:13px; flex:none; display:flex; align-items:center; justify-content:center; font-size:22px; color:#fff;
+    background:linear-gradient(150deg,#ff8fbf,#ff5b97); }
+  .daily .meta { flex:1; min-width:0; }
+  .daily .name { font-size:16px; font-weight:800; color:#241139; }
+  .daily .desc { font-size:12px; color:#8A7CA8; }
+  .daily .best { font-size:12px; font-weight:800; color:#6A2DBF; margin-top:2px; }
+  .daily .chev { color:#bcadd8; font-size:22px; }
+  .daily .pin { position:relative; }
+  .daily .pintag { position:absolute; top:-9px; right:-2px; font-size:9px; font-weight:800; color:#ff5b97; background:#ffe6f0; padding:2px 7px; border-radius:9px; }
+
+  /* accent backgrounds */
+  .g2048  { background:linear-gradient(150deg,#ffce5c,#ff9d3d); }
+  .gtap   { background:linear-gradient(150deg,#5ec8ff,#3a8dff); }
+  .gsort  { background:linear-gradient(150deg,#7be86b,#26c281); }
+  .gmagic { background:linear-gradient(150deg,#c47bff,#8a3df5); }
+</style>
+</head>
+<body>
+  <h1>Home — Random Featured Game</h1>
+  <p class="sub">
+    The Home screen stays exactly as it is — <b>one big featured game card</b>, with the
+    <b>Daily Challenge</b> card pinned right below it. The only change: the featured game is no
+    longer always 2048. Each time the app opens, it's <b>randomly one of the four games</b>
+    (2048, Number Tap, Number Sort, Magic Square).
+  </p>
+  <p class="legend">Below are four example opens — same screen, different game featured each time. Daily Challenge never moves.</p>
+
+  <div class="row">
+
+    <!-- ============ OPEN 1 — 2048 ============ -->
+    <div class="opt">
+      <div class="cap"><span class="open">Open #1</span> → featured: <b>2048</b></div>
+      <div class="phone">
+        <div class="htitle">Number Games</div>
+        <div class="hsubtitle">Play, solve, and train your brain!</div>
+        <div class="stats">
+          <div class="statpill"><span class="ico">🔥</span><div><div class="v">5 day</div><div class="l">Streak</div></div></div>
+          <div class="statpill"><span class="ico">🪙</span><div><div class="v">240</div><div class="l">Coins</div></div></div>
+          <div class="gift">🎁</div>
+        </div>
+        <div class="ghead"><div class="h">Games</div><div class="all">See all ›</div></div>
+
+        <div class="feat">
+          <span class="shuf">↻ RANDOM</span>
+          <div class="left">
+            <div class="mini g2048">🔢</div>
+            <div class="name">2048</div>
+            <div class="desc">Classic merge puzzle</div>
+            <div class="best">Best: 12,480 👑</div>
+            <button class="play">Play Now ▶</button>
+          </div>
+          <div class="preview pv2048">
+            <span class="b">2</span><span class="c">4</span><span class="e"></span>
+            <span class="a">8</span><span class="d">16</span><span class="b">2</span>
+            <span class="c">32</span><span class="d">128</span><span class="b">2</span>
+          </div>
+        </div>
+
+        <div class="daily">
+          <div class="pin"><div class="chip">📅</div><span class="pintag">PINNED</span></div>
+          <div class="meta"><div class="name">Daily Challenge</div><div class="desc">New puzzle every day</div><div class="best">🔥 5 day streak</div></div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPEN 2 — Number Sort ============ -->
+    <div class="opt">
+      <div class="cap"><span class="open">Open #2</span> → featured: <b>Number Sort</b></div>
+      <div class="phone">
+        <div class="htitle">Number Games</div>
+        <div class="hsubtitle">Play, solve, and train your brain!</div>
+        <div class="stats">
+          <div class="statpill"><span class="ico">🔥</span><div><div class="v">5 day</div><div class="l">Streak</div></div></div>
+          <div class="statpill"><span class="ico">🪙</span><div><div class="v">240</div><div class="l">Coins</div></div></div>
+          <div class="gift">🎁</div>
+        </div>
+        <div class="ghead"><div class="h">Games</div><div class="all">See all ›</div></div>
+
+        <div class="feat">
+          <span class="shuf">↻ RANDOM</span>
+          <div class="left">
+            <div class="mini gsort">🧩</div>
+            <div class="name">Number Sort</div>
+            <div class="desc">Sort the columns in fewest moves</div>
+            <div class="best">Best: 14 moves 👑</div>
+            <button class="play">Play Now ▶</button>
+          </div>
+          <div class="preview pvsort">
+            <div class="col"><b class="s1">1</b><b class="s3">3</b><b class="s2">2</b></div>
+            <div class="col"><b class="s2">2</b><b class="s1">1</b><b class="s3">3</b></div>
+            <div class="col"><b class="s3">3</b><b class="s2">2</b><b class="s1">1</b></div>
+            <div class="col"></div>
+          </div>
+        </div>
+
+        <div class="daily">
+          <div class="pin"><div class="chip">📅</div><span class="pintag">PINNED</span></div>
+          <div class="meta"><div class="name">Daily Challenge</div><div class="desc">New puzzle every day</div><div class="best">🔥 5 day streak</div></div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPEN 3 — Number Tap ============ -->
+    <div class="opt">
+      <div class="cap"><span class="open">Open #3</span> → featured: <b>Number Tap</b></div>
+      <div class="phone">
+        <div class="htitle">Number Games</div>
+        <div class="hsubtitle">Play, solve, and train your brain!</div>
+        <div class="stats">
+          <div class="statpill"><span class="ico">🔥</span><div><div class="v">5 day</div><div class="l">Streak</div></div></div>
+          <div class="statpill"><span class="ico">🪙</span><div><div class="v">240</div><div class="l">Coins</div></div></div>
+          <div class="gift">🎁</div>
+        </div>
+        <div class="ghead"><div class="h">Games</div><div class="all">See all ›</div></div>
+
+        <div class="feat">
+          <span class="shuf">↻ RANDOM</span>
+          <div class="left">
+            <div class="mini gtap">⏱️</div>
+            <div class="name">Number Tap</div>
+            <div class="desc">Tap 1–25, beat the clock</div>
+            <div class="best">Best: 18.4s 👑</div>
+            <button class="play">Play Now ▶</button>
+          </div>
+          <div class="preview pvtap">
+            <span>7</span><span>1</span><span>9</span><span class="nx">2</span>
+            <span>5</span><span class="nx">3</span><span>8</span><span>4</span>
+            <span class="nx">1</span><span>6</span><span>2</span><span>9</span>
+          </div>
+        </div>
+
+        <div class="daily">
+          <div class="pin"><div class="chip">📅</div><span class="pintag">PINNED</span></div>
+          <div class="meta"><div class="name">Daily Challenge</div><div class="desc">New puzzle every day</div><div class="best">🔥 5 day streak</div></div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPEN 4 — Magic Square ============ -->
+    <div class="opt">
+      <div class="cap"><span class="open">Open #4</span> → featured: <b>Magic Square</b></div>
+      <div class="phone">
+        <div class="htitle">Number Games</div>
+        <div class="hsubtitle">Play, solve, and train your brain!</div>
+        <div class="stats">
+          <div class="statpill"><span class="ico">🔥</span><div><div class="v">5 day</div><div class="l">Streak</div></div></div>
+          <div class="statpill"><span class="ico">🪙</span><div><div class="v">240</div><div class="l">Coins</div></div></div>
+          <div class="gift">🎁</div>
+        </div>
+        <div class="ghead"><div class="h">Games</div><div class="all">See all ›</div></div>
+
+        <div class="feat">
+          <span class="shuf">↻ RANDOM</span>
+          <div class="left">
+            <div class="mini gmagic">🔳</div>
+            <div class="name">Magic Square</div>
+            <div class="desc">Make every line sum to 15</div>
+            <div class="best">Best: 22.4s 👑</div>
+            <button class="play">Play Now ▶</button>
+          </div>
+          <div class="preview pvmagic">
+            <span>8</span><span>1</span><span>6</span>
+            <span>3</span><span>5</span><span>7</span>
+            <span>4</span><span>9</span><span>2</span>
+          </div>
+        </div>
+
+        <div class="daily">
+          <div class="pin"><div class="chip">📅</div><span class="pintag">PINNED</span></div>
+          <div class="meta"><div class="name">Daily Challenge</div><div class="desc">New puzzle every day</div><div class="best">🔥 5 day streak</div></div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 Collection — All Games Screen</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#1b1d22; color:#eee; padding:32px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin-bottom:40px; font-size:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:48px; justify-content:center; align-items:flex-start; }
+  .opt { width:360px; }
+  .opt h2 { text-align:center; font-size:16px; margin-bottom:4px; }
+  .opt .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:18px; }
+
+  /* Aurora phone frame (free theme) */
+  .phone {
+    border-radius:30px; padding:20px 16px 26px;
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+
+  /* Header */
+  .top { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .iconbtn {
+    width:38px; height:38px; border-radius:50%; flex:none;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px;
+  }
+  .title { color:#fff; font-size:22px; font-weight:900; letter-spacing:.3px; flex:1; }
+  .pill {
+    display:flex; align-items:center; gap:5px; padding:6px 12px; border-radius:20px;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.30);
+    color:#fff; font-size:13px; font-weight:800;
+  }
+
+  /* ===== Shared icon chip ===== */
+  .chip {
+    border-radius:16px; flex:none; display:flex; align-items:center; justify-content:center;
+    font-size:24px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);
+  }
+
+  /* =========================================================
+     OPTION 1 — Featured hero + rich frosted list
+     ========================================================= */
+  .hero {
+    border-radius:22px; padding:18px; margin-bottom:16px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#ff7eb3,#ff6fa5 60%,#c84bd6); color:#fff;
+    box-shadow:0 10px 24px rgba(200,40,120,.4);
+  }
+  .hero .badge {
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:800;
+    background:rgba(255,255,255,.25); padding:4px 10px; border-radius:14px; margin-bottom:10px;
+  }
+  .hero h3 { font-size:22px; font-weight:900; margin-bottom:3px; }
+  .hero p { font-size:13px; opacity:.92; margin-bottom:14px; }
+  .hero .play {
+    background:#fff; color:#c8336e; border:none; border-radius:22px;
+    padding:9px 20px; font-weight:900; font-size:14px; cursor:pointer;
+  }
+  .hero .deco { position:absolute; right:-6px; top:-8px; font-size:84px; opacity:.18; }
+
+  .glasscard {
+    display:flex; align-items:center; gap:14px; padding:14px;
+    border-radius:20px; margin-bottom:12px;
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28);
+    backdrop-filter:blur(8px); box-shadow:0 8px 20px rgba(0,0,0,.16);
+  }
+  .glasscard .chip { width:50px; height:50px; }
+  .glasscard .meta { flex:1; min-width:0; }
+  .glasscard .name { color:#fff; font-size:17px; font-weight:900; }
+  .glasscard .desc { color:rgba(255,255,255,.78); font-size:12px; margin:1px 0 4px; }
+  .glasscard .best { color:#ffe27a; font-size:12px; font-weight:800; }
+  .glasscard .chev { color:rgba(255,255,255,.7); font-size:22px; }
+
+  /* =========================================================
+     OPTION 2 — Playful 2-column tile grid
+     ========================================================= */
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+  .tile {
+    border-radius:22px; padding:16px 14px 14px; color:#fff; position:relative; overflow:hidden;
+    box-shadow:0 10px 22px rgba(0,0,0,.22); min-height:148px; display:flex; flex-direction:column;
+  }
+  .tile .chip { width:52px; height:52px; background:rgba(255,255,255,.22); margin-bottom:12px; }
+  .tile .name { font-size:17px; font-weight:900; line-height:1.1; }
+  .tile .desc { font-size:11.5px; opacity:.9; margin-top:3px; flex:1; }
+  .tile .best {
+    margin-top:10px; align-self:flex-start; font-size:11px; font-weight:800;
+    background:rgba(0,0,0,.18); padding:4px 10px; border-radius:12px;
+  }
+  .tile .deco { position:absolute; right:-10px; bottom:-12px; font-size:74px; opacity:.16; }
+  .t2048 { background:linear-gradient(150deg,#ffce5c,#ff9d3d); }
+  .ttap  { background:linear-gradient(150deg,#5ec8ff,#3a8dff); }
+  .tsort { background:linear-gradient(150deg,#7be86b,#26c281); }
+  .tspan { grid-column:1 / -1; min-height:0; flex-direction:row; align-items:center; gap:14px;
+           background:linear-gradient(135deg,#ff7eb3,#c84bd6); padding:16px; }
+  .tspan .chip { margin-bottom:0; }
+  .tspan .body { flex:1; }
+  .tspan .best { margin-top:6px; }
+</style>
+</head>
+<body>
+  <h1>All Games — Two Directions</h1>
+  <p class="sub">Both in the free Aurora theme (they recolor with every theme). Tell me <b>1</b> or <b>2</b> and I'll build it in Flutter.</p>
+
+  <div class="row">
+
+    <!-- ============ OPTION 1 ============ -->
+    <div class="opt">
+      <h2>1 · Featured Hero + Rich List</h2>
+      <div class="tag">Daily Challenge headlines the top; games as frosted cards</div>
+      <div class="phone">
+        <div class="top">
+          <div class="iconbtn">‹</div>
+          <div class="title">All Games</div>
+          <div class="pill">🔥 5</div>
+        </div>
+
+        <div class="hero">
+          <div class="deco">📅</div>
+          <div class="badge">⭐ DAILY CHALLENGE</div>
+          <h3>Today's Puzzle</h3>
+          <p>Reach 512 in the fewest moves. New puzzle every day.</p>
+          <button class="play">▶ Play now</button>
+        </div>
+
+        <div class="glasscard">
+          <div class="chip" style="background:rgba(255,193,46,.30);">🔢</div>
+          <div class="meta">
+            <div class="name">2048</div>
+            <div class="desc">Classic merge puzzle</div>
+            <div class="best">👑 Best: 12,480</div>
+          </div>
+          <div class="chev">›</div>
+        </div>
+
+        <div class="glasscard">
+          <div class="chip" style="background:rgba(79,195,247,.30);">⏱️</div>
+          <div class="meta">
+            <div class="name">Number Tap</div>
+            <div class="desc">Tap 1–25, beat the clock</div>
+            <div class="best">👑 Best: 18.4s</div>
+          </div>
+          <div class="chev">›</div>
+        </div>
+
+        <div class="glasscard">
+          <div class="chip" style="background:rgba(123,232,107,.30);">🧩</div>
+          <div class="meta">
+            <div class="name">Number Sort</div>
+            <div class="desc">Sort the columns in fewest moves</div>
+            <div class="best">👑 Best: 14 moves</div>
+          </div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 2 ============ -->
+    <div class="opt">
+      <h2>2 · Playful Tile Grid</h2>
+      <div class="tag">Big colorful tiles — kid-friendly, scannable at a glance</div>
+      <div class="phone">
+        <div class="top">
+          <div class="iconbtn">‹</div>
+          <div class="title">All Games</div>
+          <div class="pill">🪙 240</div>
+        </div>
+
+        <div class="grid2">
+          <div class="tile t2048">
+            <div class="deco">🔢</div>
+            <div class="chip">🔢</div>
+            <div class="name">2048</div>
+            <div class="desc">Classic merge puzzle</div>
+            <div class="best">👑 12,480</div>
+          </div>
+
+          <div class="tile ttap">
+            <div class="deco">⏱️</div>
+            <div class="chip">⏱️</div>
+            <div class="name">Number Tap</div>
+            <div class="desc">Tap 1–25, fast!</div>
+            <div class="best">👑 18.4s</div>
+          </div>
+
+          <div class="tile tsort">
+            <div class="deco">🧩</div>
+            <div class="chip">🧩</div>
+            <div class="name">Number Sort</div>
+            <div class="desc">Sort the columns</div>
+            <div class="best">👑 14 moves</div>
+          </div>
+
+          <div class="tile" style="background:linear-gradient(150deg,#b14cff,#7a3df5);">
+            <div class="deco">✨</div>
+            <div class="chip">🎨</div>
+            <div class="name">Themes</div>
+            <div class="desc">7 looks to unlock</div>
+            <div class="best">PREMIUM</div>
+          </div>
+
+          <div class="tile tspan">
+            <div class="chip">📅</div>
+            <div class="body">
+              <div class="name">Daily Challenge</div>
+              <div class="desc">Reach 512 in fewest moves · new every day</div>
+              <div class="best">🔥 5 day streak</div>
+            </div>
+            <div class="chev" style="font-size:24px;opacity:.8;">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 3 ============ -->
+    <div class="opt">
+      <h2>3 · Neon Dark</h2>
+      <div class="tag">Matches the Midnight Neon theme — glowing accent edges</div>
+      <div class="phone neon">
+        <div class="top">
+          <div class="iconbtn">‹</div>
+          <div class="title">All Games</div>
+          <div class="pill">🪙 240</div>
+        </div>
+        <div class="ncard"><div class="chip nglow" style="--g:#ffce5c;">🔢</div>
+          <div class="meta"><div class="name">2048</div><div class="desc">Classic merge puzzle</div></div>
+          <div class="nbest" style="color:#ffd166;">12,480</div></div>
+        <div class="ncard"><div class="chip nglow" style="--g:#5ec8ff;">⏱️</div>
+          <div class="meta"><div class="name">Number Tap</div><div class="desc">Tap 1–25, beat the clock</div></div>
+          <div class="nbest" style="color:#5ec8ff;">18.4s</div></div>
+        <div class="ncard"><div class="chip nglow" style="--g:#7be86b;">🧩</div>
+          <div class="meta"><div class="name">Number Sort</div><div class="desc">Sort the columns, fewest moves</div></div>
+          <div class="nbest" style="color:#7be86b;">14</div></div>
+        <div class="ncard"><div class="chip nglow" style="--g:#ff6fa5;">📅</div>
+          <div class="meta"><div class="name">Daily Challenge</div><div class="desc">New puzzle every day</div></div>
+          <div class="nbest" style="color:#ff6fa5;">🔥5</div></div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 4 ============ -->
+    <div class="opt">
+      <h2>4 · Live Preview Cards</h2>
+      <div class="tag">Each card shows a mini snapshot of the actual game board</div>
+      <div class="phone">
+        <div class="top">
+          <div class="iconbtn">‹</div>
+          <div class="title">All Games</div>
+          <div class="pill">🔥 5</div>
+        </div>
+
+        <div class="pcard">
+          <div class="pmeta">
+            <div class="name">2048</div>
+            <div class="desc">Classic merge puzzle</div>
+            <div class="best">👑 Best 12,480</div>
+          </div>
+          <div class="mini m2048">
+            <span class="c8">8</span><span class="c2">2</span><span class="c4">4</span><span class="e"></span>
+            <span class="c2">2</span><span class="c16">16</span><span class="e"></span><span class="c4">4</span>
+            <span class="c64">64</span><span class="c4">4</span><span class="c2">2</span><span class="e"></span>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pmeta">
+            <div class="name">Number Tap</div>
+            <div class="desc">Tap 1–25, beat the clock</div>
+            <div class="best">👑 Best 18.4s</div>
+          </div>
+          <div class="mini mtap">
+            <span>7</span><span>1</span><span>9</span><span class="nx">2</span>
+            <span>5</span><span class="nx">3</span><span>8</span><span>4</span>
+            <span class="nx">1</span><span>6</span><span>2</span><span>9</span>
+          </div>
+        </div>
+
+        <div class="pcard">
+          <div class="pmeta">
+            <div class="name">Number Sort</div>
+            <div class="desc">Sort the columns, fewest moves</div>
+            <div class="best">👑 Best 14 moves</div>
+          </div>
+          <div class="mini msort">
+            <div class="col"><b class="s1">1</b><b class="s3">3</b><b class="s2">2</b></div>
+            <div class="col"><b class="s2">2</b><b class="s1">1</b><b class="s3">3</b></div>
+            <div class="col"><b class="s3">3</b><b class="s2">2</b><b class="s1">1</b></div>
+            <div class="col"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 5 ============ -->
+    <div class="opt">
+      <h2>5 · Grouped by Category</h2>
+      <div class="tag">Sections — scales as you add more games later</div>
+      <div class="phone">
+        <div class="top">
+          <div class="iconbtn">‹</div>
+          <div class="title">All Games</div>
+          <div class="pill">🪙 240</div>
+        </div>
+
+        <div class="sec">🧠 Brain Puzzles</div>
+        <div class="glasscard">
+          <div class="chip" style="background:rgba(255,193,46,.30);width:46px;height:46px;">🔢</div>
+          <div class="meta"><div class="name">2048</div><div class="best">👑 12,480</div></div>
+          <div class="chev">›</div>
+        </div>
+        <div class="glasscard">
+          <div class="chip" style="background:rgba(123,232,107,.30);width:46px;height:46px;">🧩</div>
+          <div class="meta"><div class="name">Number Sort</div><div class="best">👑 14 moves</div></div>
+          <div class="chev">›</div>
+        </div>
+
+        <div class="sec">⚡ Speed</div>
+        <div class="glasscard">
+          <div class="chip" style="background:rgba(79,195,247,.30);width:46px;height:46px;">⏱️</div>
+          <div class="meta"><div class="name">Number Tap</div><div class="best">👑 18.4s</div></div>
+          <div class="chev">›</div>
+        </div>
+
+        <div class="sec">📅 Every Day</div>
+        <div class="glasscard">
+          <div class="chip" style="background:rgba(255,111,165,.30);width:46px;height:46px;">📅</div>
+          <div class="meta"><div class="name">Daily Challenge</div><div class="best">🔥 5 day streak</div></div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION 6 ============ -->
+    <div class="opt">
+      <h2>6 · Featured Carousel</h2>
+      <div class="tag">Swipeable spotlight on top, compact picks below</div>
+      <div class="phone">
+        <div class="top">
+          <div class="iconbtn">‹</div>
+          <div class="title">All Games</div>
+          <div class="pill">🔥 5</div>
+        </div>
+
+        <div class="caro">
+          <div class="slide" style="background:linear-gradient(135deg,#7be86b,#26c281);">
+            <div class="badge">🆕 NEW</div>
+            <h3>Number Sort</h3>
+            <p>Sort the columns in the fewest moves.</p>
+            <button class="play" style="color:#1e7a3e;">▶ Play</button>
+            <div class="deco">🧩</div>
+          </div>
+          <div class="peek" style="background:linear-gradient(135deg,#ff7eb3,#c84bd6);"></div>
+        </div>
+        <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+
+        <div class="mrow">
+          <div class="mgame"><div class="chip" style="background:rgba(255,193,46,.30);">🔢</div><span>2048</span></div>
+          <div class="mgame"><div class="chip" style="background:rgba(79,195,247,.30);">⏱️</div><span>Tap</span></div>
+          <div class="mgame"><div class="chip" style="background:rgba(255,111,165,.30);">📅</div><span>Daily</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<style>
+  /* Option 3 — Neon Dark */
+  .phone.neon { background:linear-gradient(165deg,#1c1140,#0c0d18); box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 0 0 1px #2a2350; }
+  .neon .iconbtn,.neon .pill { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); }
+  .ncard { display:flex; align-items:center; gap:13px; padding:13px 14px; border-radius:18px; margin-bottom:11px;
+           background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); }
+  .ncard .chip { width:46px; height:46px; background:rgba(255,255,255,.06); }
+  .nglow { box-shadow:0 0 16px -2px var(--g), inset 0 0 0 1px rgba(255,255,255,.12); }
+  .ncard .meta { flex:1; }
+  .ncard .name { color:#fff; font-size:16px; font-weight:800; }
+  .ncard .desc { color:rgba(255,255,255,.55); font-size:11.5px; }
+  .nbest { font-size:15px; font-weight:900; }
+
+  /* Option 4 — Live preview cards */
+  .pcard { display:flex; align-items:center; gap:12px; padding:13px; border-radius:20px; margin-bottom:12px;
+           background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28); backdrop-filter:blur(8px); }
+  .pmeta { flex:1; }
+  .pcard .name { color:#fff; font-size:17px; font-weight:900; }
+  .pcard .desc { color:rgba(255,255,255,.78); font-size:11.5px; margin:2px 0 5px; }
+  .pcard .best { color:#ffe27a; font-size:11.5px; font-weight:800; }
+  .mini { width:92px; height:92px; flex:none; border-radius:12px; padding:6px; background:rgba(0,0,0,.18); }
+  .m2048 { display:grid; grid-template-columns:repeat(3,1fr); grid-auto-rows:1fr; gap:4px; }
+  .m2048 span { border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; }
+  .m2048 .e { background:rgba(255,255,255,.10); }
+  .m2048 .c2{background:#d9dbf7;color:#1e2a4a;} .m2048 .c4{background:#7fe0d2;color:#1e2a4a;}
+  .m2048 .c8{background:#ffb23f;} .m2048 .c16{background:#ff5b5b;} .m2048 .c64{background:#ff6a3d;}
+  .mtap { display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:4px; }
+  .mtap span { background:rgba(255,255,255,.85); color:#3a1d6e; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
+  .mtap .nx { background:linear-gradient(135deg,#7be86b,#34c759); color:#fff; }
+  .msort { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; align-items:end; }
+  .msort .col { display:flex; flex-direction:column; justify-content:flex-end; gap:3px; height:100%; }
+  .msort b { border-radius:5px; text-align:center; font-size:11px; font-weight:800; color:#fff; padding:3px 0; }
+  .msort .s1{background:#ffb23f;} .msort .s2{background:#ff4d9d;} .msort .s3{background:#3fa3f0;}
+
+  /* Option 5 — Category sections */
+  .sec { color:rgba(255,255,255,.92); font-size:13px; font-weight:800; margin:14px 2px 9px; letter-spacing:.3px; }
+  .sec:first-of-type { margin-top:2px; }
+
+  /* Option 6 — Carousel */
+  .caro { display:flex; gap:10px; overflow:hidden; }
+  .slide { position:relative; flex:none; width:84%; border-radius:22px; padding:18px; color:#fff; overflow:hidden;
+           box-shadow:0 10px 24px rgba(0,0,0,.25); }
+  .slide .badge { display:inline-block; font-size:11px; font-weight:800; background:rgba(255,255,255,.25); padding:4px 10px; border-radius:14px; margin-bottom:10px; }
+  .slide h3 { font-size:22px; font-weight:900; }
+  .slide p { font-size:13px; opacity:.92; margin:3px 0 14px; max-width:78%; }
+  .slide .play { background:#fff; border:none; border-radius:20px; padding:9px 20px; font-weight:900; font-size:14px; cursor:pointer; }
+  .slide .deco { position:absolute; right:-6px; bottom:-10px; font-size:84px; opacity:.22; }
+  .peek { flex:none; width:14%; border-radius:22px; }
+  .dots { display:flex; gap:6px; justify-content:center; margin:12px 0 16px; }
+  .dots i { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.4); }
+  .dots i.on { width:18px; border-radius:4px; background:#fff; }
+  .mrow { display:flex; gap:10px; }
+  .mgame { flex:1; display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 4px; border-radius:16px;
+           background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.26); color:#fff; font-size:12px; font-weight:800; }
+  .mgame .chip { width:42px; height:42px; }
+</style>
+</body>
+</html>
