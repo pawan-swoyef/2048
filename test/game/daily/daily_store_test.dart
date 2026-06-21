@@ -51,4 +51,12 @@ void main() {
     await s.saveResult(103, success: true, score: 50);
     expect(await s.dailyStreak(), 1);
   });
+
+  test('grantBonusOnce awards the daily bonus exactly once per puzzle', () async {
+    final s = DailyStore();
+    expect(await s.grantBonusOnce(100), true); // first completion → award
+    expect(await s.grantBonusOnce(100), false); // same day → no double award
+    expect(await s.grantBonusOnce(101), true); // next day's puzzle → award again
+    expect(await s.grantBonusOnce(101), false);
+  });
 }

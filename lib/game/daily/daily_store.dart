@@ -19,6 +19,7 @@ class DailyStore {
   static const _resScore = 'daily_res_score';
   static const _streak = 'daily_streak';
   static const _lastPuzzle = 'daily_last_puzzle';
+  static const _bonusPuzzle = 'daily_bonus_puzzle';
 
   /// Today's finished result for [todayPuzzle], or null if not finished.
   Future<DailySaved?> load(int todayPuzzle) async {
@@ -58,5 +59,15 @@ class DailyStore {
   Future<int> dailyStreak() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_streak) ?? 0;
+  }
+
+  /// Grants the completion coin bonus for [puzzle] exactly once. Returns true
+  /// the first time it's called for a puzzle (so the caller awards the coins),
+  /// and false on any later call for the same puzzle.
+  Future<bool> grantBonusOnce(int puzzle) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getInt(_bonusPuzzle) == puzzle) return false;
+    await prefs.setInt(_bonusPuzzle, puzzle);
+    return true;
   }
 }

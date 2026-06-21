@@ -6,11 +6,15 @@ import '../../game/daily/daily_rotation.dart';
 import '../../game/daily/daily_seed.dart';
 import '../../game/daily/daily_share.dart';
 import '../../game/daily/daily_store.dart';
+import '../../game/progress_store.dart';
 import '../share_card.dart';
 import '../theme_controller.dart';
 import '../win_card.dart';
 import 'daily_game.dart';
 import 'daily_play_controller.dart';
+
+/// Coins awarded once for successfully completing a day's daily challenge.
+const int kDailyCompletionBonus = 100;
 
 /// The daily challenge: one game per day on rotation (2048 → Number Tap →
 /// Number Sort → Magic Square → repeat), under a shared Hero Banner chrome.
@@ -27,6 +31,7 @@ class DailyScreen extends StatefulWidget {
 
 class _DailyScreenState extends State<DailyScreen> {
   final DailyStore _store = DailyStore();
+  final ProgressStore _progressStore = ProgressStore();
   final GlobalKey _shareKey = GlobalKey();
   late final DailyPlayController _controller;
   final InterstitialController _interstitial = InterstitialController();
@@ -71,12 +76,19 @@ class _DailyScreenState extends State<DailyScreen> {
   Future<void> _onComplete(bool success, int score) async {
     await _store.saveResult(_puzzle, success: success, score: score);
     final streak = await _store.dailyStreak();
-    if (mounted) {
-      setState(() {
-        _done = DailySaved(success: success, score: score);
-        _streak = streak;
-      });
+
+    // Award the daily-completion coin bonus once, only on a successful clear.
+    if (success && await _store.grantBonusOnce(_puzzle)) {
+      final progress = await _progressStore.load();
+      await _progressStore
+          .save(progress.copyWith(coins: progress.coins + kDailyCompletionBonus));
     }
+
+    if (!mounted) return;
+    setState(() {
+      _done = DailySaved(success: success, score: score);
+      _streak = streak;
+    });
     _interstitial.setPremium(ThemeScope.controllerOf(context).premiumUnlocked);
     _interstitial.onGameOver();
   }
@@ -293,14 +305,15 @@ class _DailyScreenState extends State<DailyScreen> {
   Widget _resultOverlay(GameTheme theme) {
     final d = _done!;
     final stat = _game.resultStat(d.success, d.score);
-    final next = _gameFor(_puzzle + 1);
     return WinCardOverlay(
       child: WinCard(
         celebrate: _game.celebrateOn(d.success),
         banner: d.success ? 'DAILY DONE' : null,
         headline: _game.resultHeadline(d.success),
         stat: WinStat(label: stat.label, value: stat.value, sub: stat.sub),
-        badge: '🔥 $_streak day daily streak',
+        badge: d.success
+            ? '🪙 +$kDailyCompletionBonus  ·  🔥 $_streak day streak'
+            : '🔥 $_streak day daily streak',
         primaryLabel: 'Share Result',
         primaryIcon: Icons.share,
         onPrimary: _share,

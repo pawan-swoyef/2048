@@ -131,6 +131,9 @@ class _HubScreenState extends State<HubScreen> {
     await Navigator.of(context)
         .push(MaterialPageRoute(builder: (_) => game.builder()));
     _loadBests();
+    // Coins may have changed (e.g. the daily-challenge completion bonus).
+    final p = await _progressStore.load();
+    if (mounted) setState(() => _progress = p);
   }
 
   void _showAllGames() => setState(() => _tab = 1);
