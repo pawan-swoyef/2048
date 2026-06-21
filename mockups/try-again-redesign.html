@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>2048 — Try Again Dialog Redesign</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#1b1d22; color:#eee; padding:32px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin-bottom:6px; font-size:14px; line-height:1.55; max-width:780px; margin:0 auto 6px; }
+  .sub b { color:#ffd166; }
+  .legend { text-align:center; color:#9aa0aa; font-size:12px; margin-bottom:34px; }
+  .row { display:flex; flex-wrap:wrap; gap:42px; justify-content:center; align-items:flex-start; }
+  .opt { width:330px; }
+  .opt h2 { text-align:center; font-size:16px; margin-bottom:4px; }
+  .opt .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:16px; line-height:1.5; min-height:32px; }
+
+  /* ===== Phone with dimmed board behind the dialog ===== */
+  .phone {
+    position:relative; border-radius:30px; padding:18px; overflow:hidden;
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    box-shadow:0 18px 50px rgba(0,0,0,.45); min-height:580px;
+  }
+  .scoreRow { display:flex; gap:10px; justify-content:flex-end; margin-bottom:12px; }
+  .scoreBox { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.28);
+    border-radius:12px; padding:6px 14px; text-align:center; color:#fff; }
+  .scoreBox .l { font-size:9px; font-weight:800; letter-spacing:1px; opacity:.85; }
+  .scoreBox .v { font-size:17px; font-weight:900; }
+
+  /* dimmed mini board */
+  .board { background:rgba(0,0,0,.18); border-radius:14px; padding:8px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px; filter:blur(.5px); }
+  .board .t { aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:800; }
+  .t2{background:#D9DBF7;color:#1E2A4A;} .t4{background:#7FE0D2;color:#1E2A4A;}
+  .t8{background:#FFB23F;color:#fff;} .t16{background:#FF5B5B;color:#fff;} .t32{background:#FF4D9D;color:#fff;}
+  .t64{background:#FF6A3D;color:#fff;} .t128{background:#FFC93C;color:#fff;font-size:15px;}
+  .t256{background:#54CC57;color:#fff;font-size:15px;} .t512{background:#3FA3F0;color:#fff;font-size:15px;}
+
+  .scrim { position:absolute; inset:0; background:rgba(20,16,48,.80); display:flex;
+    align-items:center; justify-content:center; padding:18px; }
+
+  /* ===== The dialog CARD (matches the app's WinCard, muted for game over) ===== */
+  .card {
+    position:relative; width:100%; border-radius:26px; padding:42px 20px 20px;
+    background:linear-gradient(180deg,#5536c0,#4a2fb0);
+    border:1.5px solid rgba(255,255,255,.30);
+    box-shadow:0 18px 40px rgba(0,0,0,.5);
+    text-align:center;
+  }
+  .medallion {
+    position:absolute; top:-34px; left:50%; transform:translateX(-50%);
+    width:68px; height:68px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:34px; background:linear-gradient(180deg,#6a4ad0,#4a2fb0);
+    border:2px solid rgba(255,255,255,.35); box-shadow:0 6px 16px rgba(0,0,0,.4);
+  }
+  .ribbon {
+    display:inline-block; font-size:12px; font-weight:900; letter-spacing:1.5px; color:#fff;
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28);
+    padding:5px 16px; border-radius:8px; margin-bottom:12px;
+  }
+  .headline { color:#fff; font-size:21px; font-weight:900; margin-bottom:14px; }
+  .statPanel {
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+    border-radius:16px; padding:12px 16px; margin-bottom:14px;
+  }
+  .statPanel .lab { color:rgba(255,255,255,.75); font-size:12px; font-weight:700; }
+  .statPanel .big { color:#FFD23F; font-size:38px; font-weight:900; line-height:1.05; }
+  .statPanel .sub { color:rgba(255,255,255,.7); font-size:12px; font-weight:700; margin-top:2px; }
+  .newbest { display:inline-block; margin-top:6px; font-size:11px; font-weight:900; color:#241139;
+    background:#FFD23F; padding:3px 10px; border-radius:10px; }
+
+  .btnPrimary {
+    display:block; width:100%; border:none; cursor:pointer;
+    background:linear-gradient(180deg,#FFE05A,#FFC107); color:#5b2a9e;
+    font-size:16px; font-weight:900; padding:14px; border-radius:15px;
+    box-shadow:0 6px 14px rgba(255,193,7,.35); margin-bottom:10px;
+  }
+  .btnGhostRow { display:flex; gap:10px; }
+  .btnGhost {
+    flex:1; border:1px solid rgba(255,255,255,.24); background:rgba(255,255,255,.10);
+    color:#fff; font-size:13px; font-weight:800; padding:11px; border-radius:13px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .btnWatch {
+    display:flex; width:100%; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+    background:rgba(255,255,255,.10); border:1px dashed rgba(255,210,63,.6); color:#FFD23F;
+    font-size:14px; font-weight:900; padding:12px; border-radius:14px; margin-bottom:10px;
+  }
+  .closeX { position:absolute; top:12px; right:14px; color:rgba(255,255,255,.6); font-size:20px; cursor:pointer; }
+
+  .note { font-size:11px; color:#9aa0aa; text-align:center; margin-top:12px; font-style:italic; }
+
+  /* compact (option C) */
+  .card.compact { padding:36px 18px 18px; }
+  .card.compact .headline { margin-bottom:10px; }
+  .card.compact .scoreLine { color:#fff; font-size:15px; font-weight:800; margin-bottom:4px; }
+  .card.compact .scoreLine b { color:#FFD23F; font-size:30px; display:block; }
+  .card.compact .bestLine { color:rgba(255,255,255,.7); font-size:12px; margin-bottom:14px; }
+  .homeLink { display:block; margin-top:10px; color:rgba(255,255,255,.75); font-size:12px; font-weight:700; text-decoration:none; }
+</style>
+</head>
+<body>
+  <h1>2048 — "Try Again" Dialog Redesign</h1>
+  <p class="sub">
+    Today it's a plain grey overlay ("Game Over! / No more moves / Try Again"). These three
+    redesigns turn it into a polished card — the <b>same family as the app's existing Win card</b>
+    (Aurora purple <b>#4A2FB0</b>, gold accent <b>#FFD23F</b>), so wins and losses feel consistent.
+  </p>
+  <p class="legend">All shown in the free Aurora theme; the card recolors with every theme. Tell me <b>A</b>, <b>B</b>, or <b>C</b>.</p>
+
+  <div class="row">
+
+    <!-- ============ OPTION A ============ -->
+    <div class="opt">
+      <h2>A · Polished Card (Win-card sibling)</h2>
+      <div class="tag">Clean, matches the win screen exactly but muted — score stat + Try Again, with Share &amp; Home.</div>
+      <div class="phone">
+        <div class="scoreRow">
+          <div class="scoreBox"><div class="l">SCORE</div><div class="v">2,860</div></div>
+          <div class="scoreBox"><div class="l">BEST</div><div class="v">3,580</div></div>
+        </div>
+        <div class="board">
+          <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+          <div class="t t16">16</div><div class="t t4">4</div><div class="t t32">32</div><div class="t t8">8</div>
+          <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="t t2">2</div>
+          <div class="t t256">256</div><div class="t t8">8</div><div class="t t2">2</div><div class="t t16">16</div>
+        </div>
+        <div class="scrim">
+          <div class="card">
+            <div class="closeX">×</div>
+            <div class="medallion">😵</div>
+            <div class="ribbon">GAME OVER</div>
+            <div class="headline">Out of moves!</div>
+            <div class="statPanel">
+              <div class="lab">Final score</div>
+              <div class="big">2,860</div>
+              <div class="sub">Best 3,580</div>
+            </div>
+            <button class="btnPrimary">🔄  Try Again</button>
+            <div class="btnGhostRow">
+              <button class="btnGhost">📤 Share</button>
+              <button class="btnGhost">🏠 Home</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION B ============ -->
+    <div class="opt">
+      <h2>B · Comeback + Undo Hook</h2>
+      <div class="tag">Encouraging tone, shows a "New Best!" badge, and a Watch-Ad undo to keep players in the run (retention + rewarded ad).</div>
+      <div class="phone">
+        <div class="scoreRow">
+          <div class="scoreBox"><div class="l">SCORE</div><div class="v">3,720</div></div>
+          <div class="scoreBox"><div class="l">BEST</div><div class="v">3,720</div></div>
+        </div>
+        <div class="board">
+          <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+          <div class="t t16">16</div><div class="t t4">4</div><div class="t t32">32</div><div class="t t8">8</div>
+          <div class="t t4">4</div><div class="t t64">64</div><div class="t t512">512</div><div class="t t2">2</div>
+          <div class="t t256">256</div><div class="t t8">8</div><div class="t t2">2</div><div class="t t16">16</div>
+        </div>
+        <div class="scrim">
+          <div class="card">
+            <div class="closeX">×</div>
+            <div class="medallion">💪</div>
+            <div class="ribbon">SO CLOSE!</div>
+            <div class="headline">Almost had it!</div>
+            <div class="statPanel">
+              <div class="lab">You scored</div>
+              <div class="big">3,720</div>
+              <div class="newbest">🏆 NEW BEST!</div>
+            </div>
+            <button class="btnWatch">▶  Undo last move &nbsp;·&nbsp; Watch ad</button>
+            <button class="btnPrimary">🔄  New Game</button>
+            <a class="homeLink" href="#">Back to Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION C ============ -->
+    <div class="opt">
+      <h2>C · Compact &amp; Minimal</h2>
+      <div class="tag">Smaller, faster card — emoji, score, one big Try Again button, a quiet Home link. Least intrusive.</div>
+      <div class="phone">
+        <div class="scoreRow">
+          <div class="scoreBox"><div class="l">SCORE</div><div class="v">2,860</div></div>
+          <div class="scoreBox"><div class="l">BEST</div><div class="v">3,580</div></div>
+        </div>
+        <div class="board">
+          <div class="t t2">2</div><div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div>
+          <div class="t t16">16</div><div class="t t4">4</div><div class="t t32">32</div><div class="t t8">8</div>
+          <div class="t t4">4</div><div class="t t64">64</div><div class="t t128">128</div><div class="t t2">2</div>
+          <div class="t t256">256</div><div class="t t8">8</div><div class="t t2">2</div><div class="t t16">16</div>
+        </div>
+        <div class="scrim">
+          <div class="card compact">
+            <div class="medallion">😔</div>
+            <div class="headline">Game Over</div>
+            <div class="scoreLine">Final score <b>2,860</b></div>
+            <div class="bestLine">Best 3,580 👑</div>
+            <button class="btnPrimary">🔄  Try Again</button>
+            <a class="homeLink" href="#">🏠 Back to Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

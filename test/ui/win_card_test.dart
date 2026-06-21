@@ -62,7 +62,37 @@ void main() {
 
     expect(find.text('12.3s'), findsOneWidget);
     expect(find.text('PLAY AGAIN'), findsOneWidget);
-    // No close button, no secondary, no footer.
+    // No close button, no secondary, no footer, no ad action.
     expect(find.byIcon(Icons.close), findsNothing);
+    expect(find.byIcon(Icons.ondemand_video_rounded), findsNothing);
+  });
+
+  testWidgets('game-over card shows the ad action + muted emoji', (tester) async {
+    var ad = 0, primary = 0;
+    await tester.pumpWidget(_wrap(WinCardOverlay(
+      child: WinCard(
+        celebrate: false,
+        mutedEmoji: '😵',
+        banner: 'Game Over',
+        headline: 'So close!',
+        stat: const WinStat(label: 'Final score', value: '2860', sub: 'Best 3580'),
+        adActionLabel: 'Undo · Watch Ad',
+        adActionIcon: Icons.ondemand_video_rounded,
+        onAdAction: () => ad++,
+        primaryLabel: 'New Game',
+        onPrimary: () => primary++,
+      ),
+    )));
+    await tester.pumpAndSettle();
+
+    expect(find.text('😵'), findsOneWidget);
+    expect(find.text('Undo · Watch Ad'), findsOneWidget);
+    expect(find.text('2860'), findsOneWidget);
+    expect(find.text('NEW GAME'), findsOneWidget); // primary upper-cases
+
+    await tester.tap(find.text('Undo · Watch Ad'));
+    await tester.tap(find.text('NEW GAME'));
+    expect(ad, 1);
+    expect(primary, 1);
   });
 }

@@ -15,7 +15,6 @@ import '../game/sound_service.dart';
 import 'animated_board.dart';
 import 'dialogs.dart';
 import 'game_buttons.dart';
-import 'overlays.dart';
 import 'paywall.dart';
 import 'score_header.dart';
 import 'swipe.dart';
@@ -285,13 +284,35 @@ class _GameScreenState extends State<GameScreen> {
     return true;
   }
 
-  /// Board-level overlay shown over the grid (game over only). The win is
-  /// celebrated full-screen via [_winCard] instead.
-  Widget? _overlay() {
-    if (_state.over) {
-      return GameOverOverlay(score: _state.score, onTryAgain: _startNewGame);
-    }
-    return null;
+  /// Full-screen "Try Again" card shown when the board fills up. Offers an
+  /// undo (revive) via the existing rewarded-ad flow, plus New Game / Home.
+  Widget? _gameOverCard() {
+    if (!_state.over) return null;
+    final canUndo = _history.isNotEmpty;
+    final isNewBest = _state.score > 0 && _state.score >= _state.best;
+    return WinCardOverlay(
+      child: WinCard(
+        celebrate: false,
+        mutedEmoji: '😵',
+        banner: 'Game Over',
+        headline: isNewBest ? 'New high score! 🎉' : 'So close!',
+        stat: WinStat(
+            label: 'Final score',
+            value: '${_state.score}',
+            sub: 'Best ${_state.best}'),
+        badge: isNewBest ? '🏆 New Best!' : null,
+        adActionLabel:
+            canUndo ? (_premium ? 'Undo Last Move' : 'Undo · Watch Ad') : null,
+        adActionIcon: canUndo
+            ? (_premium ? Icons.undo_rounded : Icons.ondemand_video_rounded)
+            : null,
+        onAdAction: canUndo ? _undo : null,
+        primaryLabel: 'New Game',
+        primaryIcon: Icons.refresh_rounded,
+        onPrimary: _startNewGame,
+        onClose: () => Navigator.of(context).maybePop(),
+      ),
+    );
   }
 
   void _shareWin() {
@@ -335,7 +356,7 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final overlay = _overlay();
+    final gameOverCard = _gameOverCard();
     final winCard = _winCard();
     final theme = ThemeScope.of(context);
     final premium = ThemeScope.controllerOf(context).premiumUnlocked;
@@ -393,8 +414,6 @@ class _GameScreenState extends State<GameScreen> {
                                 popCells: _popCells,
                                 tick: _tick,
                               ),
-                              if (overlay != null)
-                                Positioned.fill(child: overlay),
                             ],
                           ),
                         ),
@@ -423,6 +442,7 @@ class _GameScreenState extends State<GameScreen> {
         ),
           ),
           ?winCard,
+          ?gameOverCard,
         ],
       ),
     );

@@ -37,6 +37,15 @@ class WinCard extends StatelessWidget {
   final VoidCallback? onShare; // optional share icon at the top-left corner
   final bool celebrate;
 
+  // Optional outlined "rewarded" action shown ABOVE the primary button (e.g.
+  // "Undo · Watch Ad" on the game-over card). Hidden unless [onAdAction] is set.
+  final String? adActionLabel;
+  final IconData? adActionIcon;
+  final VoidCallback? onAdAction;
+
+  // Emoji shown overhanging the top when [celebrate] is false (game over).
+  final String mutedEmoji;
+
   const WinCard({
     super.key,
     this.banner,
@@ -54,6 +63,10 @@ class WinCard extends StatelessWidget {
     this.onClose,
     this.onShare,
     this.celebrate = true,
+    this.adActionLabel,
+    this.adActionIcon,
+    this.onAdAction,
+    this.mutedEmoji = '🏁',
   });
 
   @override
@@ -112,6 +125,15 @@ class WinCard extends StatelessWidget {
                   _BadgePill(text: badge!, accent: accent),
                 ],
                 const SizedBox(height: 16),
+                if (onAdAction != null && adActionLabel != null) ...[
+                  _AdButton(
+                    label: adActionLabel!,
+                    icon: adActionIcon,
+                    accent: accent,
+                    onPressed: onAdAction!,
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 _PrimaryButton(
                   label: primaryLabel,
                   icon: primaryIcon,
@@ -144,7 +166,7 @@ class WinCard extends StatelessWidget {
         if (celebrate)
           const Positioned(top: 0, child: _Crown())
         else
-          const Positioned(top: 8, child: Text('🏁', style: TextStyle(fontSize: 44))),
+          Positioned(top: 8, child: Text(mutedEmoji, style: const TextStyle(fontSize: 44))),
 
         // Close (X) button at the top-right corner.
         if (onClose != null)
@@ -271,6 +293,51 @@ class _SunburstPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// An outlined, accent-colored "rewarded" button (e.g. "Undo · Watch Ad"),
+/// visually distinct from the solid primary button it sits above.
+class _AdButton extends StatelessWidget {
+  final String label;
+  final IconData? icon;
+  final Color accent;
+  final VoidCallback onPressed;
+  const _AdButton(
+      {required this.label, this.icon, required this.accent, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: Material(
+        color: const Color(0x14FFFFFF),
+        borderRadius: BorderRadius.circular(15),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: onPressed,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: accent.withValues(alpha: 0.8), width: 1.5),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: accent, size: 20),
+                  const SizedBox(width: 8),
+                ],
+                Text(label,
+                    style: TextStyle(
+                        color: accent, fontSize: 15, fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _Ribbon extends StatelessWidget {
