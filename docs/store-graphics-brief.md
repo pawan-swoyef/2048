@@ -1,4 +1,4 @@
-# Store Graphics Brief — Number Games Collection
+# Store Graphics Brief — Numjoy: Number Puzzle Games
 
 For the graphics team. This describes the **screens** and **colors** of the app
 so you can design the Play Store / App Store screenshots and feature graphic.

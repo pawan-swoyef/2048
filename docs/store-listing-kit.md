@@ -3,9 +3,9 @@
 Everything you need to build the Play Store / App Store listing: brand colors
 (with hex codes), the full content of the app, and ready-to-paste listing copy.
 
-> The older [`store-listing.md`](store-listing.md) describes only the single 2048
-> game and is **superseded** by this file — the app is now a collection of five
-> number games with daily streaks, coins, and themes.
+> This kit is the human reference (brand, content, copy). The machine-readable
+> listing the publisher tool reads lives in [`store-listing.md`](store-listing.md)
+> (title + short + full description) — keep the two in sync.
 
 ---
 
@@ -13,21 +13,23 @@ Everything you need to build the Play Store / App Store listing: brand colors
 
 | Field | Value |
 |---|---|
-| Package name | `com.swoyef.*` (confirm final id) |
-| Current build title | `2048 Blocks: Merge Puzzle` (legacy — see title options below) |
+| Package name | `com.number.twofoureight` (the registered Play package — do not change) |
+| App title (final) | **`Numjoy: Number Puzzle Games`** (27/30 chars) |
+| Launcher label | `Numjoy` |
 | Category | Games → Puzzle |
 | Content rating | Everyone |
 | Price | Free (with ads + optional Premium) |
 | Internet | Plays 100% offline |
 
-### Title options (max 30 chars)
-Pick one. Based on our Play Store keyword research, a unique brand + searched
-keywords ranks best:
+### App title — FINAL: `Numjoy: Number Puzzle Games`
 
-1. **`Numbie – Number Puzzle Games`** *(recommended — uncontested brand + high-traffic keywords)*
-2. `Number Games: Puzzle Hub`
-3. `Numblast – Number Puzzles`
-4. `2048 Blocks: Merge Puzzle` *(current; describes only one of the five games)*
+Chosen from live Play Store research: **Numjoy** is an uncontested brand (0
+competing apps), and the tail "Number Puzzle Games" carries high search traffic —
+so we rank for searched keywords **and** uniquely own the brand term.
+
+Alternatives considered (also uncontested, kept on file): `Numbix: Number Puzzle
+Games`, `Numberly – Number Games`. Rejected (already taken): Numblast, Numzy,
+Numbo, Numpop, Number Master, NumberMania.
 
 ---
 

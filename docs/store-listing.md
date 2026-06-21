@@ -1,50 +1,54 @@
-# Play Store Listing — 2048 Blocks: Merge Puzzle
+# Play Store Listing — Numjoy: Number Puzzle Games
+
+> This is the canonical, tool-readable listing. `tool/play_publish/push_listing.dart`
+> reads the **App title**, **Short description**, and **Full description** sections
+> below and pushes them to the Play Console. Keep them within the char limits.
 
 ## App title (max 30 chars)
-2048 Blocks: Merge Puzzle
+Numjoy: Number Puzzle Games
 
 ## Short description (max 80 chars)
-Slide & merge number tiles to reach 2048! Free offline number puzzle game.
+Brain-training number games: 2048, Magic Square, Number Sort & a daily puzzle!
 
 ## Full description (max 4000 chars)
-Join the numbers and reach the 2048 tile in this colorful, addictive number
-puzzle game! 2048 Blocks: Merge Puzzle is the classic 2048 you love — now with
-gorgeous themes, smooth sliding animations, and unlimited replay. Play anytime,
-anywhere — no Wi-Fi needed.
+Numjoy is five addictive number puzzles in one beautiful, offline app — train
+your brain, beat the clock, and chase a daily streak. No Wi-Fi needed, free to
+play.
 
-Swipe to move all the tiles. When two tiles with the same number touch, they
-merge into one. Keep merging — 2, 4, 8, 16, 32… all the way to 2048 and beyond.
-Simple to learn, hard to master, and impossible to put down!
+★ FIVE GAMES IN ONE ★
+• 2048 — Slide and merge tiles. Join the numbers to reach 2048 and beyond.
+• Number Tap — Tap 1 to 25 as fast as you can. Race your best time!
+• Number Sort — Sort the mixed columns until each is a single number, in the fewest moves.
+• Magic Square — Drag 1–9 into the 3×3 grid so every row, column, and diagonal sums to 15.
+• Daily Challenge — A brand-new puzzle every single day. Keep your streak alive!
 
 ★ WHY YOU'LL LOVE IT ★
-• Classic 2048 gameplay — slide, merge, and chase a new high score
-• Buttery-smooth sliding & merging animations
-• Colorful candy-style number tiles
-• Beautiful themes — Aurora, Midnight Neon, Ocean, Sunset, Forest, Royal Gold & Candy
+• Five distinct brain games — merge, tap, sort, and logic puzzles
+• A new Daily Challenge every single day
+• Daily streaks, coins, and a 7-day reward calendar
+• 7 gorgeous themes — Aurora, Midnight Neon, Ocean, Sunset, Forest, Royal Gold & Candy
+• Smooth, satisfying animations and colorful number tiles
 • Play 100% OFFLINE — no internet required
+• Auto-saves your best score in every game
+• Share your wins with friends
 • FREE to play
-• Unlimited Undo (Premium) — take back any move
-• Auto-saves your best score
-• Clean, modern, easy-to-use design
-• Great for quick breaks or long brain-training sessions
 
 ★ HOW TO PLAY ★
-1. Swipe up, down, left, or right to slide all tiles.
-2. Two tiles with the same number merge into one bigger number.
-3. Every merge adds to your score.
-4. Reach the 2048 tile to win — then keep going for an even higher score!
-5. Run out of moves? Just tap Try Again and beat your best.
+Pick any game from the home screen and dive in. Each game is simple to learn and
+hard to master — slide tiles in 2048, race the clock in Number Tap, organize the
+columns in Number Sort, and solve the grid in Magic Square. Come back every day
+for a fresh Daily Challenge and keep your streak alive.
 
 ★ PREMIUM ★
-Upgrade to Premium for an ad-free experience, Unlimited Undo, and all 6 bonus
-themes unlocked.
+Go Premium for an ad-free experience, unlimited Undo, unlimited Hints, and all 6
+bonus themes unlocked.
 
-Whether you're a 2048 veteran or brand new to number puzzles, 2048 Blocks: Merge
-Puzzle is the perfect brain game to relax, focus, and have fun. Download now and
-see if you can reach 2048!
+Whether you have one minute or one hour, there's always a number puzzle to play.
+Download Numjoy now, start your streak, and see how high you can score!
 
 ## Keywords woven in
-2048, merge, number, puzzle, blocks, tiles, brain game, offline, free, classic
+number games, number puzzle, math puzzle, 2048, merge, magic square, number sort,
+brain games, puzzle, offline, free
 
 ## Category
 Games → Puzzle
@@ -53,6 +57,6 @@ Games → Puzzle
 Everyone
 
 ## Notes
-- Contains ads (banner + interstitial). Declare ads = Yes.
-- In-app purchases: Premium subscription/one-time.
+- Contains ads (banner + interstitial + rewarded). Declare ads = Yes.
+- In-app purchases: Premium (subscription / one-time).
 - Privacy Policy URL: REQUIRED (app shows ads) — must be added before publishing.
