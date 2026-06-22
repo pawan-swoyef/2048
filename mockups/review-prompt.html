@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Numjoy — Review Prompt</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#1b1d22; color:#eee; padding:32px 16px 80px; }
+  h1 { text-align:center; font-size:26px; margin-bottom:6px; }
+  .sub { text-align:center; color:#9aa0aa; margin-bottom:6px; font-size:14px; line-height:1.55; max-width:760px; margin:0 auto 6px; }
+  .sub b { color:#ffd166; }
+  .legend { text-align:center; color:#9aa0aa; font-size:12px; margin-bottom:34px; }
+  .row { display:flex; flex-wrap:wrap; gap:48px; justify-content:center; align-items:flex-start; }
+  .opt { width:340px; }
+  .opt h2 { text-align:center; font-size:16px; margin-bottom:4px; }
+  .opt .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:16px; line-height:1.5; min-height:32px; }
+
+  /* ===== Phone w/ dimmed game behind ===== */
+  .phone {
+    position:relative; border-radius:30px; overflow:hidden; min-height:600px;
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  .bgboard { position:absolute; inset:0; padding:60px 30px; filter:blur(3px) brightness(.7);
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-content:center; }
+  .bgboard .t { aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; font-weight:800; opacity:.9; }
+  .c2{background:#D9DBF7;color:#1E2A4A;} .c4{background:#7FE0D2;color:#1E2A4A;} .c8{background:#FFB23F;color:#fff;}
+  .c16{background:#FF5B5B;color:#fff;} .c32{background:#FF4D9D;color:#fff;} .c64{background:#FF6A3D;color:#fff;}
+  .c128{background:#FFC93C;color:#fff;} .c256{background:#54CC57;color:#fff;}
+  .scrim { position:absolute; inset:0; background:rgba(20,16,48,.55);
+    display:flex; align-items:center; justify-content:center; padding:22px; }
+
+  /* ===== confetti ===== */
+  .confetti i { position:absolute; width:9px; height:9px; border-radius:2px; opacity:.9; }
+  .confetti i:nth-child(1){left:18%; top:-6px; background:#FFD23F; transform:rotate(20deg);}
+  .confetti i:nth-child(2){left:34%; top:-14px; background:#FF5C8A; border-radius:50%;}
+  .confetti i:nth-child(3){left:52%; top:-8px; background:#34C759; transform:rotate(45deg);}
+  .confetti i:nth-child(4){left:68%; top:-16px; background:#4FC3F7; border-radius:50%;}
+  .confetti i:nth-child(5){left:82%; top:-4px; background:#B14CFF; transform:rotate(15deg);}
+  .confetti i:nth-child(6){left:10%; top:14px; background:#FF8A3D; border-radius:50%;}
+  .confetti i:nth-child(7){left:90%; top:18px; background:#FFD23F; transform:rotate(30deg);}
+
+  /* ===== white card ===== */
+  .card {
+    position:relative; width:100%; background:#fff; border-radius:28px; padding:30px 22px 22px;
+    text-align:center; box-shadow:0 22px 50px rgba(0,0,0,.4);
+  }
+  /* celebration medallion */
+  .medal {
+    width:84px; height:84px; margin:-58px auto 8px; border-radius:50%;
+    background:linear-gradient(160deg,#7C3AED,#F53D9E); display:flex; align-items:center; justify-content:center;
+    font-size:42px; box-shadow:0 10px 22px rgba(245,61,158,.45), inset 0 -3px 8px rgba(0,0,0,.15);
+    border:4px solid #fff;
+  }
+  .title { color:#241139; font-size:23px; font-weight:900; margin-bottom:7px; }
+  .subtitle { color:#8A7CA8; font-size:13.5px; line-height:1.45; margin-bottom:16px; padding:0 6px; }
+
+  /* stars */
+  .stars { display:flex; justify-content:center; gap:8px; margin-bottom:18px; }
+  .stars span { font-size:38px; line-height:1; filter:drop-shadow(0 3px 4px rgba(255,170,0,.35)); cursor:pointer; }
+  .stars .on { color:#FFC93C; } .stars .off { color:#E3DCF0; filter:none; }
+
+  /* buttons */
+  .primary {
+    display:block; width:100%; border:none; cursor:pointer; color:#fff;
+    background:linear-gradient(90deg,#7C3AED,#F53D9E); font-size:16px; font-weight:900;
+    padding:15px; border-radius:16px; box-shadow:0 8px 18px rgba(245,61,158,.4); margin-bottom:10px;
+  }
+  .ghost {
+    display:block; width:100%; border:none; cursor:pointer; color:#6A2DBF;
+    background:#F1ECFA; font-size:14.5px; font-weight:800; padding:13px; border-radius:14px; margin-bottom:14px;
+  }
+  .hint { color:#B49FD8; font-size:12px; font-weight:700; }
+  .hint b { color:#F5A623; }
+
+  /* ===== achievement strip (option B) ===== */
+  .ach { background:linear-gradient(135deg,#FF8A5C,#FF5C8A 60%,#C84BD6); border-radius:20px;
+    padding:16px; margin:-58px -4px 14px; color:#fff; box-shadow:0 10px 22px rgba(200,40,120,.35); }
+  .ach .done { font-size:18px; font-weight:900; }
+  .ach .chips { display:flex; justify-content:center; gap:10px; margin-top:10px; }
+  .ach .chip { background:rgba(0,0,0,.18); border-radius:13px; padding:7px 13px; font-size:14px; font-weight:900;
+    display:flex; align-items:center; gap:6px; }
+  .divider { height:1px; background:#EEE7F7; margin:4px 0 14px; }
+  .b-title { color:#241139; font-size:20px; font-weight:900; margin-bottom:6px; }
+</style>
+</head>
+<body>
+  <h1>Numjoy — Review Prompt</h1>
+  <p class="sub">
+    Two ways to ask for a rating, both in Numjoy's brand colors. <b>A</b> is the clean standalone prompt;
+    <b>B</b> rides the Daily-Challenge win (coins + streak) for higher conversion.
+  </p>
+  <p class="legend">White card over the dimmed game · purple-pink gradient · gold stars. Tell me <b>A</b> or <b>B</b>.</p>
+
+  <div class="row">
+
+    <!-- ============ OPTION A ============ -->
+    <div class="opt">
+      <h2>A · Standalone "Enjoying Numjoy?"</h2>
+      <div class="tag">Shown after a few wins — clean, friendly, focused purely on the rating.</div>
+      <div class="phone">
+        <div class="bgboard">
+          <div class="t c2">2</div><div class="t c8">8</div><div class="t c4">4</div><div class="t c2">2</div>
+          <div class="t c16">16</div><div class="t c4">4</div><div class="t c32">32</div><div class="t c8">8</div>
+          <div class="t c4">4</div><div class="t c64">64</div><div class="t c128">128</div><div class="t c2">2</div>
+          <div class="t c256">256</div><div class="t c8">8</div><div class="t c2">2</div><div class="t c16">16</div>
+        </div>
+        <div class="scrim">
+          <div class="card">
+            <div class="confetti"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="medal">🏆</div>
+            <div class="title">Enjoying Numjoy? ❤️</div>
+            <div class="subtitle">Your review helps us improve and bring more brain puzzles.</div>
+            <div class="stars">
+              <span class="on">★</span><span class="on">★</span><span class="on">★</span><span class="on">★</span><span class="off">★</span>
+            </div>
+            <button class="primary">Rate Now ⭐</button>
+            <button class="ghost">Maybe Later</button>
+            <div class="hint">Thanks for supporting <b>Numjoy</b>! 💜</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ OPTION B ============ -->
+    <div class="opt">
+      <h2>B · Daily Win + Review (recommended)</h2>
+      <div class="tag">Fires right after a Daily-Challenge clear — celebrates coins &amp; streak, then asks. Highest conversion.</div>
+      <div class="phone">
+        <div class="bgboard">
+          <div class="t c2">2</div><div class="t c8">8</div><div class="t c4">4</div><div class="t c2">2</div>
+          <div class="t c16">16</div><div class="t c4">4</div><div class="t c32">32</div><div class="t c8">8</div>
+          <div class="t c4">4</div><div class="t c64">64</div><div class="t c128">128</div><div class="t c2">2</div>
+          <div class="t c256">256</div><div class="t c8">8</div><div class="t c2">2</div><div class="t c16">16</div>
+        </div>
+        <div class="scrim">
+          <div class="card">
+            <div class="confetti"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="ach">
+              <div class="done">🎉 Daily Challenge Complete!</div>
+              <div class="chips">
+                <div class="chip">🪙 +100</div>
+                <div class="chip">🔥 3 Day Streak!</div>
+              </div>
+            </div>
+            <div class="b-title">Are you enjoying Numjoy?</div>
+            <div class="subtitle">Your feedback helps us create better number puzzles.</div>
+            <div class="stars">
+              <span class="on">★</span><span class="on">★</span><span class="on">★</span><span class="on">★</span><span class="on">★</span>
+            </div>
+            <button class="primary">Rate Numjoy ⭐</button>
+            <button class="ghost">Later</button>
+            <div class="hint">Thanks for supporting <b>Numjoy</b>! 💜</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -7,6 +7,8 @@ import '../../game/daily/daily_seed.dart';
 import '../../game/daily/daily_share.dart';
 import '../../game/daily/daily_store.dart';
 import '../../game/progress_store.dart';
+import '../../game/review_store.dart';
+import '../engagement/review_prompt.dart';
 import '../share_card.dart';
 import '../theme_controller.dart';
 import '../win_card.dart';
@@ -32,6 +34,7 @@ class DailyScreen extends StatefulWidget {
 class _DailyScreenState extends State<DailyScreen> {
   final DailyStore _store = DailyStore();
   final ProgressStore _progressStore = ProgressStore();
+  final ReviewStore _reviewStore = ReviewStore();
   final GlobalKey _shareKey = GlobalKey();
   late final DailyPlayController _controller;
   final InterstitialController _interstitial = InterstitialController();
@@ -41,6 +44,8 @@ class _DailyScreenState extends State<DailyScreen> {
   late DailyGame _game;
   DailySaved? _done;
   bool _loaded = false;
+  bool _reviewEligible = false; // ask for a rating when the result is dismissed
+  bool _showReview = false; // the review prompt is currently up
 
   @override
   void initState() {
@@ -84,10 +89,18 @@ class _DailyScreenState extends State<DailyScreen> {
           .save(progress.copyWith(coins: progress.coins + kDailyCompletionBonus));
     }
 
+    // A win is a good moment to ask for a rating — but only sometimes.
+    var reviewEligible = false;
+    if (success) {
+      await _reviewStore.recordDailyWin();
+      reviewEligible = await _reviewStore.shouldAsk(DateTime.now());
+    }
+
     if (!mounted) return;
     setState(() {
       _done = DailySaved(success: success, score: score);
       _streak = streak;
+      _reviewEligible = reviewEligible;
     });
     _interstitial.setPremium(ThemeScope.controllerOf(context).premiumUnlocked);
     _interstitial.onGameOver();
@@ -158,7 +171,8 @@ class _DailyScreenState extends State<DailyScreen> {
                             ),
                           ),
                           if (_done != null) _shareCard(),
-                          if (_done != null) _resultOverlay(theme),
+                          if (_done != null && !_showReview) _resultOverlay(theme),
+                          if (_showReview) _reviewOverlay(),
                         ],
                       ),
                     ),
@@ -319,8 +333,34 @@ class _DailyScreenState extends State<DailyScreen> {
         onPrimary: _share,
         footerLabel: 'Next daily in',
         footerValue: _countdown,
-        onClose: () => Navigator.of(context).maybePop(),
+        onClose: _closeResult,
       ),
+    );
+  }
+
+  /// Dismissing the result either asks for a rating (when due) or exits.
+  void _closeResult() {
+    if (_reviewEligible) {
+      _reviewStore.markAsked(DateTime.now());
+      setState(() {
+        _reviewEligible = false;
+        _showReview = true;
+      });
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
+  Widget _reviewOverlay() {
+    return ReviewPromptOverlay(
+      coins: kDailyCompletionBonus,
+      streak: _streak,
+      onRate: () async {
+        await requestAppReview();
+        await _reviewStore.markRated();
+        if (mounted) Navigator.of(context).maybePop();
+      },
+      onLater: () => Navigator.of(context).maybePop(),
     );
   }
 }
