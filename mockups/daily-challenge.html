@@ -3,274 +3,325 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Daily Challenge — Design Directions</title>
+<title>Daily Challenge — Screen Redesign (10 options)</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
-  body { background:#15171c; color:#eee; padding:32px 16px 90px; }
+  body { background:#1b1d22; color:#eee; padding:32px 16px 80px; }
   h1 { text-align:center; font-size:26px; margin-bottom:6px; }
-  .sub { text-align:center; color:#9aa0aa; margin:0 auto 18px; font-size:14px; max-width:720px; line-height:1.5; }
+  .sub { text-align:center; color:#9aa0aa; margin:0 auto 40px; font-size:14px; max-width:780px; }
   .sub b { color:#ffd166; }
-  .pickline { text-align:center; color:#7be86b; font-size:13px; font-weight:700; margin-bottom:34px; }
-
   .row { display:flex; flex-wrap:wrap; gap:46px; justify-content:center; align-items:flex-start; }
   .opt { width:320px; }
-  .opt > h2 { text-align:center; font-size:16px; margin-bottom:3px; }
-  .opt > .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:16px; min-height:32px; }
+  .opt h2 { text-align:center; font-size:16px; margin-bottom:4px; }
+  .opt .tag { text-align:center; font-size:12px; color:#9aa0aa; margin-bottom:16px; min-height:48px; }
+
+  :root {
+    --gold:#FFC93C; --coin:#F5C542; --pink:#FF6FA5; --green:#34C759;
+    --t2:#D9DBF7; --t4:#7FE0D2; --t8:#FFB23F; --t16:#FF5B5B; --t32:#FF4D9D;
+    --t64:#FF6A3D; --t128:#FFC93C; --t256:#54CC57; --t512:#3FA3F0;
+  }
 
   .phone {
-    border-radius:32px; padding:18px 15px 20px; position:relative; min-height:560px;
+    border-radius:32px; padding:14px 13px 18px; min-height:600px; position:relative; overflow:hidden;
     background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e);
-    box-shadow:0 18px 50px rgba(0,0,0,.45);
+    box-shadow:0 18px 50px rgba(0,0,0,.45); display:flex; flex-direction:column;
   }
   .phone.neon { background:linear-gradient(165deg,#1c1140,#0c0d18); box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 0 0 1px #2a2350; }
 
-  .iconbtn {
-    width:34px; height:34px; border-radius:50%; flex:none;
-    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
-    display:flex; align-items:center; justify-content:center; color:#fff; font-size:17px;
-  }
-  .streak {
-    display:flex; align-items:center; gap:4px; padding:5px 11px; border-radius:20px;
-    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.30);
-    color:#fff; font-size:13px; font-weight:900;
-  }
-  .boardBox { border-radius:18px; padding:10px; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.18); }
-  .foot { text-align:center; color:rgba(255,255,255,.85); font-size:11.5px; margin-top:12px; font-weight:700; }
+  /* header */
+  .top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .cbtn { width:34px; height:34px; border-radius:50%; flex:none; background:rgba(255,255,255,.18);
+          border:1px solid rgba(255,255,255,.3); display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px; }
+  .daynum { flex:1; color:#fff; font-size:14px; font-weight:900; letter-spacing:1px; }
+  .pill { display:flex; align-items:center; gap:5px; padding:5px 11px; border-radius:18px;
+          background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); color:#fff; font-size:13px; font-weight:800; }
+  .neon .cbtn,.neon .pill { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); }
 
-  /* ===== mini boards (shared) ===== */
-  .m2048 { display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:6px; aspect-ratio:1; }
-  .m2048 span { border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; color:#fff; }
-  .m2048 .e { background:rgba(255,255,255,.10); }
-  .m2048 .c2{background:#d9dbf7;color:#1e2a4a;} .m2048 .c4{background:#7fe0d2;color:#1e2a4a;}
-  .m2048 .c8{background:#ffb23f;} .m2048 .c16{background:#ff8a5c;} .m2048 .c32{background:#ff5b5b;}
-  .m2048 .c64{background:#ff6a3d;} .m2048 .c128{background:#7c5cff;font-size:14px;}
+  /* 2048 board */
+  .board { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; padding:9px; border-radius:16px;
+           background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.2); }
+  .board .t,.board .e { aspect-ratio:1; border-radius:10px; display:flex; align-items:center; justify-content:center;
+           font-weight:900; font-size:19px; color:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2); }
+  .board .e { background:rgba(255,255,255,.08); box-shadow:none; }
+  .t2{background:var(--t2);color:#1e2a4a;} .t4{background:var(--t4);color:#1e2a4a;} .t8{background:var(--t8);}
+  .t16{background:var(--t16);} .t32{background:var(--t32);} .t64{background:var(--t64);}
+  .t128{background:var(--t128);} .t256{background:var(--t256);} .t512{background:var(--t512);}
+  .neon .board { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.12); }
+  .neon .board .t { box-shadow:0 0 12px -3px var(--g), inset 0 0 0 1px rgba(255,255,255,.15); }
 
-  .mtap { display:grid; grid-template-columns:repeat(5,1fr); grid-auto-rows:1fr; gap:5px; aspect-ratio:1; }
-  .mtap span { background:linear-gradient(150deg,#ffd27a,#ff9d3d); color:#5b2a00; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:900; }
-  .mtap .done { background:rgba(255,255,255,.08); color:transparent; }
-  .mtap .nx { background:linear-gradient(135deg,#7be86b,#34c759); color:#fff; box-shadow:0 0 12px rgba(52,199,89,.8), inset 0 0 0 2px #b6ff6b; }
+  /* hero card */
+  .hero { border-radius:20px; padding:15px 16px; color:#fff; position:relative; overflow:hidden;
+          background:linear-gradient(135deg,#ff7eb3,#ff6fa5 55%,#c84bd6); box-shadow:0 8px 20px rgba(200,40,120,.35); }
+  .hero .deco { position:absolute; right:-6px; top:-10px; font-size:74px; opacity:.18; }
+  .hero .badge { font-size:10px; font-weight:900; letter-spacing:.6px; opacity:.95; }
+  .hero h3 { font-size:26px; font-weight:900; line-height:1.1; }
+  .hero p { font-size:12.5px; opacity:.92; margin:2px 0 10px; }
+  .chips { display:flex; gap:8px; }
+  .chip { padding:5px 10px; border-radius:11px; background:rgba(0,0,0,.2); font-size:12px; font-weight:900; color:#fff; }
 
-  .msort { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:end; height:160px; padding:4px 2px; }
-  .msort .col { display:flex; flex-direction:column; justify-content:flex-end; gap:5px; height:100%;
-                background:rgba(255,255,255,.07); border-radius:10px; padding:5px; border:1px solid rgba(255,255,255,.12); }
-  .msort .col.guide { border-color:#b6ff6b; box-shadow:0 0 12px rgba(52,199,89,.6); }
-  .msort b { border-radius:7px; text-align:center; font-size:15px; font-weight:900; color:#fff; padding:7px 0; }
-  .msort .s1{background:#ffb23f;} .msort .s2{background:#ff4d9d;} .msort .s3{background:#3fa3f0;}
+  .goalline { color:#fff; font-size:13px; font-weight:700; }
+  .foot { color:rgba(255,255,255,.78); font-size:12px; font-weight:700; text-align:center; }
+  .grow { flex:1; }
 
-  .msq { display:grid; grid-template-columns:26px repeat(3,1fr); gap:5px; }
-  .msq .corner { font-size:10px; font-weight:900; color:#ffd166; display:flex; align-items:center; justify-content:center; }
-  .msq .csum { font-size:13px; font-weight:900; color:#fff; display:flex; align-items:center; justify-content:center; }
-  .msq .csum.ok { color:#34c759; } .msq .csum.bad { color:#ff8a5c; }
-  .msq .cell { aspect-ratio:1; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900; color:#fff; }
-  .msq .clue { background:#3a2a66; box-shadow:inset 0 0 0 2px rgba(255,255,255,.55); }
-  .msq .filled { background:linear-gradient(150deg,#c07bff,#8a3df5); }
-  .msq .empty { background:rgba(255,255,255,.10); }
-  .msq .guidecell { background:rgba(255,255,255,.10); box-shadow:0 0 12px rgba(52,199,89,.7), inset 0 0 0 2px #b6ff6b; }
-  .diagRow { display:flex; gap:8px; justify-content:center; margin-top:8px; }
-  .diag { font-size:11px; font-weight:800; color:rgba(255,255,255,.85); background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); padding:3px 9px; border-radius:9px; }
+  /* opt2 info bar */
+  .bar { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-radius:16px;
+         background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.26); color:#fff; font-weight:800; font-size:12.5px; margin-bottom:12px; }
+  .bar span { display:flex; align-items:center; gap:4px; }
 
-  /* =========================================================
-     A — HERO BANNER (2048)
-     ========================================================= */
-  .a-top { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-  .a-top .t { flex:1; color:rgba(255,255,255,.85); font-size:13px; font-weight:800; letter-spacing:.4px; }
-  .hero {
-    border-radius:22px; padding:18px; margin-bottom:14px; position:relative; overflow:hidden; color:#fff;
-    background:linear-gradient(135deg,#ffce5c,#ff9d3d); box-shadow:0 12px 26px rgba(255,140,40,.35);
-  }
-  .hero .deco { position:absolute; right:-8px; top:-12px; font-size:96px; opacity:.22; }
-  .hero .kick { font-size:11px; font-weight:900; letter-spacing:.6px; opacity:.95; }
-  .hero h3 { font-size:30px; font-weight:900; margin:2px 0 4px; }
-  .hero p { font-size:13px; opacity:.95; font-weight:600; }
-  .a-metrics { display:flex; gap:10px; margin-top:12px; }
-  .a-metrics .mb { background:rgba(0,0,0,.20); border-radius:12px; padding:7px 12px; font-size:13px; font-weight:900; color:#fff; }
+  /* opt3 week strip */
+  .week { display:flex; gap:6px; justify-content:space-between; margin-bottom:6px; }
+  .day { flex:1; text-align:center; padding:8px 0; border-radius:11px; background:rgba(255,255,255,.1);
+         border:1px solid rgba(255,255,255,.2); color:#fff; font-size:11px; font-weight:800; }
+  .day .dl { opacity:.7; font-size:9px; }
+  .day.done { background:rgba(52,199,89,.25); border-color:var(--green); }
+  .day.today { background:#fff; color:#7a2da0; }
 
-  /* =========================================================
-     B — DAILY TICKET (Number Tap)
-     ========================================================= */
-  .ticket { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.26); border-radius:20px; padding:0; overflow:hidden; backdrop-filter:blur(8px); }
-  .ticket .stub { padding:13px 15px; display:flex; align-items:center; justify-content:space-between; }
-  .ticket .stub .lab { color:#fff; font-size:11px; font-weight:900; letter-spacing:1px; }
-  .ticket .stub .date { color:#fff; font-size:13px; font-weight:900; }
-  .perf { border-top:2px dashed rgba(255,255,255,.45); position:relative; }
-  .perf::before,.perf::after { content:""; position:absolute; top:-9px; width:16px; height:16px; border-radius:50%; background:#7a2fd0; }
-  .perf::before { left:-8px; } .perf::after { right:-8px; }
-  .ticket .body { padding:14px 15px 16px; }
-  .ticket .gline { display:flex; align-items:center; gap:9px; margin-bottom:4px; }
-  .ticket .gline .em { font-size:24px; }
-  .ticket .gline .nm { color:#fff; font-size:22px; font-weight:900; }
-  .ticket .goal { color:rgba(255,255,255,.8); font-size:12.5px; font-weight:700; margin-bottom:12px; }
-  .dots { display:flex; gap:6px; justify-content:center; margin:0 0 12px; }
-  .dots i { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.35); }
-  .dots i.on { width:20px; border-radius:4px; background:#fff; }
+  /* opt4 countdown */
+  .cd { text-align:center; padding:16px; border-radius:18px; background:rgba(0,0,0,.18);
+        border:1px solid rgba(255,255,255,.2); margin-bottom:12px; }
+  .cd .lbl { color:rgba(255,255,255,.8); font-size:11px; font-weight:800; letter-spacing:.5px; }
+  .cd .time { color:#fff; font-size:30px; font-weight:900; letter-spacing:1px; }
 
-  /* =========================================================
-     C — DASHBOARD / SEGMENTED TRACKER (Number Sort)
-     ========================================================= */
-  .c-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-  .c-top .ttl { flex:1; color:#fff; font-size:18px; font-weight:900; }
-  .segbar { display:flex; gap:4px; margin-bottom:14px; }
-  .seg { flex:1; text-align:center; padding:8px 2px; border-radius:11px; font-size:11px; font-weight:900;
-         background:rgba(255,255,255,.10); color:rgba(255,255,255,.6); border:1px solid rgba(255,255,255,.12); }
-  .seg.active { background:#fff; color:#8a3df5; box-shadow:0 4px 12px rgba(0,0,0,.2); }
-  .seg.passed { color:rgba(255,255,255,.85); background:rgba(255,255,255,.20); }
-  .chips { display:flex; gap:10px; margin-bottom:14px; }
-  .chip2 { flex:1; background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.18); border-radius:14px; padding:9px 12px; }
-  .chip2 .k { font-size:10px; color:rgba(255,255,255,.7); font-weight:700; }
-  .chip2 .v { font-size:15px; color:#fff; font-weight:900; }
+  /* opt5 ring */
+  .ring { width:90px; height:90px; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center;
+          background:conic-gradient(var(--green) 0 60%, rgba(255,255,255,.18) 60% 100%); }
+  .ring .inner { width:70px; height:70px; border-radius:50%; background:#7a2da0; display:flex; flex-direction:column;
+          align-items:center; justify-content:center; color:#fff; }
+  .ring .inner b { font-size:20px; } .ring .inner span { font-size:9px; opacity:.8; }
 
-  /* =========================================================
-     D — NEON FOCUS (Magic Square)
-     ========================================================= */
-  .d-top { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-  .d-top .ttl { flex:1; text-align:center; color:#fff; font-size:13px; font-weight:900; letter-spacing:2px; }
-  .neon .iconbtn,.neon .streak { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.16); }
-  .d-game { text-align:center; color:#c9b6ff; font-size:18px; font-weight:900; margin:6px 0 4px; }
-  .d-goal { text-align:center; color:rgba(255,255,255,.55); font-size:12px; font-weight:700; margin-bottom:16px; }
-  .neon .boardBox { background:rgba(255,255,255,.03); border-color:rgba(176,76,255,.4); box-shadow:0 0 30px -6px rgba(176,76,255,.5); }
-  .neon .foot { color:rgba(255,255,255,.5); }
+  /* opt7 trophy */
+  .trophy { text-align:center; color:#fff; margin-bottom:10px; }
+  .trophy .big { font-size:40px; } .trophy h3 { font-size:20px; font-weight:900; }
+  .rankpill { display:inline-block; margin-top:4px; padding:4px 12px; border-radius:14px; background:var(--gold); color:#5a3a00; font-size:11px; font-weight:900; }
 
-  .note { max-width:760px; margin:46px auto 0; color:#9aa0aa; font-size:13px; line-height:1.6; background:#23262d; border:1px solid #2e323b; border-radius:14px; padding:18px 20px; }
-  .note h4 { color:#fff; font-size:14px; margin-bottom:8px; }
-  .note b { color:#ffd166; }
+  /* opt8 card of the day */
+  .cardday { border-radius:22px; padding:14px; background:#fff; box-shadow:0 12px 26px rgba(0,0,0,.3); }
+  .cardday .ch { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .cardday .ch .num { color:#241139; font-weight:900; font-size:14px; }
+  .cardday .ch .date { color:#8a7ca8; font-size:11px; font-weight:700; }
+  .cardday .gl { text-align:center; color:#6a2dbf; font-weight:900; font-size:14px; margin-bottom:10px; }
+  .cardday .board { background:#efeafb; border-color:#e3d9f7; }
+  .cardday .board .e { background:#e3d9f7; }
+
+  /* opt10 reward banner */
+  .rwbanner { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:16px; margin-bottom:12px;
+              background:linear-gradient(135deg,#ffd23f,#ff9d3d); color:#5a3a00; box-shadow:0 8px 18px rgba(255,160,40,.35); }
+  .rwbanner .ic { font-size:26px; } .rwbanner b { font-size:15px; font-weight:900; } .rwbanner small { font-size:11px; font-weight:700; opacity:.85; }
 </style>
 </head>
 <body>
-  <h1>Daily Challenge — 4 Design Directions</h1>
-  <p class="sub">All use the agreed <b>unified daily chrome</b> over a game that <b>rotates each day</b>
-    (2048 → Number Tap → Number Sort → Magic Square → repeat). Each option below shows a different game so you can
-    see the style on all four. Aurora free theme (recolors with every theme).</p>
-  <p class="pickline">Tell me a letter (A / B / C / D) — or mix-and-match elements — and I'll lock the design.</p>
+  <h1>Daily Challenge — 10 Redesign Directions</h1>
+  <p class="sub">Same flow (today's seeded puzzle — currently 2048, reach <b>512</b> in fewest moves, one try a day, <b>+100 coins</b> on a win, keep your 🔥 streak). All in Aurora; real tile colors. Tell me a number (or mix) and I'll build it.</p>
 
   <div class="row">
 
-    <!-- ============ A — HERO BANNER ============ -->
+    <!-- 1 — Refined Hero -->
     <div class="opt">
-      <h2>A · Hero Banner</h2>
-      <div class="tag">Today's game is a big featured card; board sits below</div>
+      <h2>1 · Refined Hero</h2>
+      <div class="tag">A cleaner take on today's screen: pink hero card, board, live countdown</div>
       <div class="phone">
-        <div class="a-top">
-          <div class="iconbtn">‹</div>
-          <div class="t">DAILY #171</div>
-          <div class="streak">🔥 5</div>
-        </div>
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY #128</div><div class="pill">🔥 5</div></div>
         <div class="hero">
-          <div class="deco">🔢</div>
-          <div class="kick">⭐ TODAY'S CHALLENGE</div>
+          <div class="deco">📅</div>
+          <div class="badge">⭐ TODAY'S CHALLENGE</div>
           <h3>2048</h3>
           <p>Reach 512 in the fewest moves</p>
-          <div class="a-metrics"><div class="mb">🎯 512</div><div class="mb">Moves 8</div></div>
+          <div class="chips"><span class="chip">🎯 512</span><span class="chip">Moves 8</span></div>
         </div>
-        <div class="boardBox">
-          <div class="m2048">
-            <span class="c8">8</span><span class="c2">2</span><span class="c4">4</span><span class="e"></span>
-            <span class="c2">2</span><span class="c16">16</span><span class="c128">128</span><span class="c4">4</span>
-            <span class="c64">64</span><span class="c4">4</span><span class="c32">32</span><span class="e"></span>
-            <span class="c8">8</span><span class="c2">2</span><span class="c4">4</span><span class="c2">2</span>
-          </div>
+        <div style="height:12px"></div>
+        <div class="board">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
         </div>
-        <div class="foot">Swipe to merge · next puzzle in 7h 12m</div>
+        <div style="height:12px"></div>
+        <div class="foot">⏳ Next puzzle in 5h 23m</div>
       </div>
     </div>
 
-    <!-- ============ B — DAILY TICKET ============ -->
+    <!-- 2 — Top Info Bar -->
     <div class="opt">
-      <h2>B · Daily Ticket</h2>
-      <div class="tag">A dated "ticket" with rotation dots — feels collectible</div>
+      <h2>2 · Compact Info Bar</h2>
+      <div class="tag">Drops the big hero for a slim bar — maximum room for the board</div>
       <div class="phone">
-        <div class="a-top">
-          <div class="iconbtn">‹</div>
-          <div class="t"></div>
-          <div class="streak">🔥 6</div>
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">2048 · DAILY #128</div><div class="pill">🔥 5</div></div>
+        <div class="bar"><span>🎯 512</span><span>⇅ 8 moves</span><span>⏳ 5h 23m</span></div>
+        <div class="board" style="gap:9px;padding:11px;">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
         </div>
-        <div class="ticket">
-          <div class="stub"><div class="lab">🎟 DAILY CHALLENGE</div><div class="date">Jun 21 · #172</div></div>
-          <div class="perf"></div>
-          <div class="body">
-            <div class="gline"><span class="em">⏱️</span><span class="nm">Number Tap</span></div>
-            <div class="goal">Tap 1 → 25 as fast as you can · Time 12.4s</div>
-            <div class="dots"><i></i><i class="on"></i><i></i><i></i></div>
-            <div class="boardBox">
-              <div class="mtap">
-                <span class="done">1</span><span>17</span><span>9</span><span>22</span><span>13</span>
-                <span>20</span><span class="nx">5</span><span>11</span><span class="done">2</span><span>25</span>
-                <span>8</span><span class="done">3</span><span>19</span><span>14</span><span>6</span>
-                <span>23</span><span>10</span><span class="done">4</span><span>16</span><span>21</span>
-                <span>12</span><span>18</span><span>7</span><span>24</span><span>15</span>
-              </div>
+        <div class="grow"></div>
+        <div class="foot">Reach 512 in the fewest moves</div>
+      </div>
+    </div>
+
+    <!-- 3 — Streak Calendar -->
+    <div class="opt">
+      <h2>3 · Streak Calendar</h2>
+      <div class="tag">A week strip up top makes "don't break the streak" the story</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY #128</div><div class="pill">🔥 5</div></div>
+        <div class="week">
+          <div class="day done"><div class="dl">M</div>✓</div>
+          <div class="day done"><div class="dl">T</div>✓</div>
+          <div class="day done"><div class="dl">W</div>✓</div>
+          <div class="day done"><div class="dl">T</div>✓</div>
+          <div class="day today"><div class="dl">F</div>•</div>
+          <div class="day"><div class="dl">S</div>·</div>
+          <div class="day"><div class="dl">S</div>·</div>
+        </div>
+        <div class="goalline" style="text-align:center;margin:8px 0 12px;">🔥 5-day streak — keep it alive! · 🎯 512</div>
+        <div class="board">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
+        </div>
+        <div class="grow"></div>
+        <div class="foot">⏳ Next puzzle in 5h 23m</div>
+      </div>
+    </div>
+
+    <!-- 4 — Big Countdown -->
+    <div class="opt">
+      <h2>4 · Big Countdown</h2>
+      <div class="tag">A bold timer makes the daily feel time-limited &amp; urgent</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY #128</div><div class="pill">🔥 5</div></div>
+        <div class="cd"><div class="lbl">⏳ TODAY'S PUZZLE ENDS IN</div><div class="time">05:23:11</div></div>
+        <div class="goalline" style="text-align:center;margin-bottom:10px;">2048 · Reach 🎯 512 · Moves 8</div>
+        <div class="board">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 — Progress Ring -->
+    <div class="opt">
+      <h2>5 · Progress Ring</h2>
+      <div class="tag">A circular gauge shows progress toward the 512 goal</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY #128 · 2048</div><div class="pill">🔥 5</div></div>
+        <div class="ring"><div class="inner"><b>64</b><span>highest tile</span></div></div>
+        <div class="goalline" style="text-align:center;margin-bottom:10px;">🎯 512 · 8 moves so far</div>
+        <div class="board">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
+        </div>
+        <div class="grow"></div>
+        <div class="foot">⏳ Next in 5h 23m</div>
+      </div>
+    </div>
+
+    <!-- 6 — Minimal Zen -->
+    <div class="opt">
+      <h2>6 · Minimal Zen</h2>
+      <div class="tag">Stripped-back &amp; calm — just the goal, the board, a tiny timer</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="daynum"></div><div class="pill" style="background:none;border:none;">⏳ 5h 23m</div></div>
+        <div style="text-align:center;color:#fff;margin:18px 0 16px;">
+          <div style="font-size:12px;opacity:.75;font-weight:800;letter-spacing:1px;">DAILY #128</div>
+          <div style="font-size:22px;font-weight:900;margin-top:4px;">Reach <span style="color:var(--gold)">512</span></div>
+          <div style="font-size:12px;opacity:.8;">8 moves</div>
+        </div>
+        <div class="board" style="gap:9px;padding:11px;">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 — Trophy / Competitive -->
+    <div class="opt">
+      <h2>7 · Trophy Focus</h2>
+      <div class="tag">Frames the daily as a prize to win — badge, bonus, bragging rights</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY #128</div><div class="pill">🔥 5</div></div>
+        <div class="trophy"><div class="big">🏆</div><h3>Today's Challenge</h3><div class="rankpill">🎯 512 · WIN +100 🪙</div></div>
+        <div class="board">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
+        </div>
+        <div class="grow"></div>
+        <div class="foot">Solve it to bank the bonus · ⏳ 5h 23m</div>
+      </div>
+    </div>
+
+    <!-- 8 — Card of the Day -->
+    <div class="opt">
+      <h2>8 · Card of the Day</h2>
+      <div class="tag">The puzzle is a collectible "daily card" — dated, framed, premium</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY CHALLENGE</div><div class="pill">🔥 5</div></div>
+        <div class="grow" style="display:flex;align-items:center;">
+          <div class="cardday" style="width:100%;">
+            <div class="ch"><div class="num">2048 · #128</div><div class="date">June 22</div></div>
+            <div class="gl">🎯 Reach 512 · fewest moves</div>
+            <div class="board">
+              <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+              <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+              <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+              <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
             </div>
           </div>
         </div>
-        <div class="foot">Tap the green tile next · next puzzle in 7h 12m</div>
+        <div class="foot" style="margin-top:12px;">⏳ New card in 5h 23m</div>
       </div>
     </div>
 
-    <!-- ============ C — DASHBOARD / SEGMENTED ============ -->
+    <!-- 9 — Neon Dark -->
     <div class="opt">
-      <h2>C · Segmented Tracker</h2>
-      <div class="tag">A 4-step rotation bar shows where today sits in the loop</div>
-      <div class="phone">
-        <div class="c-top">
-          <div class="iconbtn">‹</div>
-          <div class="ttl">Daily #173</div>
-          <div class="streak">🔥 7</div>
-        </div>
-        <div class="segbar">
-          <div class="seg passed">2048</div>
-          <div class="seg passed">Tap</div>
-          <div class="seg active">Sort</div>
-          <div class="seg">Square</div>
-        </div>
-        <div class="chips">
-          <div class="chip2"><div class="k">🎯 Goal</div><div class="v">Sort all</div></div>
-          <div class="chip2"><div class="k">Moves</div><div class="v">6</div></div>
-        </div>
-        <div class="boardBox">
-          <div class="msort">
-            <div class="col"><b class="s1">1</b><b class="s3">3</b><b class="s2">2</b></div>
-            <div class="col"><b class="s2">2</b><b class="s1">1</b><b class="s3">3</b></div>
-            <div class="col guide"><b class="s3">3</b><b class="s2">2</b></div>
-            <div class="col"><b class="s1">1</b></div>
-          </div>
-        </div>
-        <div class="foot">Drag onto a match · next puzzle in 7h 12m</div>
-      </div>
-    </div>
-
-    <!-- ============ D — NEON FOCUS ============ -->
-    <div class="opt">
-      <h2>D · Neon Focus</h2>
-      <div class="tag">Minimal, board-is-hero; glows with the accent color</div>
+      <h2>9 · Neon Dark</h2>
+      <div class="tag">For Midnight Neon — glowing board &amp; chips on a dark frame</div>
       <div class="phone neon">
-        <div class="d-top">
-          <div class="iconbtn">‹</div>
-          <div class="ttl">DAILY #174</div>
-          <div class="streak">🔥 8</div>
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY #128 · 2048</div><div class="pill">🔥 5</div></div>
+        <div class="bar" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14);">
+          <span>🎯 512</span><span>⇅ 8</span><span>⏳ 5h 23m</span>
         </div>
-        <div class="d-game">🔠 Magic Square</div>
-        <div class="d-goal">Make every line sum to 15 · 20.1s</div>
-        <div class="boardBox">
-          <div class="msq">
-            <div class="corner">=15</div><div class="csum">15</div><div class="csum bad">14</div><div class="csum">—</div>
-            <div class="csum ok">15</div><div class="cell filled">2</div><div class="cell clue">7</div><div class="cell filled">6</div>
-            <div class="csum">10</div><div class="cell clue">9</div><div class="cell filled">5</div><div class="guidecell"></div>
-            <div class="csum">—</div><div class="cell filled">4</div><div class="cell empty"></div><div class="cell clue">8</div>
-          </div>
-          <div class="diagRow"><div class="diag">↘ 15</div><div class="diag">↙ 11</div></div>
+        <div class="board">
+          <div class="t t8" style="--g:var(--t8)">8</div><div class="t t4" style="--g:var(--t4)">4</div><div class="t t2" style="--g:var(--t2)">2</div><div class="e"></div>
+          <div class="t t4" style="--g:var(--t4)">4</div><div class="t t16" style="--g:var(--t16)">16</div><div class="e"></div><div class="t t2" style="--g:var(--t2)">2</div>
+          <div class="t t64" style="--g:var(--t64)">64</div><div class="t t4" style="--g:var(--t4)">4</div><div class="t t2" style="--g:var(--t2)">2</div><div class="e"></div>
+          <div class="t t2" style="--g:var(--t2)">2</div><div class="t t32" style="--g:var(--t32)">32</div><div class="e"></div><div class="t t4" style="--g:var(--t4)">4</div>
         </div>
-        <div class="foot">Drag 1–9 into the grid · next puzzle in 7h 12m</div>
+        <div class="grow"></div>
+        <div class="foot">⏳ Next puzzle in 5h 23m</div>
       </div>
     </div>
 
-  </div>
+    <!-- 10 — Reward Forward -->
+    <div class="opt">
+      <h2>10 · Reward Forward</h2>
+      <div class="tag">Leads with the prize — "win 100 coins today" to pull players in</div>
+      <div class="phone">
+        <div class="top"><div class="cbtn">‹</div><div class="daynum">DAILY #128</div><div class="pill">🔥 5</div></div>
+        <div class="rwbanner">
+          <div class="ic">🪙</div>
+          <div><b>Win 100 coins today!</b><br><small>Solve 2048 · reach 512 to claim</small></div>
+        </div>
+        <div class="board">
+          <div class="t t8">8</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t4">4</div><div class="t t16">16</div><div class="e"></div><div class="t t2">2</div>
+          <div class="t t64">64</div><div class="t t4">4</div><div class="t t2">2</div><div class="e"></div>
+          <div class="t t2">2</div><div class="t t32">32</div><div class="e"></div><div class="t t4">4</div>
+        </div>
+        <div class="grow"></div>
+        <div class="foot">🎯 512 · 8 moves · ⏳ 5h 23m</div>
+      </div>
+    </div>
 
-  <div class="note">
-    <h4>Shared across every direction</h4>
-    <p>• <b>Rotation:</b> <code>game = (puzzleNumber − 1) mod 4</code> over <code>kGames</code> order — same date, same game for everyone, no backend.<br>
-    • <b>Per-day seed:</b> each game builds a date-seeded board from the existing <code>dailySeed(today)</code>.<br>
-    • <b>Goal &amp; metric:</b> 2048 → reach 512 / moves · Number Tap → tap 1–25 / time · Number Sort → sort all / moves · Magic Square → lines = 15 / time.<br>
-    • <b>Streak, resume, share:</b> reuse the existing <code>DailyStore</code> keyed by puzzle number, plus the shared win/result card with a "next daily (game) in …" countdown.<br>
-    • Directions differ only in <b>chrome</b> (how the header / today's-game / goal are presented) — the board and result card are the same building blocks.</p>
   </div>
 </body>
 </html>

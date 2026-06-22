@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../game/board.dart';
 import '../../../game/game_state.dart' show kBoardSize;
 import '../../../game/daily/daily_challenge.dart';
+import '../../../game/score_store.dart';
+import '../../../game/sound_service.dart';
 import '../../animated_board.dart';
 import '../../swipe.dart';
 import '../daily_game.dart';
@@ -69,11 +71,26 @@ class _Game2048PlayState extends State<_Game2048Play> {
   Offset _swipeAccum = Offset.zero;
   bool _swipeFired = false;
 
+  final SoundService _sound = SoundService();
+  final ScoreStore _store = ScoreStore();
+
   @override
   void initState() {
     super.initState();
     _ch = DailyChallenge(seed: widget.seed, puzzleNumber: 0, target: _target);
     _popCells = _allCells(_ch.state.board);
+    _loadSound();
+  }
+
+  Future<void> _loadSound() async {
+    final on = await _store.loadSoundEnabled();
+    _sound.enabled = on;
+  }
+
+  @override
+  void dispose() {
+    _sound.dispose();
+    super.dispose();
   }
 
   Set<int> _allCells(List<List<int>> board) {
@@ -109,6 +126,7 @@ class _Game2048PlayState extends State<_Game2048Play> {
     if (_ch.moves == before) return; // no-op
 
     final moves = planMove(previous, dir);
+    final hasMerge = moves.any((m) => m.merged);
     final preSpawn = applyMove(previous, dir).board;
     final pop = <int>{};
     for (final m in moves) {
@@ -131,6 +149,11 @@ class _Game2048PlayState extends State<_Game2048Play> {
     widget.controller.update(metric: _ch.moves, started: true);
     if (_ch.status != DailyStatus.playing) {
       widget.controller.complete(_ch.status == DailyStatus.won, _ch.moves);
+      _ch.status == DailyStatus.won ? _sound.win() : _sound.gameOver();
+    } else if (hasMerge) {
+      _sound.merge();
+    } else {
+      _sound.move();
     }
     Future.delayed(const Duration(milliseconds: 110), () {
       if (mounted) setState(() => _busy = false);

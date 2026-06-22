@@ -6,6 +6,7 @@ import '../../ads/banner_ad_box.dart';
 import '../../game/daily_engagement.dart';
 import '../../game/progress_store.dart';
 import '../../game/score_store.dart';
+import '../../game/sound_service.dart';
 import '../engagement/daily_reward_screen.dart';
 import '../engagement/engagement_style.dart';
 import '../engagement/reward_toast.dart';
@@ -39,6 +40,7 @@ class HubScreen extends StatefulWidget {
 class _HubScreenState extends State<HubScreen> {
   final ProgressStore _progressStore = ProgressStore();
   final ScoreStore _scoreStore = ScoreStore();
+  final SoundService _sound = SoundService();
 
   PlayerProgress _progress = const PlayerProgress();
   final Map<String, int> _bests = {};
@@ -57,6 +59,18 @@ class _HubScreenState extends State<HubScreen> {
     _featured = _pickFeatured();
     _loadEngagement();
     _loadBests();
+    _loadSound();
+  }
+
+  Future<void> _loadSound() async {
+    final on = await _scoreStore.loadSoundEnabled();
+    _sound.enabled = on;
+  }
+
+  @override
+  void dispose() {
+    _sound.dispose();
+    super.dispose();
   }
 
   GameInfo _pickFeatured() {
@@ -120,6 +134,7 @@ class _HubScreenState extends State<HubScreen> {
     if (!mounted) return;
     Navigator.of(context).pop();
     setState(() => _progress = updated);
+    _sound.coin();
     showCoinToast(context, earned);
   }
 

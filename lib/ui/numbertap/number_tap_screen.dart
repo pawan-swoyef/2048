@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../ads/banner_ad_box.dart';
 import '../../ads/interstitial_ad.dart';
+import '../../game/guide_store.dart';
 import '../../game/numbertap/number_tap_game.dart';
 import '../../game/score_store.dart';
 import '../../game/sound_service.dart';
@@ -33,11 +34,13 @@ class NumberTapScreen extends StatefulWidget {
 class _NumberTapScreenState extends State<NumberTapScreen> {
   static const _gameId = 'numbertap';
 
-  /// Highlight the next tile green only for the first numbers, then stop
-  /// guiding so the rest is a real challenge.
+  /// During the player's first-ever game, highlight the next tile green only for
+  /// the first numbers, then stop guiding so the rest is a real challenge. After
+  /// that first playthrough the guide never shows again.
   static const _guideUpTo = 10;
 
   final ScoreStore _store = ScoreStore();
+  final GuideStore _guideStore = GuideStore();
   final Stopwatch _watch = Stopwatch();
   final GlobalKey _shareKey = GlobalKey();
   final InterstitialController _interstitial = InterstitialController();
@@ -49,6 +52,7 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   int _flashCell = -1;
   int? _bestDeci;
   bool _soundOn = true;
+  bool _guideActive = false;
 
   @override
   void initState() {
@@ -56,6 +60,12 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     _game = NumberTapGame(Random());
     _loadBest();
     _loadSound();
+    _loadGuide();
+  }
+
+  Future<void> _loadGuide() async {
+    final seen = await _guideStore.guideSeen(_gameId);
+    if (mounted) setState(() => _guideActive = !seen);
   }
 
   Future<void> _loadBest() async {
@@ -118,6 +128,10 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     _watch.stop();
     _ticker?.cancel();
     _sound.win();
+    if (_guideActive) {
+      await _guideStore.markGuideSeen(_gameId);
+      if (mounted) setState(() => _guideActive = false);
+    }
     final time = _elapsedDeci;
     if (_bestDeci == null || time < _bestDeci!) {
       await _store.saveBestFor(_gameId, time);
@@ -369,8 +383,10 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     final number = _game.board[index];
     final cleared = _game.isCleared(number);
     final flashing = index == _flashCell;
-    final isNext =
-        !_game.isComplete && number == _game.next && _game.next <= _guideUpTo;
+    final isNext = _guideActive &&
+        !_game.isComplete &&
+        number == _game.next &&
+        _game.next <= _guideUpTo;
 
     if (cleared) {
       return Padding(
