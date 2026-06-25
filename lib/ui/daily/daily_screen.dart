@@ -162,7 +162,7 @@ class _DailyScreenState extends State<DailyScreen> {
                                     const SizedBox(height: 14),
                                     _hero(theme),
                                     const SizedBox(height: 14),
-                                    _game.buildPlay(dailySeed(DateTime.now()), _controller),
+                                    _game.buildPlay(dailySeed(DateTime.now()), _puzzle, _controller),
                                     const SizedBox(height: 12),
                                     _foot(theme),
                                   ],

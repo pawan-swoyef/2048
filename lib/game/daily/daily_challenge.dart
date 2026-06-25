@@ -30,6 +30,28 @@ class DailyChallenge {
     _checkEnd();
   }
 
+  /// Serializes the move history for resume-on-return. The board is rebuilt by
+  /// replaying these moves against the same seed (see [fromJson]).
+  Map<String, dynamic> toJson() => {
+        'history': [for (final dir in history) dir.index],
+      };
+
+  /// Rebuilds a challenge by replaying the saved [toJson] history against a
+  /// fresh seeded board. [seed]/[puzzleNumber]/[target] must match the original.
+  factory DailyChallenge.fromJson(
+    Map<String, dynamic> json, {
+    required int seed,
+    required int puzzleNumber,
+    int target = 512,
+  }) {
+    final challenge = DailyChallenge(
+        seed: seed, puzzleNumber: puzzleNumber, target: target);
+    for (final index in json['history'] as List) {
+      challenge.move(Direction.values[index as int]);
+    }
+    return challenge;
+  }
+
   /// Number of board-changing moves made so far.
   int get moves => history.length;
 

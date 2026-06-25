@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resume / New Game — Dialog Mockups (Aurora)</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body {
+    background:linear-gradient(135deg,#5b3df5,#a23df5 55%,#f53d9e);
+    min-height:100vh; padding:32px 16px 80px; color:#fff;
+  }
+  h1 { text-align:center; font-size:24px; margin-bottom:6px; }
+  .sub { text-align:center; color:#ffffffcc; margin-bottom:36px; font-size:14px; max-width:760px; margin-left:auto; margin-right:auto; }
+  .row { display:flex; flex-wrap:wrap; gap:40px; justify-content:center; align-items:flex-start; }
+  .panel { width:330px; }
+  .panel .label { text-align:center; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#ffffffb0; margin-bottom:14px; }
+
+  /* ---- shared buttons ---- */
+  .btn { border:none; border-radius:8px; padding:12px 18px; font-weight:700; font-size:14px; cursor:pointer; }
+  .btn-primary { background:#fff; color:#6a2dbf; box-shadow:0 4px 10px rgba(0,0,0,.3); }
+  .btn-ghost { background:rgba(255,255,255,.22); color:#fff; }
+  .full { width:100%; }
+
+  /* ============ centered modal dialogs ============ */
+  .stage {
+    position:relative; border-radius:16px; height:330px; overflow:hidden;
+    background:rgba(255,255,255,.14); border:1.4px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .scrim { position:absolute; inset:0; background:rgba(46,26,102,.55); }
+  .card {
+    position:relative; width:86%; background:#4a2fb0; border-radius:14px;
+    padding:24px 22px; text-align:center; box-shadow:0 14px 30px rgba(0,0,0,.4);
+  }
+  .card h3 { font-size:21px; font-weight:800; margin-bottom:12px; }
+  .card p { font-size:13px; color:#ffffffcc; line-height:1.5; margin-bottom:18px; }
+  .buttons { display:flex; gap:10px; justify-content:center; }
+  .buttons.stack { flex-direction:column; }
+
+  /* ---- tiles (shared palette) ---- */
+  .t2{background:#d9dbf7;color:#1e2a4a;} .t4{background:#7fe0d2;color:#1e2a4a;}
+  .t8{background:#ffb23f;color:#fff;} .t16{background:#ff5b5b;color:#fff;}
+  .t32{background:#ff4d9d;color:#fff;} .t64{background:#ff6a3d;color:#fff;}
+  .t128{background:#ffc93c;color:#fff;} .t256{background:#54cc57;color:#fff;}
+
+  /* 2 · mini board preview */
+  .mini { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; width:140px; margin:0 auto 14px;
+          background:rgba(0,0,0,.22); padding:7px; border-radius:12px; }
+  .mini div { aspect-ratio:1; border-radius:7px; background:rgba(255,255,255,.08);
+              display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; }
+
+  /* 3 · hero band */
+  .hero { margin:-24px -22px 14px; padding:18px 18px 14px; border-radius:14px 14px 0 0;
+          background:linear-gradient(135deg,#ffc12e,#ff6a3d); position:relative; overflow:hidden; text-align:left; }
+  .hero .big { position:absolute; right:-6px; top:-14px; font-size:78px; opacity:.22; }
+  .hero small { font-size:10px; font-weight:900; letter-spacing:.6px; }
+  .hero h3 { margin:2px 0 0; font-size:22px; font-weight:900; }
+
+  /* 4 · stat chips */
+  .chips { display:flex; gap:10px; justify-content:center; margin-bottom:16px; }
+  .chip { background:rgba(0,0,0,.22); border-radius:11px; padding:9px 12px; text-align:left; flex:1; }
+  .chip span { display:block; font-size:10px; color:rgba(255,255,255,.5); font-weight:700; letter-spacing:.4px; }
+  .chip b { font-size:18px; font-weight:900; }
+
+  /* 5 · playful */
+  .wave { font-size:46px; line-height:1; margin-bottom:4px; }
+  .pill { border-radius:30px !important; }
+
+  /* 6 · split panels */
+  .opt { display:flex; align-items:center; gap:12px; padding:13px; border-radius:14px; text-align:left; cursor:pointer; margin-bottom:10px; }
+  .opt .ic { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0; }
+  .opt h4 { font-size:15px; font-weight:800; }
+  .opt p { font-size:11.5px; color:rgba(255,255,255,.72); margin:2px 0 0; }
+  .optA { background:#fff; color:#2a1860; } .optA p { color:#6a5fa0; } .optA .ic { background:#54cc57; color:#fff; }
+  .optB { background:rgba(255,255,255,.20); } .optB .ic { background:rgba(255,255,255,.18); }
+
+  /* 7 · ribbon */
+  .ribbon { display:inline-block; background:#ffc93c; color:#5a4500; font-weight:900; font-size:11px;
+            padding:5px 14px; border-radius:20px; margin-bottom:10px; letter-spacing:.4px; }
+
+  /* 8 · bottom sheet */
+  .stage.sheetstage { align-items:flex-end; }
+  .sheet { position:relative; width:100%; background:#4a2fb0; border-radius:22px 22px 0 0; padding:14px 22px 22px; text-align:center; }
+  .handle { width:44px; height:5px; border-radius:3px; background:rgba(255,255,255,.4); margin:0 auto 14px; }
+
+  /* 9 · mascot */
+  .mascot { width:64px; height:64px; border-radius:16px; background:linear-gradient(135deg,#ffc93c,#ff6a3d);
+            display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:900; color:#fff;
+            margin:0 auto 8px; box-shadow:0 6px 14px rgba(0,0,0,.3); }
+  .bubble { background:rgba(255,255,255,.12); border-radius:14px; padding:11px 13px; font-size:12.5px; line-height:1.4; margin-bottom:16px; }
+
+  /* 10 · toast */
+  .toast { position:absolute; top:18px; left:16px; right:16px; background:#4a2fb0; border-radius:16px;
+           padding:12px 14px; display:flex; align-items:center; gap:10px; box-shadow:0 10px 26px rgba(0,0,0,.5);
+           border:1px solid rgba(255,255,255,.22); }
+  .toast .ic { font-size:24px; }
+  .toast .tx { flex:1; text-align:left; }
+  .toast .tx b { font-size:13px; font-weight:800; }
+  .toast .tx span { display:block; font-size:11px; color:rgba(255,255,255,.72); }
+  .toast .btn { padding:9px 12px; font-size:12.5px; }
+  .hintline { position:relative; font-size:12px; color:rgba(255,255,255,.55); text-align:center; padding:0 20px; }
+</style>
+</head>
+<body>
+  <h1>Resume / New Game — Dialog Mockups</h1>
+  <p class="sub">10 designs for the "you left a game in progress" prompt, on the Aurora theme. White = Resume (primary), translucent = New Game. Tell me a number (or a mix), and I'll build it as the live Flutter dialog.</p>
+
+  <div class="row">
+
+    <!-- 1 -->
+    <div class="panel">
+      <div class="label">1 · Current (baseline)</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <h3>Welcome back! 👋</h3>
+          <p>You left a game in progress. Continue where you left off?</p>
+          <div class="buttons">
+            <button class="btn btn-ghost">New Game</button>
+            <button class="btn btn-primary">Resume</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="panel">
+      <div class="label">2 · Board preview</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <h3>Resume your game?</h3>
+          <div class="mini">
+            <div class="t2">2</div><div></div><div class="t8">8</div><div></div>
+            <div></div><div class="t32">32</div><div></div><div class="t2">2</div>
+            <div class="t128">128</div><div></div><div class="t16">16</div><div></div>
+            <div></div><div class="t64">64</div><div></div><div class="t256">256</div>
+          </div>
+          <p style="margin-bottom:14px">Score <b style="color:#fff">2,480</b> · pick up right where you left off.</p>
+          <div class="buttons">
+            <button class="btn btn-ghost">New</button>
+            <button class="btn btn-primary">Resume</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="panel">
+      <div class="label">3 · Hero band (daily-style)</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <div class="hero"><span class="big">🎮</span><small>⭐ GAME IN PROGRESS</small><h3>Welcome back!</h3></div>
+          <p>Your last game is saved. Want to keep playing?</p>
+          <div class="buttons">
+            <button class="btn btn-ghost">New Game</button>
+            <button class="btn btn-primary">Resume</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="panel">
+      <div class="label">4 · Stat chips</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <h3>Continue playing?</h3>
+          <div class="chips">
+            <div class="chip"><span>SCORE</span><b>2,480</b></div>
+            <div class="chip"><span>BEST TILE</span><b>256</b></div>
+          </div>
+          <div class="buttons">
+            <button class="btn btn-ghost">New Game</button>
+            <button class="btn btn-primary">Resume</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="panel">
+      <div class="label">5 · Playful / kid-friendly</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <div class="wave">👋✨</div>
+          <h3 style="font-size:23px">Wanna keep going?</h3>
+          <p>We saved your game just for you!</p>
+          <div class="buttons stack">
+            <button class="btn btn-primary pill full">▶  Resume my game</button>
+            <button class="btn btn-ghost pill full">Start fresh</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="panel">
+      <div class="label">6 · Split choice panels</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <h3 style="margin-bottom:14px">Welcome back!</h3>
+          <div class="opt optA"><div class="ic">▶</div><div><h4>Resume</h4><p>Continue · Score 2,480</p></div></div>
+          <div class="opt optB"><div class="ic">🔄</div><div><h4>New Game</h4><p>Start from scratch</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="panel">
+      <div class="label">7 · Saved-game ribbon</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <div class="ribbon">💾 SAVED GAME</div>
+          <h3 style="font-size:19px">Pick up where you stopped?</h3>
+          <p>Score 2,480 — your progress is safe.</p>
+          <div class="buttons">
+            <button class="btn btn-ghost">New Game</button>
+            <button class="btn btn-primary">Resume</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8 -->
+    <div class="panel">
+      <div class="label">8 · Bottom sheet</div>
+      <div class="stage sheetstage"><div class="scrim"></div>
+        <div class="sheet">
+          <div class="handle"></div>
+          <h3 style="font-size:19px">Resume your game?</h3>
+          <p>You have an unfinished game in progress.</p>
+          <div class="buttons">
+            <button class="btn btn-ghost">New Game</button>
+            <button class="btn btn-primary">Resume</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="panel">
+      <div class="label">9 · Number mascot</div>
+      <div class="stage"><div class="scrim"></div>
+        <div class="card">
+          <div class="mascot">2⁴⁸</div>
+          <div class="bubble">"Hey! We were in the middle of a game — shall we finish it?"</div>
+          <div class="buttons">
+            <button class="btn btn-ghost">New Game</button>
+            <button class="btn btn-primary">Let's go!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="panel">
+      <div class="label">10 · Lightweight toast (no dim)</div>
+      <div class="stage">
+        <div class="toast">
+          <div class="ic">⏯️</div>
+          <div class="tx"><b>Resume your game?</b><span>Score 2,480 saved</span></div>
+          <button class="btn btn-ghost">New</button>
+          <button class="btn btn-primary">Resume</button>
+        </div>
+        <div class="hintline">Game stays visible underneath —<br>nothing is dimmed; tap the bar to choose.</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

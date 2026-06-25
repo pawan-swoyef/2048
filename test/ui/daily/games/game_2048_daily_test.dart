@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:game2048/ui/animated_board.dart';
 import 'package:game2048/ui/daily/daily_game.dart';
@@ -27,11 +28,12 @@ void main() {
   });
 
   testWidgets('2048 play renders an AnimatedBoard from the seed', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     final c = DailyPlayController();
     await tester.pumpWidget(MaterialApp(
       home: ThemeScope(
         controller: ThemeController(),
-        child: Scaffold(body: kDailyGames['2048']!.buildPlay(20260101, c)),
+        child: Scaffold(body: kDailyGames['2048']!.buildPlay(20260101, 100, c)),
       ),
     ));
     await tester.pump();

@@ -10,6 +10,7 @@ import '../game/board.dart';
 import '../game/game_state.dart';
 import '../game/numbersort/undo_allowance.dart';
 import '../game/numbersort/undo_store.dart';
+import '../game/save_store.dart';
 import '../game/score_store.dart';
 import '../game/sound_service.dart';
 import 'animated_board.dart';
@@ -32,8 +33,11 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
+  static const _gameId = '2048';
+
   final Random _rng = Random();
   final ScoreStore _store = ScoreStore();
+  final GameSaveStore _saveStore = GameSaveStore();
   final SoundService _sound = SoundService();
   final InterstitialController _interstitial = InterstitialController();
   final RewardedController _rewarded = RewardedController();
@@ -64,6 +68,50 @@ class _GameScreenState extends State<GameScreen> {
     _state = GameState.newGame(_rng);
     _popCells = _allTileCells(_state.board);
     _loadPrefs();
+    _maybeResume();
+  }
+
+  /// Offers to continue a game left in progress (Home button / app closed). A
+  /// fresh, untouched board (score 0) is never saved, so it never prompts.
+  Future<void> _maybeResume() async {
+    final saved = await _saveStore.load(_gameId);
+    if (saved == null || !mounted) return;
+    final GameState restored;
+    try {
+      restored = GameState.fromJson(saved);
+    } catch (_) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (restored.over || restored.score == 0) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (!mounted) return;
+    final resume = await confirmResume(context);
+    if (!mounted) return;
+    if (resume) {
+      setState(() {
+        _state = restored.withBest(_state.best);
+        _history.clear();
+        _moves = const [];
+        _popCells = _allTileCells(_state.board);
+        _tick++;
+        _busy = false;
+      });
+    } else {
+      await _saveStore.clear(_gameId);
+    }
+  }
+
+  /// Saves the in-progress board, or clears the save once the game is over or
+  /// back to an untouched start, so resume only offers a real game.
+  void _persist() {
+    if (_state.over || _state.score == 0) {
+      _saveStore.clear(_gameId);
+    } else {
+      _saveStore.save(_gameId, _state.toJson());
+    }
   }
 
   @override
@@ -176,9 +224,10 @@ class _GameScreenState extends State<GameScreen> {
     });
 
     if (next.best > 0) _store.saveBestFor('2048', next.best);
+    _persist();
 
     if (next.over) {
-      _sound.gameOver();
+      _sound.lose();
       _interstitial.setPremium(ThemeScope.controllerOf(context).premiumUnlocked);
       _interstitial.onGameOver();
     } else if (next.won && !wasWon) {
@@ -211,6 +260,7 @@ class _GameScreenState extends State<GameScreen> {
       _tick++;
       _busy = false;
     });
+    _persist(); // fresh board (score 0) clears any stale save
   }
 
   void _undo() {
@@ -224,6 +274,7 @@ class _GameScreenState extends State<GameScreen> {
         _popCells = const {};
         _tick++;
       });
+      _persist(); // undo can revive a game-over board; keep the save in sync
       return;
     }
 
@@ -244,6 +295,7 @@ class _GameScreenState extends State<GameScreen> {
         _popCells = const {};
         _tick++;
       });
+      _persist(); // undo can revive a game-over board; keep the save in sync
       await _undoStore.recordUndo(today: _todayStr());
       await _refreshAllowance();
     });
@@ -255,7 +307,10 @@ class _GameScreenState extends State<GameScreen> {
     if (mounted) await _refreshAllowance();
   }
 
-  void _keepGoing() => setState(() => _state = _state.keepPlaying());
+  void _keepGoing() {
+    setState(() => _state = _state.keepPlaying());
+    _persist();
+  }
 
   Set<int> _allTileCells(List<List<int>> board) {
     final cells = <int>{};

@@ -89,4 +89,27 @@ class GameState {
         keepGoing: true,
         over: over,
       );
+
+  /// Serializes the full game state for resume-on-return.
+  Map<String, dynamic> toJson() => {
+        'board': board,
+        'score': score,
+        'best': best,
+        'won': won,
+        'keepGoing': keepGoing,
+        'over': over,
+      };
+
+  /// Rebuilds a state from [toJson] output (decoded JSON).
+  factory GameState.fromJson(Map<String, dynamic> json) => GameState(
+        board: [
+          for (final row in json['board'] as List)
+            [for (final v in row as List) v as int],
+        ],
+        score: json['score'] as int,
+        best: json['best'] as int,
+        won: json['won'] as bool,
+        keepGoing: json['keepGoing'] as bool,
+        over: json['over'] as bool,
+      );
 }

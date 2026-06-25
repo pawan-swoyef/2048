@@ -32,9 +32,10 @@ abstract class DailyGame {
   /// Whether the result card should celebrate (crown + confetti).
   bool celebrateOn(bool success) => success;
 
-  /// Builds the header-less play surface, seeded by [seed], reporting to
+  /// Builds the header-less play surface, seeded by [seed] for the day's
+  /// [puzzle] (used to key an in-progress save for resume), reporting to
   /// [controller].
-  Widget buildPlay(int seed, DailyPlayController controller);
+  Widget buildPlay(int seed, int puzzle, DailyPlayController controller);
 }
 
 /// All daily games, keyed by id. Games are added here as they are implemented;

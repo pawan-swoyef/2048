@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:game2048/game/game_state.dart';
 import 'package:game2048/iap/iap_service.dart';
 import 'package:game2048/ui/animated_board.dart';
 import 'package:game2048/ui/game_screen.dart';
@@ -123,6 +126,68 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Undo'), findsOneWidget);
+  });
+
+  testWidgets('offers to resume a saved game and restores its board on Resume',
+      (tester) async {
+    final saved = GameState(
+      board: const [
+        [2, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 64],
+      ],
+      score: 1000,
+      best: 1200,
+    );
+    SharedPreferences.setMockInitialValues({
+      'save_2048': jsonEncode(saved.toJson()),
+    });
+    _phoneSurface(tester);
+    await tester.pumpWidget(_gameScreen());
+    await tester.pumpAndSettle();
+
+    // The resume prompt appears (hero-band design).
+    expect(find.text('Welcome back!'), findsOneWidget);
+    expect(find.text('⭐ GAME IN PROGRESS'), findsOneWidget);
+    expect(find.text('Resume'), findsOneWidget);
+
+    await tester.tap(find.text('Resume'));
+    await tester.pumpAndSettle();
+
+    // The saved score and the saved 64 tile are restored.
+    expect(find.text('1000'), findsOneWidget);
+    expect(find.text('64'), findsOneWidget);
+  });
+
+  testWidgets('New Game on the resume prompt starts fresh (two tiles)',
+      (tester) async {
+    final saved = GameState(
+      board: const [
+        [8, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 256],
+      ],
+      score: 2048,
+    );
+    SharedPreferences.setMockInitialValues({
+      'save_2048': jsonEncode(saved.toJson()),
+    });
+    _phoneSurface(tester);
+    await tester.pumpWidget(_gameScreen());
+    await tester.pumpAndSettle();
+
+    // Decline the resume: tap New Game inside the dialog (the only one on screen
+    // while the barrier is up is the dialog's GhostButton).
+    await tester.tap(find.text('New Game').last);
+    await tester.pumpAndSettle();
+
+    // Fresh board: the saved 256 tile is gone and exactly two starting tiles show.
+    expect(find.text('256'), findsNothing);
+    final twos = find.text('2').evaluate().length;
+    final fours = find.text('4').evaluate().length;
+    expect(twos + fours, 2);
   });
 
   testWidgets('free player who runs out of undos is directed to paywall', (tester) async {

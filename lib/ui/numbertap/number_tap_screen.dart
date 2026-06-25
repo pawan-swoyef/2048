@@ -7,8 +7,10 @@ import '../../ads/banner_ad_box.dart';
 import '../../ads/interstitial_ad.dart';
 import '../../game/guide_store.dart';
 import '../../game/numbertap/number_tap_game.dart';
+import '../../game/save_store.dart';
 import '../../game/score_store.dart';
 import '../../game/sound_service.dart';
+import '../dialogs.dart';
 import '../share_card.dart';
 import '../theme_controller.dart';
 import '../theme_picker.dart';
@@ -31,7 +33,8 @@ class NumberTapScreen extends StatefulWidget {
   State<NumberTapScreen> createState() => _NumberTapScreenState();
 }
 
-class _NumberTapScreenState extends State<NumberTapScreen> {
+class _NumberTapScreenState extends State<NumberTapScreen>
+    with WidgetsBindingObserver {
   static const _gameId = 'numbertap';
 
   /// During the player's first-ever game, highlight the next tile green only for
@@ -40,8 +43,13 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   static const _guideUpTo = 10;
 
   final ScoreStore _store = ScoreStore();
+  final GameSaveStore _saveStore = GameSaveStore();
   final GuideStore _guideStore = GuideStore();
   final Stopwatch _watch = Stopwatch();
+
+  /// Elapsed milliseconds banked before the current [_watch] run (carried across
+  /// a resume and across app-background pauses, so the clock never inflates).
+  int _baseMs = 0;
   final GlobalKey _shareKey = GlobalKey();
   final InterstitialController _interstitial = InterstitialController();
   final SoundService _sound = SoundService();
@@ -57,10 +65,84 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _game = NumberTapGame(Random());
     _loadBest();
     _loadSound();
     _loadGuide();
+    _maybeResume();
+  }
+
+  /// Offers to continue a game left in progress. The clock pauses while the app
+  /// is backgrounded, so a resumed time stays fair.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_started || _game.isComplete) return;
+    if (state == AppLifecycleState.paused) {
+      if (_watch.isRunning) {
+        _baseMs += _watch.elapsedMilliseconds;
+        _watch
+          ..stop()
+          ..reset();
+      }
+      _persist();
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_watch.isRunning) _watch.start();
+    }
+  }
+
+  Future<void> _maybeResume() async {
+    final saved = await _saveStore.load(_gameId);
+    if (saved == null || !mounted) return;
+    final NumberTapGame restored;
+    try {
+      restored = NumberTapGame.fromJson(saved);
+    } catch (_) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (restored.isComplete) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (!mounted) return;
+    final resume = await confirmResume(context);
+    if (!mounted) return;
+    if (resume) {
+      setState(() {
+        _game = restored;
+        _baseMs = (saved['elapsedMs'] as num?)?.toInt() ?? 0;
+        _started = saved['started'] as bool? ?? false;
+        _flashCell = -1;
+      });
+      if (_started) {
+        _watch
+          ..reset()
+          ..start();
+        _startTicker();
+      }
+    } else {
+      await _saveStore.clear(_gameId);
+    }
+  }
+
+  void _startTicker() {
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      if (mounted && !_game.isComplete) setState(() {});
+    });
+  }
+
+  void _persist() {
+    if (!_started || _game.isComplete) {
+      _saveStore.clear(_gameId);
+    } else {
+      _saveStore.save(_gameId, {
+        ..._game.toJson(),
+        'elapsedMs': _baseMs + _watch.elapsedMilliseconds,
+        'started': _started,
+      });
+    }
   }
 
   Future<void> _loadGuide() async {
@@ -92,6 +174,7 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
     _interstitial.dispose();
     _sound.dispose();
@@ -99,21 +182,20 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   }
 
   int get _elapsedDeci =>
-      (_watch.elapsedMilliseconds / 100).round() + _game.penaltySeconds * 10;
+      ((_baseMs + _watch.elapsedMilliseconds) / 100).round() +
+      _game.penaltySeconds * 10;
 
   void _onTap(int number, int cellIndex) {
     if (_game.isComplete) return;
     if (!_started) {
       _started = true;
       _watch.start();
-      _ticker = Timer.periodic(const Duration(milliseconds: 100), (_) {
-        if (mounted && !_game.isComplete) setState(() {});
-      });
+      _startTicker();
     }
     final wasCorrect = number == _game.next;
     setState(() => _game.tap(number));
     if (!wasCorrect) {
-      _sound.gameOver();
+      _sound.lose();
       setState(() => _flashCell = cellIndex);
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) setState(() => _flashCell = -1);
@@ -121,12 +203,17 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
     } else if (!_game.isComplete) {
       _sound.merge();
     }
-    if (_game.isComplete) _finish();
+    if (_game.isComplete) {
+      _finish();
+    } else {
+      _persist();
+    }
   }
 
   Future<void> _finish() async {
     _watch.stop();
     _ticker?.cancel();
+    _saveStore.clear(_gameId);
     _sound.win();
     if (_guideActive) {
       await _guideStore.markGuideSeen(_gameId);
@@ -145,11 +232,13 @@ class _NumberTapScreenState extends State<NumberTapScreen> {
   }
 
   void _playAgain() {
+    _saveStore.clear(_gameId);
     setState(() {
       _game = NumberTapGame(Random());
       _watch
         ..stop()
         ..reset();
+      _baseMs = 0;
       _started = false;
       _flashCell = -1;
     });

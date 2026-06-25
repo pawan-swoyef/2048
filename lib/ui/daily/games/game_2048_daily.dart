@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../game/board.dart';
 import '../../../game/game_state.dart' show kBoardSize;
 import '../../../game/daily/daily_challenge.dart';
+import '../../../game/save_store.dart';
 import '../../../game/score_store.dart';
 import '../../../game/sound_service.dart';
 import '../../animated_board.dart';
+import '../../dialogs.dart';
 import '../../swipe.dart';
 import '../daily_game.dart';
 import '../daily_play_controller.dart';
@@ -49,14 +51,16 @@ class Game2048Daily extends DailyGame {
       success ? '🎯$_target in $score moves' : "🎯$_target  ❌ didn't make it";
 
   @override
-  Widget buildPlay(int seed, DailyPlayController controller) =>
-      _Game2048Play(seed: seed, controller: controller);
+  Widget buildPlay(int seed, int puzzle, DailyPlayController controller) =>
+      _Game2048Play(seed: seed, puzzle: puzzle, controller: controller);
 }
 
 class _Game2048Play extends StatefulWidget {
   final int seed;
+  final int puzzle;
   final DailyPlayController controller;
-  const _Game2048Play({required this.seed, required this.controller});
+  const _Game2048Play(
+      {required this.seed, required this.puzzle, required this.controller});
 
   @override
   State<_Game2048Play> createState() => _Game2048PlayState();
@@ -73,6 +77,11 @@ class _Game2048PlayState extends State<_Game2048Play> {
 
   final SoundService _sound = SoundService();
   final ScoreStore _store = ScoreStore();
+  final GameSaveStore _saveStore = GameSaveStore();
+
+  // A single key holds the one in-progress daily; the saved puzzle number guards
+  // against resuming yesterday's game once the day (and seed) has rolled over.
+  static const _saveId = 'daily_2048';
 
   @override
   void initState() {
@@ -80,6 +89,41 @@ class _Game2048PlayState extends State<_Game2048Play> {
     _ch = DailyChallenge(seed: widget.seed, puzzleNumber: 0, target: _target);
     _popCells = _allCells(_ch.state.board);
     _loadSound();
+    _maybeResume();
+  }
+
+  /// Offers to continue today's daily if it was left mid-attempt. The board is
+  /// rebuilt by replaying the saved move history against the same seed.
+  Future<void> _maybeResume() async {
+    final saved = await _saveStore.load(_saveId);
+    if (saved == null || !mounted) return;
+    if (saved['puzzle'] != widget.puzzle) return; // a save from a previous day
+    final DailyChallenge restored;
+    try {
+      restored = DailyChallenge.fromJson(saved,
+          seed: widget.seed, puzzleNumber: 0, target: _target);
+    } catch (_) {
+      await _saveStore.clear(_saveId);
+      return;
+    }
+    if (restored.status != DailyStatus.playing || restored.moves == 0) {
+      await _saveStore.clear(_saveId);
+      return;
+    }
+    if (!mounted) return;
+    final resume = await confirmResume(context);
+    if (!mounted) return;
+    if (resume) {
+      setState(() {
+        _ch = restored;
+        _moves = const [];
+        _popCells = _allCells(_ch.state.board);
+        _tick++;
+      });
+      widget.controller.update(metric: _ch.moves, started: true);
+    } else {
+      await _saveStore.clear(_saveId);
+    }
   }
 
   Future<void> _loadSound() async {
@@ -148,12 +192,16 @@ class _Game2048PlayState extends State<_Game2048Play> {
     });
     widget.controller.update(metric: _ch.moves, started: true);
     if (_ch.status != DailyStatus.playing) {
+      _saveStore.clear(_saveId);
       widget.controller.complete(_ch.status == DailyStatus.won, _ch.moves);
-      _ch.status == DailyStatus.won ? _sound.win() : _sound.gameOver();
-    } else if (hasMerge) {
-      _sound.merge();
+      _ch.status == DailyStatus.won ? _sound.win() : _sound.lose();
     } else {
-      _sound.move();
+      _saveStore.save(_saveId, {'puzzle': widget.puzzle, ..._ch.toJson()});
+      if (hasMerge) {
+        _sound.merge();
+      } else {
+        _sound.move();
+      }
     }
     Future.delayed(const Duration(milliseconds: 110), () {
       if (mounted) setState(() => _busy = false);

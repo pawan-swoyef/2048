@@ -58,6 +58,23 @@ class MagicSquareGame {
     return MagicSquareGame._(List.of(solution), grid, clue, tray);
   }
 
+  /// Serializes the board for resume-on-return. The elapsed timer lives in the
+  /// UI and is saved alongside this map.
+  Map<String, dynamic> toJson() => {
+        'solution': solution,
+        'grid': grid,
+        'clue': clue,
+        'tray': tray,
+      };
+
+  /// Rebuilds a game from [toJson] output (decoded JSON).
+  factory MagicSquareGame.fromJson(Map<String, dynamic> json) => MagicSquareGame._(
+        [for (final v in json['solution'] as List) v as int],
+        [for (final v in json['grid'] as List) v as int?],
+        [for (final v in json['clue'] as List) v as bool],
+        [for (final v in json['tray'] as List) v as int],
+      );
+
   /// Whether [value] (from the tray) may be dropped on the empty, non-clue [cell].
   bool canPlace(int value, int cell) =>
       !clue[cell] && grid[cell] == null && tray.contains(value);

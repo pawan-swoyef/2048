@@ -4,7 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 /// player so rapid moves don't cut each other off awkwardly. All playback is
 /// guarded so audio failures (e.g. browser autoplay rules) never crash the game.
 class SoundService {
-  static const _names = ['move', 'merge', 'win', 'gameover', 'coin'];
+  static const _names = ['move', 'merge', 'win', 'lose', 'coin'];
 
   final Map<String, AudioPlayer> _players = {};
   bool enabled = true;
@@ -30,7 +30,7 @@ class SoundService {
   void move() => _play('move');
   void merge() => _play('merge');
   void win() => _play('win');
-  void gameOver() => _play('gameover');
+  void lose() => _play('lose');
   void coin() => _play('coin');
 
   void dispose() {

@@ -9,8 +9,10 @@ import '../../game/guide_store.dart';
 import '../../game/numbersort/number_sort_game.dart';
 import '../../game/numbersort/undo_allowance.dart';
 import '../../game/numbersort/undo_store.dart';
+import '../../game/save_store.dart';
 import '../../game/score_store.dart';
 import '../../game/sound_service.dart';
+import '../dialogs.dart';
 import '../paywall.dart';
 import '../share_card.dart';
 import '../theme_controller.dart';
@@ -42,6 +44,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
   static const _gameId = 'numbersort';
 
   final ScoreStore _store = ScoreStore();
+  final GameSaveStore _saveStore = GameSaveStore();
   final UndoStore _undoStore = UndoStore();
   final RewardedController _rewarded = RewardedController();
   final InterstitialController _interstitial = InterstitialController();
@@ -62,6 +65,41 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
     _loadBest();
     _loadGuide();
     _loadSound();
+    if (widget.initialGame == null) _maybeResume();
+  }
+
+  Future<void> _maybeResume() async {
+    final saved = await _saveStore.load(_gameId);
+    if (saved == null || !mounted) return;
+    final NumberSortGame restored;
+    try {
+      restored = NumberSortGame.fromJson(saved);
+    } catch (_) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (restored.isComplete) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (!mounted) return;
+    final resume = await confirmResume(context);
+    if (!mounted) return;
+    if (resume) {
+      setState(() => _game = restored);
+    } else {
+      await _saveStore.clear(_gameId);
+    }
+  }
+
+  /// Saves the in-progress board, or clears the save once solved or back to an
+  /// untouched start (so resume only offers a real game).
+  void _persist() {
+    if (_game.isComplete || _game.moves == 0) {
+      _saveStore.clear(_gameId);
+    } else {
+      _saveStore.save(_gameId, _game.toJson());
+    }
   }
 
   @override
@@ -126,10 +164,12 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
       _finish();
     } else {
       _sound.move();
+      _persist();
     }
   }
 
   Future<void> _finish() async {
+    _saveStore.clear(_gameId);
     _sound.win();
     final m = _game.moves;
     if (_bestMoves == null || m < _bestMoves!) {
@@ -147,6 +187,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
   }
 
   void _restart() {
+    _saveStore.clear(_gameId);
     setState(() => _game = NumberSortGame(Random()));
   }
 
@@ -157,6 +198,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
     if (_premium) {
       setState(() => _game.undo());
       _sound.move();
+      _persist();
       return;
     }
     final allowance = _allowance;
@@ -169,6 +211,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
       if (!mounted) return;
       setState(() => _game.undo());
       _sound.move();
+      _persist();
       await _undoStore.recordUndo(today: _todayStr());
       await _refreshAllowance();
     });

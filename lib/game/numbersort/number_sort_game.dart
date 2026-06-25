@@ -61,6 +61,24 @@ class NumberSortGame {
     return NumberSortGame._(filled, height, spares, cols);
   }
 
+  /// Serializes the board for resume-on-return. The undo history is not saved,
+  /// so undo resets after a resume.
+  Map<String, dynamic> toJson() => {
+        'columns': columns,
+        'moves': moves,
+        'height': height,
+      };
+
+  /// Rebuilds a game from [toJson] output (decoded JSON).
+  factory NumberSortGame.fromJson(Map<String, dynamic> json) {
+    final cols = [
+      for (final c in json['columns'] as List) [for (final v in c as List) v as int],
+    ];
+    final game = NumberSortGame.fromColumns(cols, height: json['height'] as int);
+    game.moves = json['moves'] as int;
+    return game;
+  }
+
   bool get canUndo => _history.isNotEmpty;
 
   bool get isComplete => _complete(columns, height);

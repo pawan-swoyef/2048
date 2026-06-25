@@ -17,6 +17,24 @@ class NumberTapGame {
   NumberTapGame(Random rng)
       : board = [for (var i = 1; i <= 25; i++) i]..shuffle(rng);
 
+  NumberTapGame._(this.board);
+
+  /// Serializes the tap progress for resume-on-return. The elapsed timer lives
+  /// in the UI and is saved alongside this map.
+  Map<String, dynamic> toJson() => {
+        'board': board,
+        'next': next,
+        'mistakes': mistakes,
+      };
+
+  /// Rebuilds a game from [toJson] output (decoded JSON).
+  factory NumberTapGame.fromJson(Map<String, dynamic> json) {
+    final game = NumberTapGame._([for (final v in json['board'] as List) v as int]);
+    game.next = json['next'] as int;
+    game.mistakes = json['mistakes'] as int;
+    return game;
+  }
+
   bool get isComplete => next > 25;
 
   /// Two-second penalty per wrong tap.

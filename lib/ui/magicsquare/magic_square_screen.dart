@@ -10,8 +10,10 @@ import '../../game/guide_store.dart';
 import '../../game/magicsquare/hint_allowance.dart';
 import '../../game/magicsquare/hint_store.dart';
 import '../../game/magicsquare/magic_square_game.dart';
+import '../../game/save_store.dart';
 import '../../game/score_store.dart';
 import '../../game/sound_service.dart';
+import '../dialogs.dart';
 import '../paywall.dart';
 import '../share_card.dart';
 import '../theme_controller.dart';
@@ -50,16 +52,22 @@ class MagicSquareScreen extends StatefulWidget {
   State<MagicSquareScreen> createState() => _MagicSquareScreenState();
 }
 
-class _MagicSquareScreenState extends State<MagicSquareScreen> {
+class _MagicSquareScreenState extends State<MagicSquareScreen>
+    with WidgetsBindingObserver {
   static const _gameId = 'magicsquare';
 
   final ScoreStore _store = ScoreStore();
+  final GameSaveStore _saveStore = GameSaveStore();
   final HintStore _hintStore = HintStore();
   final RewardedController _rewarded = RewardedController();
   final InterstitialController _interstitial = InterstitialController();
   final Stopwatch _watch = Stopwatch();
   final GlobalKey _shareKey = GlobalKey();
   final SoundService _sound = SoundService();
+
+  /// Elapsed milliseconds banked before the current [_watch] run (carried across
+  /// a resume and across app-background pauses, so the clock never inflates).
+  int _baseMs = 0;
 
   late MagicSquareGame _game;
   Timer? _ticker;
@@ -73,10 +81,78 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _game = widget.initialGame ?? MagicSquareGame(Random());
     _loadBest();
     _loadGuide();
     _loadSound();
+    if (widget.initialGame == null) _maybeResume();
+  }
+
+  /// Pauses the clock while the app is backgrounded so a resumed time is fair.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_started || _game.isComplete) return;
+    if (state == AppLifecycleState.paused) {
+      if (_watch.isRunning) {
+        _baseMs += _watch.elapsedMilliseconds;
+        _watch
+          ..stop()
+          ..reset();
+      }
+      _persist();
+    } else if (state == AppLifecycleState.resumed) {
+      if (!_watch.isRunning) _watch.start();
+    }
+  }
+
+  Future<void> _maybeResume() async {
+    final saved = await _saveStore.load(_gameId);
+    if (saved == null || !mounted) return;
+    final MagicSquareGame restored;
+    try {
+      restored = MagicSquareGame.fromJson(saved);
+    } catch (_) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (restored.isComplete) {
+      await _saveStore.clear(_gameId);
+      return;
+    }
+    if (!mounted) return;
+    final resume = await confirmResume(context);
+    if (!mounted) return;
+    if (resume) {
+      setState(() {
+        _game = restored;
+        _baseMs = (saved['elapsedMs'] as num?)?.toInt() ?? 0;
+        _started = saved['started'] as bool? ?? false;
+      });
+      if (_started) {
+        _watch
+          ..reset()
+          ..start();
+        _ticker?.cancel();
+        _ticker = Timer.periodic(const Duration(milliseconds: 100), (_) {
+          if (mounted && !_game.isComplete) setState(() {});
+        });
+      }
+    } else {
+      await _saveStore.clear(_gameId);
+    }
+  }
+
+  void _persist() {
+    if (!_started || _game.isComplete) {
+      _saveStore.clear(_gameId);
+    } else {
+      _saveStore.save(_gameId, {
+        ..._game.toJson(),
+        'elapsedMs': _baseMs + _watch.elapsedMilliseconds,
+        'started': _started,
+      });
+    }
   }
 
   @override
@@ -88,6 +164,7 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _ticker?.cancel();
     _rewarded.dispose();
     _interstitial.dispose();
@@ -114,7 +191,8 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
 
   bool get _premium => ThemeScope.controllerOf(context).premiumUnlocked;
 
-  int get _elapsedDeci => (_watch.elapsedMilliseconds / 100).round();
+  int get _elapsedDeci =>
+      ((_baseMs + _watch.elapsedMilliseconds) / 100).round();
 
   String _fmt(int deci) => '${(deci / 10).toStringAsFixed(1)}s';
 
@@ -155,6 +233,7 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
       _finish();
     } else {
       _sound.move();
+      _persist();
     }
   }
 
@@ -170,12 +249,14 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
     if (_game.removeAt(cell) != null) {
       setState(() {});
       _sound.move();
+      _persist();
     }
   }
 
   Future<void> _finish() async {
     _watch.stop();
     _ticker?.cancel();
+    _saveStore.clear(_gameId);
     _sound.win();
     final time = _elapsedDeci;
     if (_bestDeci == null || time < _bestDeci!) {
@@ -193,11 +274,13 @@ class _MagicSquareScreenState extends State<MagicSquareScreen> {
   }
 
   void _newPuzzle() {
+    _saveStore.clear(_gameId);
     setState(() {
       _game = MagicSquareGame(Random());
       _watch
         ..stop()
         ..reset();
+      _baseMs = 0;
       _started = false;
     });
   }
