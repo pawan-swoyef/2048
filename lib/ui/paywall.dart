@@ -152,7 +152,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         _benefits(),
                         const SizedBox(height: 22),
                         for (var i = 0; i < _plans.length; i++) ...[
-                          _planCard(i, iapService.products),
+                          _planCard(i, iapService.products,
+                              iapService.isLoading && iapService.products.isEmpty),
                           const SizedBox(height: 12),
                         ],
                         const SizedBox(height: 6),
@@ -231,13 +232,16 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
-  Widget _planCard(int i, List<ProductDetails> storeProducts) {
+  Widget _planCard(int i, List<ProductDetails> storeProducts, bool pricesLoading) {
     final plan = _plans[i];
     final prod = _findProduct(plan.id, storeProducts);
     final selected = i == _selected;
 
     final name = prod?.title ?? plan.name;
-    final price = prod?.price ?? plan.price;
+    // Always prefer the live store price. While the store is still being
+    // queried, show a placeholder rather than a possibly-stale hardcoded price;
+    // the hardcoded value is only a last resort (e.g. simulator/dev).
+    final price = prod?.price ?? (pricesLoading ? '···' : plan.price);
     final subText = (prod?.description != null && prod!.description.isNotEmpty)
         ? prod.description
         : plan.sub;
