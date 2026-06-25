@@ -9,6 +9,7 @@ secretandstunts-*.json
 key.properties
 
 # Miscellaneous
+devtools_options.yaml
 *.class
 *.log
 *.pyc
