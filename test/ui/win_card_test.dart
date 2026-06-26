@@ -36,12 +36,12 @@ void main() {
     expect(find.text('512'), findsOneWidget);
     expect(find.text('in 252 moves'), findsOneWidget);
     expect(find.text('🔥 1 day daily streak'), findsOneWidget);
-    expect(find.text('SHARE RESULT'), findsOneWidget); // primary upper-cases
-    expect(find.text('New Game'), findsOneWidget);
-    expect(find.text('10h 47m'), findsOneWidget);
+    expect(find.text('SHARE RESULT'), findsOneWidget); // buttons upper-case
+    expect(find.text('NEW GAME'), findsOneWidget);
+    expect(find.text('Next puzzle in 10h 47m'), findsOneWidget);
 
     await tester.tap(find.text('SHARE RESULT'));
-    await tester.tap(find.text('New Game'));
+    await tester.tap(find.text('NEW GAME'));
     await tester.tap(find.byIcon(Icons.close));
     expect(primary, 1);
     expect(secondary, 1);
@@ -86,11 +86,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('😵'), findsOneWidget);
-    expect(find.text('Undo · Watch Ad'), findsOneWidget);
+    expect(find.text('UNDO · WATCH AD'), findsOneWidget); // buttons upper-case
     expect(find.text('2860'), findsOneWidget);
-    expect(find.text('NEW GAME'), findsOneWidget); // primary upper-cases
+    expect(find.text('NEW GAME'), findsOneWidget);
 
-    await tester.tap(find.text('Undo · Watch Ad'));
+    await tester.tap(find.text('UNDO · WATCH AD'));
     await tester.tap(find.text('NEW GAME'));
     expect(ad, 1);
     expect(primary, 1);

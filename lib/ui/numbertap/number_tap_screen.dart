@@ -588,7 +588,7 @@ class _NumberTapScreenState extends State<NumberTapScreen>
               ? '${_game.mistakes} misses · +${_game.penaltySeconds}s'
               : 'no mistakes',
         ),
-        badge: _bestDeci != null ? '👑 Best ${_fmt(_bestDeci!)}' : null,
+        badge: _bestDeci != null ? 'Best ${_fmt(_bestDeci!)}' : null,
         primaryLabel: 'Play Again',
         primaryIcon: Icons.refresh,
         onPrimary: _playAgain,
@@ -609,7 +609,7 @@ class _NumberTapScreenState extends State<NumberTapScreen>
         valueSub: _game.mistakes > 0
             ? '${_game.mistakes} misses · +${_game.penaltySeconds}s'
             : 'no mistakes',
-        badge: _bestDeci != null ? '👑 Best ${_fmt(_bestDeci!)}' : null,
+        badge: _bestDeci != null ? 'Best ${_fmt(_bestDeci!)}' : null,
       ),
     );
   }

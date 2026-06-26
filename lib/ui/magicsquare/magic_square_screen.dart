@@ -810,7 +810,7 @@ class _MagicSquareScreenState extends State<MagicSquareScreen>
         banner: 'Solved!',
         headline: isBest ? 'New record! 🎉' : 'Magic! 🎉',
         stat: WinStat(label: 'Your time', value: _fmt(time)),
-        badge: _bestDeci != null ? '👑 Best ${_fmt(_bestDeci!)}' : null,
+        badge: _bestDeci != null ? 'Best ${_fmt(_bestDeci!)}' : null,
         primaryLabel: 'New Puzzle',
         primaryIcon: Icons.refresh,
         onPrimary: _newPuzzle,
@@ -827,7 +827,7 @@ class _MagicSquareScreenState extends State<MagicSquareScreen>
         title: 'Magic Square',
         valueLabel: 'Your time',
         value: _fmt(_elapsedDeci),
-        badge: _bestDeci != null ? '👑 Best ${_fmt(_bestDeci!)}' : null,
+        badge: _bestDeci != null ? 'Best ${_fmt(_bestDeci!)}' : null,
       ),
     );
   }

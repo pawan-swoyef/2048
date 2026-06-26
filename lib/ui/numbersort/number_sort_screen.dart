@@ -625,7 +625,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
           value: '$m',
           sub: m == 1 ? 'move' : 'moves',
         ),
-        badge: _bestMoves != null ? '👑 Best $_bestMoves moves' : null,
+        badge: _bestMoves != null ? 'Best $_bestMoves moves' : null,
         primaryLabel: 'Play Again',
         primaryIcon: Icons.refresh,
         onPrimary: _restart,
@@ -643,7 +643,7 @@ class _NumberSortScreenState extends State<NumberSortScreen> {
         valueLabel: 'Solved in',
         value: '${_game.moves}',
         valueSub: _game.moves == 1 ? 'move' : 'moves',
-        badge: _bestMoves != null ? '👑 Best $_bestMoves moves' : null,
+        badge: _bestMoves != null ? 'Best $_bestMoves moves' : null,
       ),
     );
   }
