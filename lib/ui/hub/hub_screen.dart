@@ -7,9 +7,10 @@ import '../../game/daily_engagement.dart';
 import '../../game/progress_store.dart';
 import '../../game/score_store.dart';
 import '../../game/sound_service.dart';
+import '../engagement/animated_coin_count.dart';
+import '../engagement/coin_burst.dart';
 import '../engagement/daily_reward_screen.dart';
 import '../engagement/engagement_style.dart';
-import '../engagement/reward_toast.dart';
 import '../engagement/streak_sheet.dart';
 import '../paywall.dart';
 import '../theme_controller.dart';
@@ -41,6 +42,17 @@ class _HubScreenState extends State<HubScreen> {
   final ProgressStore _progressStore = ProgressStore();
   final ScoreStore _scoreStore = ScoreStore();
   final SoundService _sound = SoundService();
+
+  // Targets the coin-balance pill so collected coins can fly into it.
+  final GlobalKey _coinPillKey = GlobalKey();
+  final GlobalKey _giftKey = GlobalKey();
+
+  // Bumped to make the coin count snap (no animation) when the source screen
+  // already animated the collect; left unchanged when the hub should count up.
+  int _coinEpoch = 0;
+
+  static const _statValueStyle =
+      TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _cardTitle);
 
   PlayerProgress _progress = const PlayerProgress();
   final Map<String, int> _bests = {};
@@ -120,6 +132,7 @@ class _HubScreenState extends State<HubScreen> {
         builder: (_) => DailyRewardScreen(
           progress: _progress,
           today: today,
+          sound: _sound,
           onClaim: () => _claimDailyGift(today),
         ),
       ),
@@ -129,13 +142,29 @@ class _HubScreenState extends State<HubScreen> {
   Future<void> _claimDailyGift(DateTime today) async {
     if (!giftAvailable(_progress, today)) return;
     final updated = claimGift(_progress, today);
-    final earned = updated.coins - _progress.coins;
     await _progressStore.save(updated);
     if (!mounted) return;
     Navigator.of(context).pop();
-    setState(() => _progress = updated);
-    _sound.coin();
-    showCoinToast(context, earned);
+    // The reward screen already played the collect animation + count-up, so the
+    // hub pill just snaps to the new total (bump the epoch to skip re-animating).
+    setState(() {
+      _progress = updated;
+      _coinEpoch++;
+    });
+  }
+
+  /// Plays the fly-to-balance coin burst + shower toward the coin pill, after
+  /// the next frame so the pill's key is laid out.
+  void _collectCoins({required Offset from}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      playCoinBurst(
+        context: context,
+        from: from,
+        toKey: _coinPillKey,
+        sound: _sound,
+      );
+    });
   }
 
   void _openThemePicker() => Navigator.of(context).push(
@@ -148,7 +177,15 @@ class _HubScreenState extends State<HubScreen> {
     _loadBests();
     // Coins may have changed (e.g. the daily-challenge completion bonus).
     final p = await _progressStore.load();
-    if (mounted) setState(() => _progress = p);
+    if (!mounted) return;
+    final gained = p.coins - _progress.coins;
+    setState(() => _progress = p); // coin pill counts up
+    if (gained > 0) _collectCoins(from: _screenCenter());
+  }
+
+  Offset _screenCenter() {
+    final s = MediaQuery.of(context).size;
+    return Offset(s.width / 2, s.height * 0.42);
   }
 
   void _showAllGames() => setState(() => _tab = 1);
@@ -190,7 +227,9 @@ class _HubScreenState extends State<HubScreen> {
       builder: (context, constraints) {
         final width =
             constraints.maxWidth.clamp(0.0, 480.0);
-        return Center(
+        return Align(
+          // Sit a little above centre so the title isn't pushed too far down.
+          alignment: const Alignment(0, -0.35),
           child: FittedBox(
             fit: BoxFit.scaleDown,
             child: SizedBox(
@@ -242,10 +281,15 @@ class _HubScreenState extends State<HubScreen> {
             Row(
               children: [
                 _statPill(const Text('🔥', style: TextStyle(fontSize: 22)),
-                    '${_progress.streakCurrent} day', 'Streak',
-                    onTap: _openStreakSheet),
+                    Text('${_progress.streakCurrent} day', style: _statValueStyle),
+                    'Streak', onTap: _openStreakSheet),
                 const SizedBox(width: 12),
-                _statPill(const CoinIcon(size: 24), '${_progress.coins}', 'Coins'),
+                _statPill(
+                    const CoinIcon(size: 24),
+                    AnimatedCoinCount(_progress.coins,
+                        key: ValueKey(_coinEpoch), style: _statValueStyle),
+                    'Coins',
+                    pillKey: _coinPillKey),
               ],
             ),
           ],
@@ -256,8 +300,10 @@ class _HubScreenState extends State<HubScreen> {
     );
   }
 
-  Widget _statPill(Widget icon, String value, String label, {VoidCallback? onTap}) {
+  Widget _statPill(Widget icon, Widget value, String label,
+      {VoidCallback? onTap, Key? pillKey}) {
     final pill = Container(
+      key: pillKey,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -278,9 +324,7 @@ class _HubScreenState extends State<HubScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w800, color: _cardTitle)),
+              value,
               Text(label,
                   style: const TextStyle(fontSize: 12, color: _cardSub)),
             ],
@@ -315,6 +359,7 @@ class _HubScreenState extends State<HubScreen> {
         clipBehavior: Clip.none,
         children: [
           Container(
+            key: _giftKey,
             width: 64,
             height: 64,
             decoration: BoxDecoration(
@@ -415,8 +460,6 @@ class _HubScreenState extends State<HubScreen> {
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: _accent)),
-                      const SizedBox(width: 6),
-                      const Text('👑', style: TextStyle(fontSize: 13)),
                     ],
                   ),
                   const SizedBox(height: 12),

@@ -1,42 +1,34 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../game/daily_engagement.dart';
 import '../../game/reward_schedule.dart';
+import '../../game/sound_service.dart';
 import '../theme_controller.dart';
-import 'coin_pill.dart';
+import 'animated_coin_count.dart';
+import 'coin_burst.dart';
 import 'engagement_style.dart';
 
-// The featured card's beautiful gradient.
-const _featuredGradient = [
-  Color(0xFF4F1CA6),
-  Color(0xFF9F28B4),
-  Color(0xFFE2387B),
-  Color(0xFFF9663E),
-];
+// Brand-constant accents (read as gold/green on every theme).
+const _giftGradient = [Color(0xFFFFE27A), Color(0xFFFFB300)];
+const _claimedGreen = Color(0xFF7CFFB0);
 
-// Dark background gradient matching the mockup.
-const _backgroundGradient = [
-  Color(0xFF0C0926),
-  Color(0xFF140E34),
-];
-
-// Active button gradient.
-const _buttonGradient = [
-  Color(0xFF8B5CF6),
-  Color(0xFFEC4899),
-];
-
+/// The Daily Rewards screen — a "tap-to-open gift" in the app's theme. Tapping
+/// the wrapped gift reveals the day's coins, which fly into the balance pill
+/// (count-up + coin-shower sound) before the claim is finalized.
 class DailyRewardScreen extends StatefulWidget {
   final PlayerProgress progress;
   final DateTime today;
   final VoidCallback onClaim;
+  final SoundService sound;
 
   const DailyRewardScreen({
     super.key,
     required this.progress,
     required this.today,
     required this.onClaim,
+    required this.sound,
   });
 
   @override
@@ -44,37 +36,56 @@ class DailyRewardScreen extends StatefulWidget {
 }
 
 class _DailyRewardScreenState extends State<DailyRewardScreen> {
-  late Timer _timer;
-  late Duration _timeLeft;
+  final GlobalKey _coinKey = GlobalKey();
+  final GlobalKey _giftKey = GlobalKey();
+
+  Timer? _timer;
+  Duration _timeLeft = Duration.zero;
+  bool _revealing = false;
+  int? _displayCoins; // overrides the header balance during the reveal
 
   @override
   void initState() {
     super.initState();
+    _tick();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  void _tick() {
     final now = DateTime.now();
     final nextMidnight = DateTime(now.year, now.month, now.day + 1);
-    _timeLeft = nextMidnight.difference(now);
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          final now = DateTime.now();
-          final nextMidnight = DateTime(now.year, now.month, now.day + 1);
-          _timeLeft = nextMidnight.difference(now);
-        });
-      }
-    });
+    if (mounted) setState(() => _timeLeft = nextMidnight.difference(now));
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
-  String _formatDuration(Duration d) {
-    final hours = d.inHours.toString().padLeft(2, '0');
-    final minutes = (d.inMinutes % 60).toString().padLeft(2, '0');
-    final seconds = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return '$hours:$minutes:$seconds';
+  String _fmt(Duration d) {
+    final h = d.inHours.toString().padLeft(2, '0');
+    final m = (d.inMinutes % 60).toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
+  /// Opens the gift: reveal the amount, fly coins into the balance with the
+  /// shower sound, then finalize the claim (which saves and pops).
+  Future<void> _reveal(int reward) async {
+    if (_revealing) return;
+    setState(() {
+      _revealing = true;
+      _displayCoins = widget.progress.coins + reward; // header counts up
+    });
+    final box = _giftKey.currentContext?.findRenderObject() as RenderBox?;
+    final size = MediaQuery.of(context).size;
+    final from = box != null
+        ? box.localToGlobal(box.size.center(Offset.zero))
+        : Offset(size.width / 2, size.height / 2);
+    await playCoinBurst(
+        context: context, from: from, toKey: _coinKey, sound: widget.sound);
+    if (mounted) widget.onClaim();
   }
 
   @override
@@ -87,33 +98,43 @@ class _DailyRewardScreenState extends State<DailyRewardScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: _backgroundGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: theme.backgroundGradient,
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              _header(context),
+              _header(theme),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  children: [
-                    _featuredCard(available, day, reward),
-                    const SizedBox(height: 24),
-                    _thisWeekHeader(available),
-                    const SizedBox(height: 14),
-                    _weekStripSection(day, claimedThrough, available),
-                    const SizedBox(height: 24),
-                    _streakReminder(),
-                  ],
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _giftCard(theme, available, reward),
+                        const SizedBox(height: 22),
+                        _hints(theme, available, day, reward),
+                        const SizedBox(height: 22),
+                        _dots(theme, day, claimedThrough, available),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              _bottomAction(available, reward),
-              _footer(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                child: _streakReminder(theme),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                child: _button(theme, available, reward),
+              ),
+              _footer(theme),
             ],
           ),
         ),
@@ -121,67 +142,57 @@ class _DailyRewardScreenState extends State<DailyRewardScreen> {
     );
   }
 
-  Widget _header(BuildContext context) {
+  Widget _header(GameTheme theme) {
+    final c = theme.onBackground;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => Navigator.of(context).maybePop(),
             child: Container(
-              width: 44,
-              height: 44,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
+                border:
+                    Border.all(color: Colors.white.withValues(alpha: 0.30)),
               ),
-              child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+              child: Icon(Icons.arrow_back_rounded, color: c, size: 20),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Daily Rewards',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Come back every day and earn more!',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 13,
-                  ),
-                ),
+                Text('Daily Rewards',
+                    style: TextStyle(
+                        color: c, fontSize: 20, fontWeight: FontWeight.w900)),
+                Text('Come back every day and earn more!',
+                    style: TextStyle(
+                        color: c.withValues(alpha: 0.7), fontSize: 12)),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            key: _coinKey,
+            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CoinIcon(size: 20),
+                const CoinIcon(size: 18),
                 const SizedBox(width: 6),
-                Text(
-                  '${widget.progress.coins}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+                AnimatedCoinCount(
+                  _displayCoins ?? widget.progress.coins,
+                  style: TextStyle(
+                      color: c, fontWeight: FontWeight.w900, fontSize: 14),
                 ),
               ],
             ),
@@ -191,408 +202,165 @@ class _DailyRewardScreenState extends State<DailyRewardScreen> {
     );
   }
 
-  Widget _featuredCard(bool available, int day, int reward) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+  Widget _giftCard(GameTheme theme, bool available, int reward) {
+    final opened = _revealing || !available;
+    final card = Container(
+      key: _giftKey,
+      width: 200,
+      height: 230,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: _featuredGradient,
+          colors: _giftGradient,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF9F28B4).withOpacity(0.4),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
+              color: kCoinGold.withValues(alpha: available ? 0.55 : 0.25),
+              blurRadius: 34,
+              offset: const Offset(0, 14)),
         ],
       ),
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
-              borderRadius: BorderRadius.circular(20),
+          // Ribbon cross (hidden once opened).
+          if (!opened)
+            const Positioned.fill(
+              child: _Ribbon(),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star_rounded, color: Color(0xFFFFD23F), size: 14),
-                const SizedBox(width: 6),
-                Text(
-                  available ? 'DAY $day • READY' : 'DAY $day • CLAIMED',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: 200,
-            height: 150,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        Colors.white.withOpacity(0.25),
-                        Colors.white.withOpacity(0.0),
-                      ],
-                    ),
-                  ),
-                ),
-                Image.asset(
-                  'assets/images/gift_box.png',
-                  width: 125,
-                  height: 125,
-                  fit: BoxFit.contain,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
+          Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFE27A), Color(0xFFFFB300)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: Icon(Icons.star_rounded, color: Colors.white, size: 20),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '+$reward',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.w900,
-                  height: 1.0,
-                ),
-              ),
+              Text(opened ? '🎁' : '🎀',
+                  style: const TextStyle(fontSize: 64)),
+              const SizedBox(height: 4),
+              if (_revealing)
+                Text('+$reward',
+                    style: const TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF7A4A00)))
+              else if (!opened)
+                const Text('?',
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF7A4A00))),
             ],
-          ),
-          const SizedBox(height: 12),
-          RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-              children: [
-                TextSpan(text: '${widget.progress.streakCurrent}-day streak — '),
-                const TextSpan(
-                  text: 'keep it going!',
-                  style: TextStyle(
-                    color: Color(0xFFFFD23F),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
+
+    // Tappable only when there's a gift to open.
+    if (!available || _revealing) {
+      return Opacity(opacity: opened && !available ? 0.85 : 1, child: card);
+    }
+    return GestureDetector(onTap: () => _reveal(reward), child: card);
   }
 
-  Widget _thisWeekHeader(bool available) {
-    return Row(
+  Widget _hints(GameTheme theme, bool available, int day, int reward) {
+    final c = theme.onBackground;
+    if (_revealing) {
+      return Text('+$reward coins!',
+          style: const TextStyle(
+              color: Color(0xFFFFE27A),
+              fontSize: 18,
+              fontWeight: FontWeight.w900));
+    }
+    if (!available) {
+      return Text('Next reward in ${_fmt(_timeLeft)}',
+          style: TextStyle(
+              color: c.withValues(alpha: 0.85),
+              fontSize: 15,
+              fontWeight: FontWeight.w800));
+    }
+    return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
-          ),
-          child: const Icon(Icons.calendar_today_rounded, color: Colors.white, size: 18),
+        Text('Tap to open Day $day',
+            style:
+                TextStyle(color: c, fontSize: 17, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 4),
+        Text(
+          '${widget.progress.streakCurrent}-day streak · today\'s gift is +$reward coins',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: c.withValues(alpha: 0.75), fontSize: 12.5),
         ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'This week',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              available
-                  ? 'Claim reward now!'
-                  : 'Next reward in ${_formatDuration(_timeLeft)}',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        )
       ],
     );
   }
 
-  Widget _weekStripSection(int currentDay, int claimedThrough, bool available) {
-    const cardW = 64.0;
-    const gap = 10.0;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                for (var n = 1; n <= 7; n++) ...[
-                  _dayCard(n, currentDay, claimedThrough, available, cardW),
-                  if (n < 7) const SizedBox(width: gap),
-                ],
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                for (var n = 1; n <= 7; n++) ...[
-                  Container(
-                    width: cardW,
-                    alignment: Alignment.center,
-                    child: _timelineDot(n, currentDay, claimedThrough, available),
-                  ),
-                  if (n < 7) _timelineLine(n, currentDay, claimedThrough, available, gap),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
+  Widget _dots(GameTheme theme, int day, int claimedThrough, bool available) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var n = 1; n <= 7; n++) ...[
+          if (n > 1) const SizedBox(width: 8),
+          _dot(theme, n, day, claimedThrough, available),
+        ],
+      ],
     );
   }
 
-  Widget _dayCard(
-    int n,
-    int currentDay,
-    int claimedThrough,
-    bool available,
-    double w,
-  ) {
-    final isClaimed = n <= claimedThrough;
-    final isToday = available && n == currentDay;
-    final isLocked = n > currentDay;
-
-    Color bg;
-    Border? border;
-    Color textCol;
-    Widget icon;
-
-    if (isToday) {
-      bg = Colors.white;
-      border = null;
-      textCol = const Color(0xFF1E1B4B);
-      icon = Container(
-        width: 24,
-        height: 24,
-        decoration: const BoxDecoration(
-          color: Color(0xFF8B5CF6),
-          shape: BoxShape.circle,
+  Widget _dot(
+      GameTheme theme, int n, int day, int claimedThrough, bool available) {
+    final claimed = n <= claimedThrough;
+    final today = available && n == day;
+    if (today) {
+      return Container(
+        width: 26,
+        height: 9,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(5),
         ),
-        child: const Icon(Icons.check_rounded, color: Colors.white, size: 14),
-      );
-    } else if (isClaimed) {
-      bg = Colors.white.withOpacity(0.08);
-      border = Border.all(color: Colors.white.withOpacity(0.12), width: 1);
-      textCol = Colors.white.withOpacity(0.5);
-      icon = Container(
-        width: 24,
-        height: 24,
-        decoration: const BoxDecoration(
-          color: Color(0xFF8B5CF6),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.check_rounded, color: Colors.white, size: 14),
-      );
-    } else {
-      // Locked future day
-      bg = Colors.white.withOpacity(0.04);
-      border = Border.all(color: Colors.white.withOpacity(0.08), width: 1);
-      textCol = Colors.white.withOpacity(0.35);
-      icon = Icon(
-        Icons.lock_outline_rounded,
-        color: Colors.white.withOpacity(0.35),
-        size: 20,
       );
     }
-
-    final coins = giftCoins(n);
-
     return Container(
-      width: w,
-      height: 96,
+      width: 9,
+      height: 9,
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(14),
-        border: border,
-        boxShadow: isToday
-            ? [
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                )
-              ]
-            : null,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'DAY $n',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: textCol.withOpacity(isToday ? 0.7 : 0.8),
-            ),
-          ),
-          const SizedBox(height: 8),
-          icon,
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '$coins',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                  color: textCol,
-                ),
-              ),
-              const SizedBox(width: 3),
-              CoinIcon(size: 11),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _timelineDot(int n, int currentDay, int claimedThrough, bool available) {
-    final isCompletedOrToday = n <= currentDay;
-    final dotColor = isCompletedOrToday
-        ? const Color(0xFFEC4899)
-        : Colors.white.withOpacity(0.2);
-
-    return Container(
-      width: 10,
-      height: 10,
-      decoration: BoxDecoration(
-        color: dotColor,
         shape: BoxShape.circle,
-        boxShadow: isCompletedOrToday
-            ? [
-                BoxShadow(
-                  color: const Color(0xFFEC4899).withOpacity(0.5),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                )
-              ]
-            : null,
+        color: claimed ? _claimedGreen : Colors.white.withValues(alpha: 0.35),
       ),
     );
   }
 
-  Widget _timelineLine(int n, int currentDay, int claimedThrough, bool available, double w) {
-    final isActive = n < currentDay;
-    final lineColor = isActive
-        ? const Color(0xFFEC4899)
-        : Colors.white.withOpacity(0.12);
-
+  Widget _streakReminder(GameTheme theme) {
+    final c = theme.onBackground;
     return Container(
-      width: w,
-      height: 2.5,
-      color: lineColor,
-    );
-  }
-
-  Widget _streakReminder() {
-    return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.08), width: 1),
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFFFF8A3D).withOpacity(0.12),
+              color: kFlame.withValues(alpha: 0.18),
               shape: BoxShape.circle,
             ),
             child: const Center(
-              child: Text('🔥', style: TextStyle(fontSize: 22)),
-            ),
+                child: Text('🔥', style: TextStyle(fontSize: 20))),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Keep your streak alive!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  "Don't miss a day to maximize your rewards.",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                  ),
-                ),
+                Text('Keep your streak alive!',
+                    style: TextStyle(
+                        color: c, fontSize: 14, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 2),
+                Text("Don't miss a day to maximize your rewards.",
+                    style: TextStyle(
+                        color: c.withValues(alpha: 0.6), fontSize: 12)),
               ],
             ),
           ),
@@ -601,103 +369,89 @@ class _DailyRewardScreenState extends State<DailyRewardScreen> {
     );
   }
 
-  Widget _bottomAction(bool available, int reward) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
-      child: available
-          ? Container(
-              width: double.infinity,
-              height: 56,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                gradient: const LinearGradient(
-                  colors: _buttonGradient,
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFEC4899).withOpacity(0.45),
-                    blurRadius: 18,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                ),
-                onPressed: widget.onClaim,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('✨', style: TextStyle(fontSize: 16, color: Colors.white70)),
-                    const SizedBox(width: 8),
-                    const Text('🎁', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Claim +$reward Reward',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('✨', style: TextStyle(fontSize: 16, color: Colors.white70)),
-                  ],
-                ),
-              ),
-            )
-          : Container(
-              width: double.infinity,
-              height: 56,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                color: Colors.white.withOpacity(0.08),
-                border: Border.all(color: Colors.white.withOpacity(0.12), width: 1),
-              ),
-              child: Center(
-                child: Text(
-                  'Come back tomorrow',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.4),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
+  Widget _button(GameTheme theme, bool available, int reward) {
+    if (_revealing) {
+      return const SizedBox(height: 56); // reserve space while coins fly
+    }
+    if (!available) {
+      return Container(
+        width: double.infinity,
+        height: 56,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          color: Colors.white.withValues(alpha: 0.12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+        ),
+        child: Text('Come back tomorrow',
+            style: TextStyle(
+                color: theme.onBackground.withValues(alpha: 0.6),
+                fontSize: 15,
+                fontWeight: FontWeight.w800)),
+      );
+    }
+    return GestureDetector(
+      onTap: () => _reveal(reward),
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: const LinearGradient(colors: _giftGradient),
+          boxShadow: [
+            BoxShadow(
+                color: kCoinGold.withValues(alpha: 0.45),
+                blurRadius: 18,
+                offset: const Offset(0, 6)),
+          ],
+        ),
+        child: const Text('Tap to Reveal 🎁',
+            style: TextStyle(
+                color: Color(0xFF5A3A00),
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.3)),
+      ),
     );
   }
 
-  Widget _footer() {
+  Widget _footer(GameTheme theme) {
+    final c = theme.onBackground.withValues(alpha: 0.5);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20, top: 4),
+      padding: const EdgeInsets.only(bottom: 16, top: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.verified_user_outlined,
-            color: Colors.white.withOpacity(0.4),
-            size: 14,
-          ),
+          Icon(Icons.verified_user_outlined, color: c, size: 13),
           const SizedBox(width: 6),
-          Text(
-            'Rewards reset daily at midnight',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          Text('Rewards reset daily at midnight',
+              style: TextStyle(
+                  color: c, fontSize: 12, fontWeight: FontWeight.w600)),
         ],
       ),
+    );
+  }
+}
+
+/// The white ribbon cross on the wrapped gift.
+class _Ribbon extends StatelessWidget {
+  const _Ribbon();
+
+  @override
+  Widget build(BuildContext context) {
+    final band = Colors.white.withValues(alpha: 0.45);
+    return Stack(
+      children: [
+        Align(
+          alignment: Alignment.center,
+          child: Container(width: 26, color: band),
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: Container(height: 26, color: band),
+        ),
+      ],
     );
   }
 }

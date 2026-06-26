@@ -28,15 +28,14 @@ void main() {
     await tester.tap(find.text('🎁'));
     await tester.pumpAndSettle();
 
-    // Day-1 gift pays 10 coins.
-    expect(find.text('Claim +10 Reward'), findsOneWidget);
-    await tester.tap(find.text('Claim +10 Reward'));
+    // Day-1 gift pays 10 coins — tap the gift to reveal it.
+    expect(find.text('Tap to Reveal 🎁'), findsOneWidget);
+    await tester.tap(find.text('Tap to Reveal 🎁'));
+    await tester.pump(); // start the reveal
+    await tester.pump(const Duration(milliseconds: 1300)); // coins fly, then claim
     await tester.pumpAndSettle();
 
-    // Day-1 gift pays 10 coins -> the coins stat shows 10.
+    // Day-1 gift pays 10 coins -> the coins stat shows 10 on the hub.
     expect(find.text('10'), findsOneWidget);
-
-    // Flush the toast's auto-dismiss timer.
-    await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 }

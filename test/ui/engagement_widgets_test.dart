@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game2048/game/daily_engagement.dart';
+import 'package:game2048/game/sound_service.dart';
 import 'package:game2048/ui/engagement/coin_pill.dart';
 import 'package:game2048/ui/engagement/streak_pill.dart';
 import 'package:game2048/ui/engagement/daily_gift_button.dart';
@@ -35,18 +36,23 @@ void main() {
     expect(tapped, true);
   });
 
-  testWidgets('DailyRewardScreen shows the day reward and claims it',
+  testWidgets('DailyRewardScreen reveals the gift and claims it',
       (tester) async {
     var claimed = false;
     const progress = PlayerProgress(streakCurrent: 5, giftClaimedDate: '2026-06-07');
     await tester.pumpWidget(_wrapScreen(DailyRewardScreen(
       progress: progress,
       today: DateTime(2026, 6, 8),
+      sound: SoundService(),
       onClaim: () => claimed = true,
     )));
 
-    expect(find.text('+60'), findsOneWidget); // day-5 gift
-    await tester.tap(find.text('Claim +60 Reward'));
+    expect(find.text('Tap to open Day 5'), findsOneWidget);
+    expect(find.text('Tap to Reveal 🎁'), findsOneWidget);
+
+    await tester.tap(find.text('Tap to Reveal 🎁'));
+    await tester.pump(); // start the reveal
+    await tester.pump(const Duration(milliseconds: 1300)); // coins fly, then claim
     expect(claimed, true);
   });
 
@@ -57,31 +63,28 @@ void main() {
     await tester.pumpWidget(_wrapScreen(DailyRewardScreen(
       progress: progress,
       today: DateTime(2026, 6, 8),
+      sound: SoundService(),
       onClaim: () => claimed = true,
     )));
 
-    expect(find.textContaining('Claim'), findsNothing);
-    expect(find.textContaining('Come back'), findsWidgets);
+    expect(find.text('Tap to Reveal 🎁'), findsNothing);
+    expect(find.text('Come back tomorrow'), findsOneWidget);
     expect(claimed, false);
   });
 
-  testWidgets('DailyRewardScreen shows the 7-day strip with the jackpot day',
+  testWidgets('DailyRewardScreen shows the tap-to-open gift and streak reminder',
       (tester) async {
     const progress = PlayerProgress(streakCurrent: 5, giftClaimedDate: '2026-06-07');
     await tester.pumpWidget(_wrapScreen(DailyRewardScreen(
       progress: progress,
       today: DateTime(2026, 6, 8),
+      sound: SoundService(),
       onClaim: () {},
     )));
 
-    // Scroll down to build off-screen items in the lazy ListView
-    await tester.drag(find.byType(ListView), const Offset(0, -400));
-    await tester.pumpAndSettle();
-
-    expect(find.text('This week'), findsOneWidget);
-    expect(find.text('DAY 1'), findsOneWidget);
-    expect(find.text('DAY 7'), findsOneWidget);
-    expect(find.text('150'), findsOneWidget); // day-7 jackpot coins
+    expect(find.text('Tap to open Day 5'), findsOneWidget);
+    expect(find.text('Keep your streak alive!'), findsOneWidget);
+    expect(find.text('Rewards reset daily at midnight'), findsOneWidget);
   });
 
   testWidgets('StreakSheet shows current and best streak', (tester) async {
