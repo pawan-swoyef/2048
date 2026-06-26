@@ -73,11 +73,17 @@ class _AllGamesScreenState extends State<AllGamesScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 6, 20, 24),
                 children: [
                   _heroCard(theme, daily),
-                  const SizedBox(height: 16),
-                  for (final g in others) ...[
-                    _glassCard(theme, g),
-                    const SizedBox(height: 12),
-                  ],
+                  const SizedBox(height: 18),
+                  _sectionLabel(theme),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.88,
+                    children: [for (final g in others) _gameTile(theme, g)],
+                  ),
                 ],
               ),
             ),
@@ -239,55 +245,160 @@ class _AllGamesScreenState extends State<AllGamesScreen> {
     );
   }
 
-  Widget _glassCard(GameTheme theme, GameInfo game) {
+  Widget _sectionLabel(GameTheme theme) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 2, bottom: 11),
+      child: Text('GAMES',
+          style: TextStyle(
+              color: theme.onBackground.withValues(alpha: 0.62),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.4)),
+    );
+  }
+
+  /// A square game card: a signature gradient icon on a tinted stage, with the
+  /// name + best score on a gradient foot.
+  Widget _gameTile(GameTheme theme, GameInfo game) {
     return GestureDetector(
       onTap: () => _open(game),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.all(13),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: theme.scoreBox,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.glassStroke, width: 1.2),
+          color: const Color(0x0FFFFFFF),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0x24FFFFFF), width: 1),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 18,
+                offset: const Offset(0, 8)),
+          ],
         ),
-        child: Row(
+        child: Column(
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: game.accent.withValues(alpha: 0.20),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Icon(game.icon, color: game.accent, size: 26),
-            ),
-            const SizedBox(width: 14),
             Expanded(
+              child: Container(
+                width: double.infinity,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [game.accent.withValues(alpha: 0.16), Colors.transparent],
+                  ),
+                ),
+                child: _sigTile(game),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(13, 9, 13, 13),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Color(0x4D000000), Colors.transparent],
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(game.title,
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                          color: theme.onBackground)),
-                  Text(game.subtitle,
-                      style: TextStyle(fontSize: 12, color: theme.scoreLabel)),
-                  const SizedBox(height: 3),
-                  Text('👑 ${game.bestText(_bests[game.id] ?? 0)}',
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: theme.onBackground.withValues(alpha: 0.9))),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.2)),
+                  const SizedBox(height: 1),
+                  Text(game.bestText(_bests[game.id] ?? 0),
+                      style: const TextStyle(
+                          color: Color(0x99FFFFFF), fontSize: 10.5)),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right,
-                color: theme.onBackground.withValues(alpha: 0.6)),
           ],
         ),
       ),
+    );
+  }
+
+  /// The branded "signature tile" for each game.
+  Widget _sigTile(GameInfo game) {
+    switch (game.id) {
+      case '2048':
+        return _tile(
+          const [Color(0xFFFFD76A), Color(0xFFFFAE12)],
+          const Text('2048',
+              style: TextStyle(
+                  color: Color(0xFF5A3A00),
+                  fontSize: 27,
+                  fontWeight: FontWeight.w900)),
+        );
+      case 'numbertap':
+        return _tile(
+          const [Color(0xFF7FD4FB), Color(0xFF2196D6)],
+          const Text('7',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 54,
+                  fontWeight: FontWeight.w900)),
+        );
+      case 'numbersort':
+        return _tile(
+          const [Color(0xFF9CF28E), Color(0xFF4CC23A)],
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [_bar(34), _bar(56), _bar(46)],
+          ),
+        );
+      case 'magicsquare':
+        return _tile(
+          const [Color(0xFFCB8CFF), Color(0xFF9333EA)],
+          const Text('8 1 6\n3 5 7\n4 9 2',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  height: 1.2)),
+        );
+      default:
+        return _tile([game.accent, game.accent],
+            Icon(game.icon, color: Colors.white, size: 48));
+    }
+  }
+
+  Widget _tile(List<Color> colors, Widget child) {
+    return Container(
+      width: 104,
+      height: 104,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+            begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.32),
+              blurRadius: 18,
+              offset: const Offset(0, 9)),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _bar(double h) {
+    return Container(
+      width: 12,
+      height: h,
+      margin: const EdgeInsets.symmetric(horizontal: 2.5),
+      decoration: BoxDecoration(
+          color: Colors.white, borderRadius: BorderRadius.circular(3)),
     );
   }
 }

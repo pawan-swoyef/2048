@@ -23,7 +23,8 @@ void main() {
   testWidgets('lists the other games as cards', (tester) async {
     await tester.pumpWidget(_wrap());
     await tester.pumpAndSettle();
-    expect(find.text('2048'), findsOneWidget);
+    // "2048" appears on both the game's signature tile and its name label.
+    expect(find.text('2048'), findsWidgets);
     expect(find.text('Number Tap'), findsOneWidget);
     expect(find.text('Number Sort'), findsOneWidget);
   });
