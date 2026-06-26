@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Games — B with game icons</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,Inter,sans-serif; }
+  body { background:#15102e; color:#eee; padding:30px 18px 80px; }
+  h1 { text-align:center; font-size:25px; color:#fff; margin-bottom:6px; }
+  .sub { text-align:center; color:#b9b2d8; font-size:14px; margin-bottom:34px; max-width:760px; margin-inline:auto; }
+  .rowwrap { display:flex; flex-wrap:wrap; gap:44px; justify-content:center; align-items:flex-start; }
+  .opt { width:288px; }
+  .opt h2 { text-align:center; font-size:16px; color:#fff; margin-bottom:3px; }
+  .opt .tag { text-align:center; font-size:12px; color:#b9b2d8; margin-bottom:14px; min-height:30px; }
+
+  .phone { height:560px; border-radius:34px; padding:18px 16px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:0 18px 44px rgba(0,0,0,.5);
+    background:linear-gradient(165deg,#5b3df5,#a23df5 55%,#f53d9e); }
+  .top { display:flex; align-items:center; margin-bottom:14px; }
+  .top h3 { color:#fff; font-size:19px; font-weight:800; letter-spacing:-.3px; flex:1; }
+  .pill { background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.26); border-radius:18px; padding:6px 12px; color:#fff; font-size:12px; font-weight:700; }
+  .sectlabel { color:rgba(255,255,255,.62); font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; margin-bottom:11px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  /* B card shell */
+  .card { border-radius:18px; overflow:hidden; aspect-ratio:.9; position:relative; display:flex; flex-direction:column;
+    border:1px solid rgba(255,255,255,.14); box-shadow:0 8px 22px rgba(0,0,0,.22); background:rgba(255,255,255,.06); }
+  .art { flex:1; display:flex; align-items:center; justify-content:center; }
+  .meta { padding:10px 12px 12px; background:linear-gradient(0deg,rgba(0,0,0,.30),transparent); }
+  .nm { color:#fff; font-size:14px; font-weight:700; letter-spacing:-.2px; }
+  .st { color:rgba(255,255,255,.6); font-size:10px; margin-top:1px; }
+
+  /* ---- Style 1: signature number-tile icons ---- */
+  .tile { width:56px; height:56px; border-radius:15px; display:flex; align-items:center; justify-content:center;
+    font-weight:900; color:#fff; box-shadow:0 6px 14px rgba(0,0,0,.3); position:relative; }
+  .t2048 { background:linear-gradient(135deg,#ffd76a,#ffae12); color:#5a3a00; font-size:15px; }
+  .ttap { background:linear-gradient(135deg,#7fd4fb,#2196d6); font-size:24px; }
+  .tsort { background:linear-gradient(135deg,#9cf28e,#4cc23a); display:flex; gap:3px; align-items:flex-end; padding:12px 0; }
+  .tsort i { width:7px; border-radius:2px; background:#fff; }
+  .tmagic { background:linear-gradient(135deg,#cb8cff,#9333ea); font-size:20px; }
+
+  /* ---- Style 2: glyph in tinted soft circle ---- */
+  .circle { width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px; }
+
+  /* ---- Style 3: duotone rounded-square line icon ---- */
+  .duo { width:58px; height:58px; border-radius:17px; display:flex; align-items:center; justify-content:center; }
+</style>
+</head>
+<body>
+  <h1>All Games — design B with game icons</h1>
+  <p class="sub">Design B's card (icon hero + name/best foot), with three icon treatments. Same Daily hero above (omitted here to focus on the grid). Pick a style — 1, 2, or 3.</p>
+
+  <div class="rowwrap">
+
+    <!-- Style 1 -->
+    <div class="opt"><h2>1 · Signature tiles</h2><div class="tag">Each game as a bold branded tile — 2048 tile, a target number, sorted bars, a 3×3</div>
+      <div class="phone">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="sectlabel">Games</div>
+        <div class="grid">
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(255,193,46,.16),transparent);"><div class="tile t2048">2048</div></div><div class="meta"><div class="nm">2048</div><div class="st">Best 12480</div></div></div>
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(79,195,247,.16),transparent);"><div class="tile ttap">7</div></div><div class="meta"><div class="nm">Number Tap</div><div class="st">Best 9.4s</div></div></div>
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(123,232,107,.16),transparent);"><div class="tile tsort"><i style="height:18px;"></i><i style="height:30px;"></i><i style="height:24px;"></i></div></div><div class="meta"><div class="nm">Number Sort</div><div class="st">Best 8 moves</div></div></div>
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(177,76,255,.16),transparent);"><div class="tile tmagic" style="font-size:11px;line-height:1.1;text-align:center;font-weight:800;">8 1 6<br>3 5 7<br>4 9 2</div></div><div class="meta"><div class="nm">Magic Square</div><div class="st">Best 10.2s</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Style 2 -->
+    <div class="opt"><h2>2 · Soft circle glyphs</h2><div class="tag">A clean glyph in a tinted circle — minimal, friendly, very legible</div>
+      <div class="phone">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="sectlabel">Games</div>
+        <div class="grid">
+          <div class="card"><div class="art"><div class="circle" style="background:rgba(255,193,46,.18);color:#FFD27A;font-size:15px;">2048</div></div><div class="meta"><div class="nm">2048</div><div class="st">Best 12480</div></div></div>
+          <div class="card"><div class="art"><div class="circle" style="background:rgba(79,195,247,.18);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7fd4fb" stroke-width="2"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11" stroke-linecap="round"/><path d="M12 11V8.5a1.5 1.5 0 0 1 3 0V12" stroke-linecap="round"/><path d="M15 12v-1a1.5 1.5 0 0 1 3 0v5a4 4 0 0 1-4 4h-2.5a3 3 0 0 1-2.3-1.1L7 18c-1-1.2-2-2.5-2.6-3.4a1.4 1.4 0 0 1 2-1.9L9 14.5V11" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="meta"><div class="nm">Number Tap</div><div class="st">Best 9.4s</div></div></div>
+          <div class="card"><div class="art"><div class="circle" style="background:rgba(123,232,107,.18);"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9cf28e" stroke-width="2" stroke-linecap="round"><path d="M5 21V11M12 21V6M19 21v-8"/><path d="M3 11h4M10 6h4M17 13h4"/></svg></div></div><div class="meta"><div class="nm">Number Sort</div><div class="st">Best 8 moves</div></div></div>
+          <div class="card"><div class="art"><div class="circle" style="background:rgba(177,76,255,.18);color:#cb8cff;font-size:11px;line-height:1.15;text-align:center;font-weight:800;">8 1 6<br>3 5 7<br>4 9 2</div></div><div class="meta"><div class="nm">Magic Square</div><div class="st">Best 10.2s</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Style 3 -->
+    <div class="opt"><h2>3 · Duotone icons</h2><div class="tag">Filled, modern duotone icons in a rounded tile — app-store polished</div>
+      <div class="phone">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="sectlabel">Games</div>
+        <div class="grid">
+          <div class="card"><div class="art"><div class="duo" style="background:rgba(255,193,46,.18);"><svg width="30" height="30" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2" fill="#FFC12E"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#FFC12E" opacity=".45"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#FFC12E" opacity=".45"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#FFC12E"/></svg></div></div><div class="meta"><div class="nm">2048</div><div class="st">Best 12480</div></div></div>
+          <div class="card"><div class="art"><div class="duo" style="background:rgba(79,195,247,.18);"><svg width="30" height="30" viewBox="0 0 24 24"><circle cx="10" cy="10" r="7" fill="#4FC3F7" opacity=".45"/><circle cx="10" cy="10" r="3.4" fill="#4FC3F7"/><rect x="14" y="14" width="7" height="7" rx="2" fill="#4FC3F7"/></svg></div></div><div class="meta"><div class="nm">Number Tap</div><div class="st">Best 9.4s</div></div></div>
+          <div class="card"><div class="art"><div class="duo" style="background:rgba(123,232,107,.18);"><svg width="30" height="30" viewBox="0 0 24 24"><rect x="3" y="11" width="5" height="10" rx="1.5" fill="#7BE86B" opacity=".5"/><rect x="9.5" y="5" width="5" height="16" rx="1.5" fill="#7BE86B"/><rect x="16" y="14" width="5" height="7" rx="1.5" fill="#7BE86B" opacity=".5"/></svg></div></div><div class="meta"><div class="nm">Number Sort</div><div class="st">Best 8 moves</div></div></div>
+          <div class="card"><div class="art"><div class="duo" style="background:rgba(177,76,255,.18);"><svg width="30" height="30" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#B14CFF" opacity=".28"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.2" fill="#B14CFF"/><rect x="3" y="3" width="5" height="5" rx="1.2" fill="#B14CFF" opacity=".7"/><rect x="16" y="16" width="5" height="5" rx="1.2" fill="#B14CFF" opacity=".7"/></svg></div></div><div class="meta"><div class="nm">Magic Square</div><div class="st">Best 10.2s</div></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Games — professional grid</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,Inter,sans-serif; }
+  body { background:#15102e; color:#eee; padding:30px 18px 80px; }
+  h1 { text-align:center; font-size:25px; color:#fff; margin-bottom:6px; }
+  .sub { text-align:center; color:#b9b2d8; font-size:14px; margin-bottom:34px; max-width:760px; margin-inline:auto; }
+  .rowwrap { display:flex; flex-wrap:wrap; gap:44px; justify-content:center; align-items:flex-start; }
+  .opt { width:288px; }
+  .opt h2 { text-align:center; font-size:16px; color:#fff; margin-bottom:3px; }
+  .opt .tag { text-align:center; font-size:12px; color:#b9b2d8; margin-bottom:14px; min-height:30px; }
+
+  .phone { height:610px; border-radius:34px; padding:18px 16px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:0 18px 44px rgba(0,0,0,.5);
+    background:linear-gradient(165deg,#5b3df5,#a23df5 55%,#f53d9e); }
+
+  .top { display:flex; align-items:center; margin-bottom:14px; }
+  .top h3 { color:#fff; font-size:19px; font-weight:800; letter-spacing:-.3px; flex:1; }
+  .top .pill { background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.26); border-radius:18px; padding:6px 12px; color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; gap:5px; }
+
+  /* Daily hero — unchanged */
+  .hero { border-radius:22px; padding:17px 18px; margin-bottom:20px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#ff7eb3,#ff6fa5 55%,#c84bd6); box-shadow:0 10px 24px rgba(200,75,150,.38); }
+  .hero .deco { position:absolute; right:14px; top:50%; transform:translateY(-50%); opacity:.22; }
+  .hero .b { display:inline-block; background:rgba(255,255,255,.22); color:#fff; font-size:9.5px; font-weight:700; padding:4px 10px; border-radius:11px; letter-spacing:.8px; }
+  .hero .t { color:#fff; font-size:21px; font-weight:800; margin-top:8px; letter-spacing:-.3px; }
+  .hero .s { color:rgba(255,255,255,.88); font-size:11.5px; margin-top:1px; }
+  .hero .play { display:inline-flex; align-items:center; gap:6px; background:#fff; color:#c8336e; font-weight:800; font-size:13px; padding:8px 17px; border-radius:18px; margin-top:13px; }
+
+  .sectlabel { color:rgba(255,255,255,.62); font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; margin-bottom:11px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  svg { display:block; }
+  .chip { display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.14);
+    border-radius:9px; padding:4px 8px; font-size:10.5px; font-weight:700; color:rgba(255,255,255,.82); }
+  .chip svg { opacity:.7; }
+
+  /* ===== A · Refined glass ===== */
+  .a .card { border-radius:18px; padding:14px; aspect-ratio:.92; display:flex; flex-direction:column;
+    background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.055));
+    border:1px solid rgba(255,255,255,.15); box-shadow:0 8px 22px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.16); }
+  .a .iconbox { width:42px; height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; }
+  .a .nm { color:#fff; font-size:15px; font-weight:700; letter-spacing:-.2px; margin-top:auto; }
+  .a .st { color:rgba(255,255,255,.55); font-size:10.5px; margin:2px 0 9px; line-height:1.2; }
+
+  /* ===== B · Board art ===== */
+  .b .card { border-radius:18px; overflow:hidden; aspect-ratio:.86; position:relative; display:flex; flex-direction:column;
+    border:1px solid rgba(255,255,255,.14); box-shadow:0 8px 22px rgba(0,0,0,.22); background:rgba(0,0,0,.18); }
+  .b .art { flex:1; padding:14px; display:flex; align-items:center; justify-content:center; }
+  .b .meta { padding:10px 12px 12px; background:linear-gradient(0deg,rgba(0,0,0,.35),transparent); }
+  .b .nm { color:#fff; font-size:14px; font-weight:700; letter-spacing:-.2px; }
+  .b .st { color:rgba(255,255,255,.6); font-size:10px; margin-top:1px; }
+  .miniboard { display:grid; gap:3px; }
+
+  /* ===== C · Minimal editorial ===== */
+  .c .card { border-radius:16px; padding:15px 14px; aspect-ratio:1.04; display:flex; flex-direction:column;
+    background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); }
+  .c .iconline { width:34px; height:34px; }
+  .c .nm { color:#fff; font-size:15px; font-weight:700; letter-spacing:-.2px; margin-top:auto; }
+  .c .st { color:rgba(255,255,255,.5); font-size:10.5px; margin-top:2px; }
+  .c .rule { height:1px; background:rgba(255,255,255,.1); margin:11px 0 9px; }
+  .c .best { color:rgba(255,255,255,.85); font-size:11px; font-weight:700; }
+  .c .accent { width:22px; height:3px; border-radius:2px; }
+</style>
+</head>
+<body>
+  <h1>All Games — professional grid</h1>
+  <p class="sub">Refined cards: crisp line icons, restrained glass, clear type hierarchy, tasteful best-score chips. Daily Challenge kept as the top hero. Pick a number.</p>
+
+  <div class="rowwrap">
+
+    <!-- A -->
+    <div class="opt"><h2>A · Refined glass</h2><div class="tag">Soft glass cards, accent-tinted line icon, clean name + best chip. Polished, Apple-Arcade-ish</div>
+      <div class="phone a">
+        <div class="top"><h3>All Games</h3><div class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff9a3d" stroke-width="2.4"><path d="M12 3c1 3 4 4 4 7a4 4 0 0 1-8 0c0-1.5 1-2.5 1-2.5" stroke-linecap="round"/></svg>5</div></div>
+        <div class="hero"><div class="deco"><svg width="62" height="62" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4" stroke-linecap="round"/></svg></div><div class="b">DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in the fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="sectlabel">Games</div>
+        <div class="grid">
+          <div class="card"><div class="iconbox" style="background:rgba(255,193,46,.16);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFC12E" stroke-width="2"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg></div><div class="nm">2048</div><div class="st">Classic merge</div><span class="chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="#ffd23f"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>12480</span></div>
+          <div class="card"><div class="iconbox" style="background:rgba(79,195,247,.16);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4FC3F7" stroke-width="2"><circle cx="9" cy="9" r="5"/><path d="M13 13l6 6M16 16l-1.5 4-2-6 6 2-4 1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nm">Number Tap</div><div class="st">Beat the clock</div><span class="chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="#ffd23f"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>9.4s</span></div>
+          <div class="card"><div class="iconbox" style="background:rgba(123,232,107,.16);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7BE86B" stroke-width="2" stroke-linecap="round"><path d="M5 21V11M12 21V5M19 21v-7"/></svg></div><div class="nm">Number Sort</div><div class="st">Fewest moves</div><span class="chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="#ffd23f"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>8</span></div>
+          <div class="card"><div class="iconbox" style="background:rgba(177,76,255,.16);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B14CFF" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div><div class="nm">Magic Square</div><div class="st">Lines sum to 15</div><span class="chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="#ffd23f"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>10.2s</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="opt"><h2>B · Board art</h2><div class="tag">Each card leads with a crisp snapshot of the game; name + best on a gradient foot. Premium gallery feel</div>
+      <div class="phone b">
+        <div class="top"><h3>All Games</h3><div class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff9a3d" stroke-width="2.4"><path d="M12 3c1 3 4 4 4 7a4 4 0 0 1-8 0c0-1.5 1-2.5 1-2.5" stroke-linecap="round"/></svg>5</div></div>
+        <div class="hero"><div class="deco"><svg width="62" height="62" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4" stroke-linecap="round"/></svg></div><div class="b">DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in the fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="sectlabel">Games</div>
+        <div class="grid">
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(255,193,46,.18),rgba(255,193,46,.04));"><div class="miniboard" style="grid-template-columns:repeat(3,16px);grid-auto-rows:16px;"><div style="background:#d9dbf7;border-radius:3px;"></div><div style="background:#7fe0d2;border-radius:3px;"></div><div style="background:#0002;border-radius:3px;"></div><div style="background:#ffb23f;border-radius:3px;"></div><div style="background:#ff6a3d;border-radius:3px;"></div><div style="background:#0002;border-radius:3px;"></div><div style="background:#54cc57;border-radius:3px;"></div><div style="background:#0002;border-radius:3px;"></div><div style="background:#3fa3f0;border-radius:3px;"></div></div></div><div class="meta"><div class="nm">2048</div><div class="st">Best 12480</div></div></div>
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(79,195,247,.18),rgba(79,195,247,.04));"><div class="miniboard" style="grid-template-columns:repeat(3,16px);grid-auto-rows:16px;"><div style="background:#34c759;border-radius:3px;"></div><div style="background:#fff2;border-radius:3px;"></div><div style="background:#fff2;border-radius:3px;"></div><div style="background:#fff2;border-radius:3px;"></div><div style="background:#34c759;border-radius:3px;"></div><div style="background:#fff2;border-radius:3px;"></div><div style="background:#fff2;border-radius:3px;"></div><div style="background:#fff2;border-radius:3px;"></div><div style="background:#34c759;border-radius:3px;"></div></div></div><div class="meta"><div class="nm">Number Tap</div><div class="st">Best 9.4s</div></div></div>
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(123,232,107,.18),rgba(123,232,107,.04));"><div style="display:flex;align-items:flex-end;gap:5px;height:50px;"><div style="width:11px;height:60%;background:#ffb23f;border-radius:3px;"></div><div style="width:11px;height:90%;background:#ff4d9d;border-radius:3px;"></div><div style="width:11px;height:40%;background:#3fa3f0;border-radius:3px;"></div></div></div><div class="meta"><div class="nm">Number Sort</div><div class="st">Best 8 moves</div></div></div>
+          <div class="card"><div class="art" style="background:linear-gradient(160deg,rgba(177,76,255,.18),rgba(177,76,255,.04));"><div class="miniboard" style="grid-template-columns:repeat(3,16px);grid-auto-rows:16px;"><div style="background:#e3d2ff;border-radius:3px;"></div><div style="background:#e3d2ff;border-radius:3px;"></div><div style="background:#e3d2ff;border-radius:3px;"></div><div style="background:#e3d2ff;border-radius:3px;"></div><div style="background:#cb8cff;border-radius:3px;"></div><div style="background:#e3d2ff;border-radius:3px;"></div><div style="background:#e3d2ff;border-radius:3px;"></div><div style="background:#e3d2ff;border-radius:3px;"></div><div style="background:#e3d2ff;border-radius:3px;"></div></div></div><div class="meta"><div class="nm">Magic Square</div><div class="st">Best 10.2s</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="opt"><h2>C · Minimal editorial</h2><div class="tag">Lots of air, monochrome line icon, a thin accent bar, strong type. Restrained &amp; premium</div>
+      <div class="phone c">
+        <div class="top"><h3>All Games</h3><div class="pill"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ff9a3d" stroke-width="2.4"><path d="M12 3c1 3 4 4 4 7a4 4 0 0 1-8 0c0-1.5 1-2.5 1-2.5" stroke-linecap="round"/></svg>5</div></div>
+        <div class="hero"><div class="deco"><svg width="62" height="62" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4" stroke-linecap="round"/></svg></div><div class="b">DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in the fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="sectlabel">Games</div>
+        <div class="grid">
+          <div class="card"><div class="accent" style="background:#FFC12E;"></div><svg class="iconline" style="margin-top:11px;" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg><div class="nm">2048</div><div class="st">Classic merge</div><div class="rule"></div><div class="best">Best 12480</div></div>
+          <div class="card"><div class="accent" style="background:#4FC3F7;"></div><svg class="iconline" style="margin-top:11px;" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="9" cy="9" r="5"/><path d="M13 13l6 6" stroke-linecap="round"/></svg><div class="nm">Number Tap</div><div class="st">Beat the clock</div><div class="rule"></div><div class="best">Best 9.4s</div></div>
+          <div class="card"><div class="accent" style="background:#7BE86B;"></div><svg class="iconline" style="margin-top:11px;" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M5 21V11M12 21V5M19 21v-7"/></svg><div class="nm">Number Sort</div><div class="st">Fewest moves</div><div class="rule"></div><div class="best">Best 8 moves</div></div>
+          <div class="card"><div class="accent" style="background:#B14CFF;"></div><svg class="iconline" style="margin-top:11px;" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg><div class="nm">Magic Square</div><div class="st">Lines sum to 15</div><div class="rule"></div><div class="best">Best 10.2s</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

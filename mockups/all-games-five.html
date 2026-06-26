@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Games — cards in the shape of "5"</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#15102e; color:#eee; padding:30px 18px 80px; }
+  h1 { text-align:center; font-size:25px; color:#fff; margin-bottom:6px; }
+  .sub { text-align:center; color:#b9b2d8; font-size:14px; margin-bottom:34px; max-width:780px; margin-inline:auto; }
+  .row { display:flex; flex-wrap:wrap; gap:42px; justify-content:center; align-items:flex-start; }
+  .opt { width:280px; }
+  .opt h2 { text-align:center; font-size:16px; color:#fff; margin-bottom:3px; }
+  .opt .tag { text-align:center; font-size:12px; color:#b9b2d8; margin-bottom:14px; min-height:32px; }
+
+  .phone { height:600px; border-radius:32px; padding:16px 14px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:0 16px 40px rgba(0,0,0,.5);
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e); }
+
+  .top { display:flex; align-items:center; margin-bottom:12px; }
+  .top h3 { color:#fff; font-size:18px; font-weight:900; flex:1; }
+  .pill { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); border-radius:18px; padding:5px 11px; color:#fff; font-size:12px; font-weight:800; }
+
+  /* daily hero (compact) */
+  .hero { border-radius:20px; padding:14px 16px; margin-bottom:16px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#ff7eb3,#ff6fa5 55%,#c84bd6); box-shadow:0 8px 20px rgba(200,75,150,.4); }
+  .hero .deco { position:absolute; right:-6px; top:-10px; font-size:64px; opacity:.18; }
+  .hero .b { display:inline-block; background:rgba(255,255,255,.25); color:#fff; font-size:9px; font-weight:800; padding:3px 9px; border-radius:11px; letter-spacing:.4px; }
+  .hero .t { color:#fff; font-size:18px; font-weight:900; margin-top:6px; }
+  .hero .s { color:#fff; opacity:.9; font-size:11px; }
+  .hero .play { display:inline-flex; align-items:center; gap:4px; background:#fff; color:#c8336e; font-weight:900; font-size:12px; padding:6px 14px; border-radius:16px; margin-top:10px; }
+
+  /* a game card (square tile) */
+  .card { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:16px; padding:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; aspect-ratio:1; }
+  .card .ic { width:42px; height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .card .nm { color:#fff; font-size:12px; font-weight:900; margin-top:7px; line-height:1.1; }
+  .card .bs { color:#ffffffb0; font-size:9px; margin-top:2px; }
+  .g2048 { background:rgba(255,193,46,.25); } .gtap { background:rgba(79,195,247,.25); }
+  .gsort { background:rgba(123,232,107,.25); } .gmagic { background:rgba(177,76,255,.25); }
+
+  .area { flex:1; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:9px; height:100%; }
+  .center5 { display:flex; align-items:center; justify-content:center; }
+  .five { width:100%; height:100%; border-radius:16px; background:linear-gradient(135deg,#ffd23f,#ffb300);
+    display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:900; color:#7a4a00; box-shadow:0 6px 14px rgba(0,0,0,.25); }
+  .empty { }
+
+  /* placements */
+  .p11{grid-area:1/1;} .p13{grid-area:1/3;} .p22{grid-area:2/2;} .p31{grid-area:3/1;} .p33{grid-area:3/3;}
+
+  /* watermark 5 */
+  .wm { position:absolute; right:-10px; bottom:40px; font-size:300px; font-weight:900; color:rgba(255,255,255,.07); line-height:1; z-index:0; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:11px; position:relative; z-index:1; }
+
+  .lead { text-align:center; color:#fff; font-size:11px; font-weight:800; opacity:.8; margin:2px 0 8px; letter-spacing:.5px; }
+</style>
+</head>
+<body>
+  <h1>All Games — cards arranged as a "5"</h1>
+  <p class="sub">Daily Challenge stays as the top hero; the 4 games (2048, Number Tap, Number Sort, Magic Square) form a "5". A few ways to read it — pick a number and I'll build it.</p>
+
+  <div class="row">
+
+    <!-- 1 Dice Five -->
+    <div class="opt"><h2>1 · Dice Five</h2><div class="tag">4 cards in the corners + a gold "5" in the middle — the classic dice-5 / number-5</div>
+      <div class="phone">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="area"><div class="grid">
+          <div class="card p11"><div class="ic g2048">🔢</div><div class="nm">2048</div><div class="bs">👑 12480</div></div>
+          <div class="card p13"><div class="ic gtap">👆</div><div class="nm">Number Tap</div><div class="bs">👑 9.4s</div></div>
+          <div class="center5 p22"><div class="five">5</div></div>
+          <div class="card p31"><div class="ic gsort">🟰</div><div class="nm">Number Sort</div><div class="bs">👑 8</div></div>
+          <div class="card p33"><div class="ic gmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">👑 10.2s</div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 2 Number-5 Trace -->
+    <div class="opt"><h2>2 · Number-5 Trace</h2><div class="tag">Cards step down the page tracing the digit 5 (top row, then down-left, then bottom-right)</div>
+      <div class="phone">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="area"><div class="grid">
+          <div class="card p11"><div class="ic g2048">🔢</div><div class="nm">2048</div><div class="bs">👑 12480</div></div>
+          <div class="card p13"><div class="ic gtap">👆</div><div class="nm">Number Tap</div><div class="bs">👑 9.4s</div></div>
+          <div class="card" style="grid-area:2/1;"><div class="ic gsort">🟰</div><div class="nm">Number Sort</div><div class="bs">👑 8</div></div>
+          <div class="card" style="grid-area:3/2/4/4;"><div class="ic gmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">👑 10.2s</div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 3 Zigzag-5 -->
+    <div class="opt"><h2>3 · Zigzag Stroke</h2><div class="tag">Cards offset in a zigzag that echoes the pen-stroke of a 5</div>
+      <div class="phone">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="area" style="display:flex;flex-direction:column;gap:10px;justify-content:center;">
+          <div style="display:flex;justify-content:flex-start;"><div class="card" style="width:46%;"><div class="ic g2048">🔢</div><div class="nm">2048</div><div class="bs">👑 12480</div></div></div>
+          <div style="display:flex;justify-content:flex-end;"><div class="card" style="width:46%;"><div class="ic gtap">👆</div><div class="nm">Number Tap</div><div class="bs">👑 9.4s</div></div></div>
+          <div style="display:flex;justify-content:flex-start;"><div class="card" style="width:46%;"><div class="ic gsort">🟰</div><div class="nm">Number Sort</div><div class="bs">👑 8</div></div></div>
+          <div style="display:flex;justify-content:flex-end;"><div class="card" style="width:46%;"><div class="ic gmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">👑 10.2s</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Big-5 Watermark -->
+    <div class="opt"><h2>4 · 2x2 + Giant "5"</h2><div class="tag">A clean 2×2 grid of cards over a big translucent Numjoy "5" behind</div>
+      <div class="phone">
+        <div class="wm">5</div>
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="area" style="display:flex;align-items:center;">
+          <div class="grid2">
+            <div class="card"><div class="ic g2048">🔢</div><div class="nm">2048</div><div class="bs">👑 12480</div></div>
+            <div class="card"><div class="ic gtap">👆</div><div class="nm">Number Tap</div><div class="bs">👑 9.4s</div></div>
+            <div class="card"><div class="ic gsort">🟰</div><div class="nm">Number Sort</div><div class="bs">👑 8</div></div>
+            <div class="card"><div class="ic gmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">👑 10.2s</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 Pentagon (all 5) -->
+    <div class="opt"><h2>5 · Pentagon (all 5 games)</h2><div class="tag">No separate hero — all 5 games (incl. Daily) as the 5 points of a pentagon</div>
+      <div class="phone">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="lead">5 GAMES · TAP TO PLAY</div>
+        <div class="area" style="position:relative;">
+          <!-- top center -->
+          <div class="card" style="position:absolute;left:50%;top:2%;transform:translateX(-50%);width:34%;background:rgba(255,111,165,.22);border-color:rgba(255,111,165,.5);"><div class="ic" style="background:rgba(255,111,165,.3);">📅</div><div class="nm">Daily</div><div class="bs">today</div></div>
+          <!-- upper left/right -->
+          <div class="card" style="position:absolute;left:2%;top:34%;width:34%;"><div class="ic g2048">🔢</div><div class="nm">2048</div><div class="bs">👑 12480</div></div>
+          <div class="card" style="position:absolute;right:2%;top:34%;width:34%;"><div class="ic gtap">👆</div><div class="nm">Number Tap</div><div class="bs">👑 9.4s</div></div>
+          <!-- lower left/right -->
+          <div class="card" style="position:absolute;left:12%;bottom:6%;width:34%;"><div class="ic gsort">🟰</div><div class="nm">Number Sort</div><div class="bs">👑 8</div></div>
+          <div class="card" style="position:absolute;right:12%;bottom:6%;width:34%;"><div class="ic gmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">👑 10.2s</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

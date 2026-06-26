@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Winning screen — premium redesigns</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,Inter,sans-serif; }
+  body { background:#15102e; color:#eee; padding:30px 18px 80px; }
+  h1 { text-align:center; font-size:25px; color:#fff; margin-bottom:6px; }
+  .sub { text-align:center; color:#b9b2d8; font-size:14px; margin-bottom:34px; max-width:760px; margin-inline:auto; }
+  .rowwrap { display:flex; flex-wrap:wrap; gap:42px; justify-content:center; align-items:flex-start; }
+  .opt { width:266px; }
+  .opt h2 { text-align:center; font-size:16px; color:#fff; margin-bottom:3px; }
+  .opt .tag { text-align:center; font-size:12px; color:#b9b2d8; margin-bottom:14px; min-height:30px; }
+
+  .phone { height:540px; border-radius:34px; padding:20px 18px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; box-shadow:0 18px 44px rgba(0,0,0,.5);
+    background:linear-gradient(165deg,#6a3df5,#9b3df5 55%,#f53d9e); }
+
+  .corner { position:absolute; top:18px; width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.4); display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px; }
+  .corner.x { right:18px; } .corner.s { left:18px; }
+
+  .confetti { position:absolute; inset:0; pointer-events:none; opacity:.85;
+    background-image:
+      radial-gradient(circle, #ff5ba3 2.5px, transparent 3px),
+      radial-gradient(circle, #3fd6f0 2.5px, transparent 3px),
+      radial-gradient(circle, #ffd23f 2.5px, transparent 3px),
+      radial-gradient(circle, #54cc57 2.5px, transparent 3px),
+      radial-gradient(circle, #b14cff 2.5px, transparent 3px);
+    background-size:46px 46px,58px 58px,52px 52px,66px 66px,72px 72px;
+    background-position:0 0,20px 14px,12px 36px,38px 8px,28px 50px; }
+
+  .mid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; width:100%; z-index:2; }
+  .title { color:#fff; font-size:40px; font-weight:900; letter-spacing:-1px; text-shadow:0 4px 16px rgba(0,0,0,.3); }
+  .subtitle { color:rgba(255,255,255,.85); font-size:13px; margin-top:2px; }
+
+  .panel { width:100%; border-radius:22px; padding:18px 16px; margin-top:18px;
+    background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.2); box-shadow:inset 0 1px 0 rgba(255,255,255,.25); }
+  .panel .l { color:rgba(255,255,255,.8); font-size:11px; font-weight:700; letter-spacing:1.5px; }
+  .panel .v { color:#ffd23f; font-size:52px; font-weight:900; line-height:1; text-shadow:0 3px 10px rgba(0,0,0,.25); margin-top:2px; }
+  .best { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:7px 16px; border-radius:18px;
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); color:#fff; font-size:12px; font-weight:800; }
+  .best .star { color:#ffd23f; }
+
+  .btn { width:100%; margin-top:auto; border:none; border-radius:20px; padding:16px; font-size:16px; font-weight:900; letter-spacing:.4px;
+    color:#fff; background:#2fb84a; box-shadow:0 6px 0 #1f8a35; cursor:pointer; z-index:2; }
+
+  /* graphics */
+  .halo { width:170px; height:170px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; }
+  .halo::before { content:""; position:absolute; inset:0; border-radius:50%;
+    background:repeating-conic-gradient(rgba(255,226,122,.32) 0 7deg, transparent 7deg 22deg); }
+  .halo::after { content:""; position:absolute; inset:24px; border-radius:50%; background:radial-gradient(circle, rgba(255,226,122,.55), transparent 70%); }
+  .emoji { font-size:84px; position:relative; z-index:2; filter:drop-shadow(0 8px 16px rgba(0,0,0,.3)); }
+
+  /* medallion */
+  .medal { width:140px; height:140px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center;
+    background:conic-gradient(#fff2b0,#ffcb45,#ffae12,#ffcb45,#fff2b0); box-shadow:0 10px 26px rgba(255,170,20,.5),inset 0 0 0 6px rgba(255,255,255,.35); }
+  .medal .inner { width:104px; height:104px; border-radius:50%; background:linear-gradient(160deg,#ffd66b,#ff9e0f); display:flex; align-items:center; justify-content:center; font-size:52px; box-shadow:inset 0 3px 8px rgba(255,255,255,.5),inset 0 -4px 8px rgba(160,90,0,.4); }
+  .ribbon { position:absolute; bottom:-18px; width:26px; height:40px; }
+  .ribbon.l { left:30px; background:#ff5ba3; clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%); transform:rotate(8deg); }
+  .ribbon.r { right:30px; background:#3fd6f0; clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%); transform:rotate(-8deg); }
+
+  /* minimal */
+  .ring { width:130px; height:130px; border-radius:50%; border:2px solid rgba(255,210,63,.5); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 40px rgba(255,210,63,.25); }
+  .huge { color:#fff; font-size:78px; font-weight:900; letter-spacing:-2px; line-height:1; text-shadow:0 4px 18px rgba(0,0,0,.3); }
+</style>
+</head>
+<body>
+  <h1>Winning screen — premium redesigns</h1>
+  <p class="sub">Four more-polished takes on the win screen (Magic Square sample: 13.1s). Cleaner graphics, denser confetti, refined glass panel, crown removed from "Best". Pick a number.</p>
+
+  <div class="rowwrap">
+
+    <!-- 1 Polished -->
+    <div class="opt"><h2>1 · Polished crown</h2><div class="tag">Your current screen, elevated — soft gold halo behind the crown, denser confetti, glassier panel</div>
+      <div class="phone">
+        <div class="confetti"></div><div class="corner s">⤴</div><div class="corner x">✕</div>
+        <div class="mid">
+          <div class="halo"><div class="emoji">👑</div></div>
+          <div class="title">SOLVED!</div>
+          <div class="subtitle">Magic! 🎉</div>
+          <div class="panel"><div class="l">YOUR TIME</div><div class="v">13.1s</div><div class="best"><span class="star">★</span> BEST 4.5s</div></div>
+        </div>
+        <button class="btn">↻ NEW PUZZLE</button>
+      </div>
+    </div>
+
+    <!-- 2 Trophy -->
+    <div class="opt"><h2>2 · Trophy spotlight</h2><div class="tag">A trophy in a strong light-ray spotlight; elegant, fewer confetti, premium gold</div>
+      <div class="phone">
+        <div class="corner s">⤴</div><div class="corner x">✕</div>
+        <div class="mid">
+          <div class="halo" style="width:190px;height:190px;"><div class="emoji" style="font-size:92px;">🏆</div></div>
+          <div class="title">VICTORY!</div>
+          <div class="subtitle">New record · Magic Square</div>
+          <div class="panel"><div class="l">YOUR TIME</div><div class="v">13.1s</div><div class="best"><span class="star">★</span> BEST 4.5s</div></div>
+        </div>
+        <button class="btn" style="background:linear-gradient(135deg,#ffd23f,#ffae12);color:#5a3a00;box-shadow:0 6px 0 #d99012;">↻ NEW PUZZLE</button>
+      </div>
+    </div>
+
+    <!-- 3 Medallion -->
+    <div class="opt"><h2>3 · Winner medallion</h2><div class="tag">A gold award medal with ribbons — feels like earning a trophy. Most premium</div>
+      <div class="phone">
+        <div class="confetti" style="opacity:.5;"></div><div class="corner s">⤴</div><div class="corner x">✕</div>
+        <div class="mid">
+          <div class="medal"><div class="inner">⭐</div><div class="ribbon l"></div><div class="ribbon r"></div></div>
+          <div class="title" style="margin-top:20px;">SOLVED!</div>
+          <div class="subtitle">Magic! 🎉</div>
+          <div class="panel"><div class="l">YOUR TIME</div><div class="v">13.1s</div><div class="best"><span class="star">★</span> BEST 4.5s</div></div>
+        </div>
+        <button class="btn">↻ NEW PUZZLE</button>
+      </div>
+    </div>
+
+    <!-- 4 Minimal -->
+    <div class="opt"><h2>4 · Minimal premium</h2><div class="tag">The time is the hero — huge & clean, a thin gold ring, lots of air. Sophisticated</div>
+      <div class="phone">
+        <div class="corner s">⤴</div><div class="corner x">✕</div>
+        <div class="mid">
+          <div class="ring"><div style="color:#ffd23f;font-size:13px;font-weight:800;letter-spacing:2px;">SOLVED</div></div>
+          <div class="l" style="color:rgba(255,255,255,.75);font-size:11px;font-weight:700;letter-spacing:2px;margin-top:26px;">YOUR TIME</div>
+          <div class="huge">13.1<span style="font-size:36px;">s</span></div>
+          <div class="best" style="margin-top:14px;"><span class="star">★</span> BEST 4.5s</div>
+        </div>
+        <button class="btn" style="background:#fff;color:#7a2da0;box-shadow:0 6px 0 #cdbce8;">↻ NEW PUZZLE</button>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

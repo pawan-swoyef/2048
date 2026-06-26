@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Games — Daily hero + games in a grid</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#15102e; color:#eee; padding:30px 18px 80px; }
+  h1 { text-align:center; font-size:25px; color:#fff; margin-bottom:6px; }
+  .sub { text-align:center; color:#b9b2d8; font-size:14px; margin-bottom:34px; max-width:760px; margin-inline:auto; }
+  .row { display:flex; flex-wrap:wrap; gap:42px; justify-content:center; align-items:flex-start; }
+  .opt { width:282px; }
+  .opt h2 { text-align:center; font-size:16px; color:#fff; margin-bottom:3px; }
+  .opt .tag { text-align:center; font-size:12px; color:#b9b2d8; margin-bottom:14px; min-height:30px; }
+
+  .phone { height:600px; border-radius:32px; padding:16px 14px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:0 16px 40px rgba(0,0,0,.5);
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e); }
+
+  .top { display:flex; align-items:center; margin-bottom:12px; }
+  .top h3 { color:#fff; font-size:18px; font-weight:900; flex:1; }
+  .pill { background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); border-radius:18px; padding:5px 11px; color:#fff; font-size:12px; font-weight:800; }
+
+  /* Daily hero — kept as the current design */
+  .hero { border-radius:22px; padding:16px 18px; margin-bottom:18px; position:relative; overflow:hidden;
+    background:linear-gradient(135deg,#ff7eb3,#ff6fa5 55%,#c84bd6); box-shadow:0 8px 20px rgba(200,75,150,.4); }
+  .hero .deco { position:absolute; right:-6px; top:-10px; font-size:72px; opacity:.18; }
+  .hero .b { display:inline-block; background:rgba(255,255,255,.25); color:#fff; font-size:9px; font-weight:800; padding:3px 9px; border-radius:11px; letter-spacing:.4px; }
+  .hero .t { color:#fff; font-size:20px; font-weight:900; margin-top:7px; }
+  .hero .s { color:#fff; opacity:.9; font-size:11px; }
+  .hero .play { display:inline-flex; align-items:center; gap:5px; background:#fff; color:#c8336e; font-weight:900; font-size:13px; padding:7px 16px; border-radius:18px; margin-top:11px; }
+
+  .lead { color:#fff; font-size:13px; font-weight:900; margin-bottom:10px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+
+  /* base card */
+  .card { border-radius:18px; padding:12px; aspect-ratio:1; display:flex; flex-direction:column; }
+  .ic { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .nm { color:#fff; font-size:13px; font-weight:900; margin-top:auto; }
+  .bs { color:#ffffffb0; font-size:10px; margin-top:2px; }
+  .g2048 { background:rgba(255,193,46,.28); } .gtap { background:rgba(79,195,247,.28); }
+  .gsort { background:rgba(123,232,107,.28); } .gmagic { background:rgba(177,76,255,.28); }
+
+  /* 1 glass */
+  .o1 .card { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); }
+
+  /* 2 accent tinted */
+  .o2 .c2048 { background:rgba(255,193,46,.16); border:1px solid rgba(255,193,46,.45); }
+  .o2 .ctap { background:rgba(79,195,247,.16); border:1px solid rgba(79,195,247,.45); }
+  .o2 .csort { background:rgba(123,232,107,.16); border:1px solid rgba(123,232,107,.45); }
+  .o2 .cmagic { background:rgba(177,76,255,.16); border:1px solid rgba(177,76,255,.45); }
+
+  /* 3 board preview */
+  .o3 .card { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); padding:10px; }
+  .prev { flex:1; border-radius:10px; background:rgba(0,0,0,.18); display:grid; grid-template-columns:repeat(3,1fr); gap:3px; padding:5px; margin-bottom:7px; }
+  .prev div { border-radius:4px; }
+  .row3 { color:#fff; font-size:12px; font-weight:900; } .row3b { color:#ffffffb0; font-size:10px; }
+
+  /* 4 big gradient icon */
+  .o4 .card { background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); align-items:center; text-align:center; justify-content:center; }
+  .o4 .ic { width:60px; height:60px; border-radius:18px; font-size:30px; box-shadow:0 6px 14px rgba(0,0,0,.3); }
+  .o4 .nm { margin-top:10px; } .o4 .bs { margin-top:3px; }
+  .grad2048 { background:linear-gradient(135deg,#ffd76a,#ffae12); } .gradtap { background:linear-gradient(135deg,#7fd4fb,#2196d6); }
+  .gradsort { background:linear-gradient(135deg,#9cf28e,#4cc23a); } .gradmagic { background:linear-gradient(135deg,#cb8cff,#9333ea); }
+</style>
+</head>
+<body>
+  <h1>All Games — Daily hero + games grid</h1>
+  <p class="sub">Daily Challenge stays exactly as it is (top hero); the 4 games move into a 2-column grid. Four card styles — pick a number and I'll build it.</p>
+
+  <div class="row">
+
+    <!-- 1 Glass -->
+    <div class="opt"><h2>1 · Glass squares</h2><div class="tag">Frosted-glass square cards — icon tile, name, best. Matches the current theme</div>
+      <div class="phone o1">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="lead">Games</div>
+        <div class="grid">
+          <div class="card"><div class="ic g2048">🔢</div><div class="nm">2048</div><div class="bs">Best 12480</div></div>
+          <div class="card"><div class="ic gtap">👆</div><div class="nm">Number Tap</div><div class="bs">Best 9.4s</div></div>
+          <div class="card"><div class="ic gsort">🟰</div><div class="nm">Number Sort</div><div class="bs">Best 8</div></div>
+          <div class="card"><div class="ic gmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">Best 10.2s</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 Accent tinted -->
+    <div class="opt"><h2>2 · Accent tinted</h2><div class="tag">Each card tinted + outlined in its game's color — more colorful, easy to tell apart</div>
+      <div class="phone o2">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="lead">Games</div>
+        <div class="grid">
+          <div class="card c2048"><div class="ic g2048">🔢</div><div class="nm">2048</div><div class="bs">Best 12480</div></div>
+          <div class="card ctap"><div class="ic gtap">👆</div><div class="nm">Number Tap</div><div class="bs">Best 9.4s</div></div>
+          <div class="card csort"><div class="ic gsort">🟰</div><div class="nm">Number Sort</div><div class="bs">Best 8</div></div>
+          <div class="card cmagic"><div class="ic gmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">Best 10.2s</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Board preview -->
+    <div class="opt"><h2>3 · Board preview</h2><div class="tag">Each card shows a mini board snapshot of the game, like the home featured card</div>
+      <div class="phone o3">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="lead">Games</div>
+        <div class="grid">
+          <div class="card"><div class="prev"><div style="background:#d9dbf7;"></div><div style="background:#7fe0d2;"></div><div></div><div style="background:#ffb23f;"></div><div style="background:#ff6a3d;"></div><div></div><div style="background:#54cc57;"></div><div></div><div style="background:#3fa3f0;"></div></div><div class="row3">2048</div><div class="row3b">Best 12480</div></div>
+          <div class="card"><div class="prev" style="grid-template-columns:repeat(3,1fr);"><div style="background:#34c759;"></div><div style="background:#fff2;"></div><div style="background:#fff2;"></div><div style="background:#fff2;"></div><div style="background:#34c759;"></div><div style="background:#fff2;"></div><div style="background:#fff2;"></div><div style="background:#fff2;"></div><div style="background:#34c759;"></div></div><div class="row3">Number Tap</div><div class="row3b">Best 9.4s</div></div>
+          <div class="card"><div class="prev" style="align-items:end;"><div style="background:#ffb23f;align-self:end;height:60%;"></div><div style="background:#ff4d9d;align-self:end;height:80%;"></div><div style="background:#3fa3f0;align-self:end;height:40%;"></div></div><div class="row3">Number Sort</div><div class="row3b">Best 8</div></div>
+          <div class="card"><div class="prev"><div style="background:#e3d2ff;"></div><div style="background:#e3d2ff;"></div><div style="background:#e3d2ff;"></div><div style="background:#e3d2ff;"></div><div style="background:#cb8cff;"></div><div style="background:#e3d2ff;"></div><div style="background:#e3d2ff;"></div><div style="background:#e3d2ff;"></div><div style="background:#e3d2ff;"></div></div><div class="row3">Magic Square</div><div class="row3b">Best 10.2s</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Big gradient icon -->
+    <div class="opt"><h2>4 · Bold icon tiles</h2><div class="tag">A big gradient icon centered in each card — clean, app-store-y, very tappable</div>
+      <div class="phone o4">
+        <div class="top"><h3>All Games</h3><div class="pill">🔥 5</div></div>
+        <div class="hero"><div class="deco">📅</div><div class="b">⭐ DAILY CHALLENGE</div><div class="t">Daily Challenge</div><div class="s">Reach 512 in fewest moves</div><div class="play">▶ Play Now</div></div>
+        <div class="lead">Games</div>
+        <div class="grid">
+          <div class="card"><div class="ic grad2048">🔢</div><div class="nm">2048</div><div class="bs">Best 12480</div></div>
+          <div class="card"><div class="ic gradtap">👆</div><div class="nm">Number Tap</div><div class="bs">Best 9.4s</div></div>
+          <div class="card"><div class="ic gradsort">🟰</div><div class="nm">Number Sort</div><div class="bs">Best 8</div></div>
+          <div class="card"><div class="ic gradmagic">🔮</div><div class="nm">Magic Square</div><div class="bs">Best 10.2s</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

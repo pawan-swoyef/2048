@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Win / Game Over — Result Screen (10 designs)</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { background:#15102e; color:#eee; padding:30px 18px 80px; }
+  h1 { text-align:center; font-size:25px; color:#fff; margin-bottom:6px; }
+  .sub { text-align:center; color:#b9b2d8; font-size:14px; margin-bottom:34px; max-width:780px; margin-inline:auto; }
+  .sub b { color:#ffd23f; }
+  .row { display:flex; flex-wrap:wrap; gap:40px; justify-content:center; align-items:flex-start; }
+  .opt { width:540px; }
+  .opt h2 { text-align:center; font-size:16px; color:#fff; margin-bottom:3px; }
+  .opt .tag { text-align:center; font-size:12px; color:#b9b2d8; margin-bottom:14px; }
+  .pair { display:flex; gap:14px; justify-content:center; }
+  .lbl { text-align:center; font-size:11px; font-weight:800; letter-spacing:1px; color:#8e86b5; margin-bottom:6px; text-transform:uppercase; }
+
+  .phone { width:250px; height:512px; border-radius:30px; padding:16px 14px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; box-shadow:0 16px 40px rgba(0,0,0,.5);
+    background:linear-gradient(160deg,#5b3df5,#a23df5 55%,#f53d9e); }
+  .phone.lose { background:linear-gradient(160deg,#3a2f63,#4a3a73 55%,#5e4a78); filter:saturate(.8); }
+
+  /* shared chrome */
+  .corner { position:absolute; top:14px; width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,.22);
+    border:1px solid rgba(255,255,255,.35); display:flex; align-items:center; justify-content:center; color:#fff; font-size:15px; z-index:5; }
+  .corner.x { right:14px; } .corner.s { left:14px; }
+  .mid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .ribbon { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.35);
+    padding:6px 16px; border-radius:13px; font-size:20px; font-weight:900; color:#fff; letter-spacing:1px; }
+  .ribbon .st { color:#ffd23f; }
+  .headline { color:#fff; font-size:16px; font-weight:800; margin-top:12px; }
+  .crown { font-size:54px; filter:drop-shadow(0 0 18px rgba(255,210,63,.8)); }
+  .muted { font-size:48px; opacity:.92; }
+  .statpanel { width:100%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); border-radius:16px; padding:14px; margin-top:14px; }
+  .statpanel .l { color:#ffffffcc; font-size:12px; } .statpanel .v { color:#ffd23f; font-size:44px; font-weight:900; line-height:1; }
+  .statpanel.lose .v { color:#ffb27a; } .statpanel .sub { color:#ffffffcc; font-size:12px; margin-top:2px; }
+  .badge { margin-top:10px; width:100%; text-align:center; background:rgba(255,122,61,.14); border:1px solid rgba(255,122,61,.55);
+    color:#fff; border-radius:20px; padding:9px; font-size:13px; font-weight:800; }
+  .btns { margin-top:auto; padding-top:12px; display:flex; flex-direction:column; gap:9px; }
+  .btn { border:none; border-radius:24px; padding:13px; font-size:14px; font-weight:900; letter-spacing:.4px; cursor:pointer; }
+  .btn.primary { background:#fff; color:#6a2dbf; box-shadow:0 6px 16px rgba(0,0,0,.3); }
+  .btn.gold { background:linear-gradient(135deg,#ffe27a,#ffb300); color:#5a3a00; }
+  .btn.ghost { background:transparent; border:1.5px solid rgba(255,255,255,.45); color:#fff; }
+  .btn.ad { background:transparent; border:1.5px solid #ffd23f; color:#ffd23f; }
+  .confetti { position:absolute; inset:0; pointer-events:none; z-index:1;
+    background-image:
+      radial-gradient(circle, #ff5ba3 2px, transparent 3px),
+      radial-gradient(circle, #3fa3f0 2px, transparent 3px),
+      radial-gradient(circle, #ffc93c 2px, transparent 3px),
+      radial-gradient(circle, #54cc57 2px, transparent 3px);
+    background-size:60px 60px,80px 80px,70px 70px,90px 90px;
+    background-position:0 0,30px 20px,15px 50px,45px 10px; opacity:.5; }
+
+  /* 2 full-bleed */
+  .o2 .big { font-size:80px; } .o2 .win2 { color:#ffd23f; font-size:30px; font-weight:900; }
+  .o2 .val { color:#fff; font-size:60px; font-weight:900; }
+
+  /* 3 scoreboard */
+  .o3 .cap { color:#ffffffcc; font-size:12px; font-weight:800; letter-spacing:2px; }
+  .o3 .huge { color:#fff; font-size:92px; font-weight:900; line-height:.95; }
+  .o3 .chips { display:flex; gap:8px; margin-top:10px; }
+  .o3 .chip { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:8px 10px; color:#fff; font-size:11px; font-weight:800; }
+
+  /* 4 trophy spotlight */
+  .o4 .spot { width:150px; height:150px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:80px;
+    background:radial-gradient(circle, rgba(255,226,122,.5), transparent 68%); }
+  .o4 .spot.lose { background:radial-gradient(circle, rgba(255,255,255,.12), transparent 68%); }
+
+  /* 6 top banner */
+  .o6 .banner { margin:-16px -14px 0; padding:30px 14px 22px; text-align:center; position:relative;
+    background:linear-gradient(135deg,#ffc12e,#ff6a3d); }
+  .o6 .banner.lose { background:linear-gradient(135deg,#5a5070,#6b5a78); }
+  .o6 .banner .big { font-size:46px; } .o6 .banner .ttl { color:#fff; font-size:26px; font-weight:900; }
+
+  /* 7 share focus */
+  .o7 .sharecard { width:170px; border-radius:18px; background:linear-gradient(160deg,#7c3aed,#f53d9e); padding:16px; color:#fff; box-shadow:0 10px 24px rgba(0,0,0,.35); }
+  .o7 .sharecard .t { font-size:12px; opacity:.85; } .o7 .sharecard .v { font-size:40px; font-weight:900; } .o7 .sharecard .b { font-size:10px; opacity:.8; margin-top:6px; }
+
+  /* 9 mascot */
+  .o9 .mascot { width:96px; height:96px; border-radius:24px; background:linear-gradient(135deg,#ffd23f,#ff6a3d); display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:900; color:#fff; box-shadow:0 8px 20px rgba(0,0,0,.3); }
+  .o9 .mascot.lose { background:linear-gradient(135deg,#6b5a8a,#8a6a9e); }
+  .o9 .bubble { margin-top:14px; background:rgba(255,255,255,.14); border-radius:14px; padding:10px 12px; color:#fff; font-size:12.5px; }
+
+  /* 10 ticket */
+  .o10 .ticket { width:190px; background:#fff; border-radius:14px; color:#3a2060; padding:16px; position:relative; box-shadow:0 10px 24px rgba(0,0,0,.3); }
+  .o10 .ticket::before,.o10 .ticket::after { content:""; position:absolute; width:18px; height:18px; border-radius:50%; background:#5b3df5; top:50%; transform:translateY(-50%); }
+  .o10 .ticket.lose::before,.o10 .ticket.lose::after { background:#4a3a73; }
+  .o10 .ticket::before { left:-9px; } .o10 .ticket::after { right:-9px; }
+  .o10 .tt { font-size:11px; font-weight:900; letter-spacing:2px; color:#8a5cf6; text-align:center; }
+  .o10 .tv { font-size:44px; font-weight:900; text-align:center; color:#6a2dbf; }
+  .o10 .dash { border-top:2px dashed #d8cdef; margin:10px 0; }
+  .o10 .line { display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:#6a5a8a; margin:3px 0; }
+</style>
+</head>
+<body>
+  <h1>Win / Game Over — Result Screen</h1>
+  <p class="sub">The centered card overlay becomes a full <b>screen</b>. One screen, two states: a celebratory <b>Win</b> and a muted <b>Game Over</b>. Aurora theme (recolors with all 7). All keep: big stat, streak badge, Share, Watch-Ad undo, Keep Going, confetti. Tell me a number and I'll build it.</p>
+
+  <div class="row">
+
+    <!-- 1 Faithful Hero -->
+    <div class="opt"><h2>1 · Faithful Hero</h2><div class="tag">Today's card, opened to a full screen — crown/sunburst, ribbon, stat, badge</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone">
+          <div class="corner s">⤴</div><div class="corner x">✕</div><div class="confetti"></div>
+          <div class="mid">
+            <div class="crown">👑</div>
+            <div class="ribbon" style="margin-top:8px;"><span class="st">★</span> SOLVED! <span class="st">★</span></div>
+            <div class="headline">New record! 🎉</div>
+            <div class="statpanel"><div class="l">Your time</div><div class="v">12.4s</div></div>
+            <div class="badge">👑 Best 10.2s</div>
+          </div>
+          <div class="btns"><button class="btn primary">▶ PLAY AGAIN</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div class="muted">😵</div>
+            <div class="ribbon" style="margin-top:8px;">GAME OVER</div>
+            <div class="headline">So close!</div>
+            <div class="statpanel lose"><div class="l">Final score</div><div class="v">2860</div><div class="sub">Best 4120</div></div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn primary">↻ NEW GAME</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 2 Full-bleed Celebration -->
+    <div class="opt"><h2>2 · Full-bleed Celebration</h2><div class="tag">No card — giant emoji + value fill the screen, buttons pinned bottom</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone o2">
+          <div class="corner s">⤴</div><div class="corner x">✕</div><div class="confetti"></div>
+          <div class="mid">
+            <div class="big">🎉</div>
+            <div class="win2">YOU WIN!</div>
+            <div style="color:#fff;opacity:.85;font-size:12px;margin:6px 0 2px;">You reached</div>
+            <div class="val">2048</div>
+            <div style="color:#fff;opacity:.85;font-size:12px;margin-top:4px;">Score 12,480</div>
+          </div>
+          <div class="btns"><button class="btn gold">▶ KEEP GOING</button><button class="btn ghost">NEW GAME</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose o2">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div class="big">😵</div>
+            <div class="win2" style="color:#ffb27a;">GAME OVER</div>
+            <div style="color:#fff;opacity:.85;font-size:12px;margin:6px 0 2px;">Final score</div>
+            <div class="val">2860</div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn ghost">NEW GAME</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 3 Scoreboard -->
+    <div class="opt"><h2>3 · Scoreboard</h2><div class="tag">The big number dominates; best/streak as chips. Sporty, stat-first</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone o3">
+          <div class="corner s">⤴</div><div class="corner x">✕</div>
+          <div class="mid">
+            <div class="cap">SOLVED IN</div>
+            <div class="huge">8</div>
+            <div style="color:#fff;font-size:13px;opacity:.85;">moves</div>
+            <div class="chips"><div class="chip">👑 Best 8</div><div class="chip">🔥 5 day streak</div></div>
+          </div>
+          <div class="btns"><button class="btn primary">▶ PLAY AGAIN</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose o3">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div class="cap" style="color:#ffb27a;">FINAL SCORE</div>
+            <div class="huge">2860</div>
+            <div class="chips"><div class="chip">👑 Best 4120</div></div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn primary">↻ NEW GAME</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 4 Trophy Spotlight -->
+    <div class="opt"><h2>4 · Trophy Spotlight</h2><div class="tag">A medal/trophy in a glow; stat below. Premium, focused</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone o4">
+          <div class="corner s">⤴</div><div class="corner x">✕</div><div class="confetti"></div>
+          <div class="mid">
+            <div class="spot">🏆</div>
+            <div class="headline" style="font-size:20px;">Magic! 🎉</div>
+            <div class="statpanel"><div class="l">Your time</div><div class="v">12.4s</div></div>
+            <div class="badge">👑 Best 10.2s</div>
+          </div>
+          <div class="btns"><button class="btn gold">▶ NEW PUZZLE</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose o4">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div class="spot lose">💔</div>
+            <div class="headline" style="font-size:20px;">Out of moves</div>
+            <div class="statpanel lose"><div class="l">You reached</div><div class="v">256</div></div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ REVIVE · WATCH AD</button><button class="btn primary">↻ TRY AGAIN</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 5 Minimal Glass -->
+    <div class="opt"><h2>5 · Minimal Glass</h2><div class="tag">A clean centered glass card, lots of air, restrained chrome</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone">
+          <div class="corner s">⤴</div><div class="corner x">✕</div>
+          <div class="mid">
+            <div style="width:100%;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:24px 16px;">
+              <div class="crown" style="font-size:40px;">👑</div>
+              <div class="headline" style="margin-top:6px;">You Win! 🎉</div>
+              <div class="statpanel" style="background:transparent;border:none;padding-top:8px;"><div class="l">Score</div><div class="v">12,480</div></div>
+            </div>
+          </div>
+          <div class="btns"><button class="btn primary">▶ KEEP GOING</button><button class="btn ghost">NEW GAME</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:24px;padding:24px 16px;">
+              <div class="muted" style="font-size:40px;">😵</div>
+              <div class="headline" style="margin-top:6px;">So close!</div>
+              <div class="statpanel lose" style="background:transparent;border:none;padding-top:8px;"><div class="l">Final score</div><div class="v">2860</div></div>
+            </div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn primary">↻ NEW GAME</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 6 Top Banner -->
+    <div class="opt"><h2>6 · Top Banner</h2><div class="tag">A bold colored hero banner up top, content + buttons below</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone o6">
+          <div class="corner x" style="top:18px;">✕</div>
+          <div class="banner"><div class="big">👑</div><div class="ttl">YOU WIN!</div></div>
+          <div class="mid">
+            <div class="statpanel"><div class="l">You reached</div><div class="v">2048</div><div class="sub">Score 12,480</div></div>
+            <div class="badge">🔥 5 day streak</div>
+          </div>
+          <div class="btns"><button class="btn gold">▶ KEEP GOING</button><button class="btn ghost">NEW GAME</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose o6">
+          <div class="corner x" style="top:18px;">✕</div>
+          <div class="banner lose"><div class="big">😵</div><div class="ttl">GAME OVER</div></div>
+          <div class="mid"><div class="statpanel lose"><div class="l">Final score</div><div class="v">2860</div><div class="sub">Best 4120</div></div></div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn primary">↻ NEW GAME</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 7 Share Focus -->
+    <div class="opt"><h2>7 · Share Focus</h2><div class="tag">The branded share card is the hero — built to be screenshotted/shared</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone o7">
+          <div class="corner x">✕</div><div class="confetti"></div>
+          <div class="mid">
+            <div class="headline" style="margin-bottom:12px;font-size:18px;">Great job! 🎉</div>
+            <div class="sharecard"><div class="t">Number Sort · I solved in</div><div class="v">8 moves</div><div class="b">👑 Best 8 · 🔥 5 day streak</div></div>
+          </div>
+          <div class="btns"><button class="btn gold">📤 SHARE RESULT</button><button class="btn ghost">PLAY AGAIN</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose o7">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div class="headline" style="margin-bottom:12px;font-size:18px;">So close!</div>
+            <div class="sharecard" style="background:linear-gradient(160deg,#5a4a73,#7a5a8a);"><div class="t">2048 · Final score</div><div class="v">2860</div><div class="b">Best 4120</div></div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn primary">↻ NEW GAME</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 8 Streak Focus -->
+    <div class="opt"><h2>8 · Streak / Reward Focus</h2><div class="tag">Celebrates the win and the streak/coins earned; "keep the run going"</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone">
+          <div class="corner s">⤴</div><div class="corner x">✕</div><div class="confetti"></div>
+          <div class="mid">
+            <div class="crown" style="font-size:44px;">🎉</div>
+            <div class="headline">Daily done!</div>
+            <div class="statpanel"><div class="l">You reached</div><div class="v">512</div><div class="sub">in 31 moves</div></div>
+            <div class="badge" style="background:rgba(255,210,63,.16);border-color:#ffd23f;">🪙 +100 · 🔥 5 day streak</div>
+          </div>
+          <div class="btns"><button class="btn gold">📤 SHARE RESULT</button></div>
+          <div style="text-align:center;color:#fff;opacity:.7;font-size:11px;padding-top:8px;">Next daily in 10h 47m</div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div class="muted" style="font-size:40px;">😔</div>
+            <div class="headline">Out of moves</div>
+            <div class="statpanel lose"><div class="l">You couldn't reach</div><div class="v">512</div></div>
+            <div class="badge" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);">🔥 5 day daily streak</div>
+          </div>
+          <div class="btns"><button class="btn primary">📤 SHARE</button></div>
+          <div style="text-align:center;color:#fff;opacity:.7;font-size:11px;padding-top:8px;">Next daily in 10h 47m</div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 9 Mascot -->
+    <div class="opt"><h2>9 · Number Mascot</h2><div class="tag">A tile mascot reacts — cheering on a win, dizzy on a loss</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone">
+          <div class="corner s">⤴</div><div class="corner x">✕</div><div class="confetti"></div>
+          <div class="mid o9">
+            <div class="mascot">2⁰⁴⁸</div>
+            <div class="bubble">"You did it! New record! 🎉"</div>
+            <div class="statpanel"><div class="l">Your time</div><div class="v">12.4s</div></div>
+          </div>
+          <div class="btns"><button class="btn primary">▶ PLAY AGAIN</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose">
+          <div class="corner x">✕</div>
+          <div class="mid o9">
+            <div class="mascot lose">@_@</div>
+            <div class="bubble">"Oof! So close — give it another go?"</div>
+            <div class="statpanel lose"><div class="l">Final score</div><div class="v">2860</div></div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn primary">↻ TRY AGAIN</button></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- 10 Ticket -->
+    <div class="opt"><h2>10 · Game Ticket</h2><div class="tag">The result as a collectible "ticket"/receipt with stats listed</div>
+      <div class="pair">
+        <div><div class="lbl">Win</div><div class="phone o10">
+          <div class="corner s">⤴</div><div class="corner x">✕</div><div class="confetti"></div>
+          <div class="mid">
+            <div class="ticket">
+              <div class="tt">★ SOLVED ★</div>
+              <div class="tv">8</div>
+              <div style="text-align:center;font-size:11px;color:#8a7ca8;">moves</div>
+              <div class="dash"></div>
+              <div class="line"><span>Best</span><span>8 moves 👑</span></div>
+              <div class="line"><span>Streak</span><span>🔥 5 days</span></div>
+            </div>
+          </div>
+          <div class="btns"><button class="btn primary">▶ PLAY AGAIN</button></div>
+        </div></div>
+        <div><div class="lbl">Game Over</div><div class="phone lose o10">
+          <div class="corner x">✕</div>
+          <div class="mid">
+            <div class="ticket lose">
+              <div class="tt" style="color:#a07ab5;">GAME OVER</div>
+              <div class="tv" style="color:#7a5a8a;">2860</div>
+              <div style="text-align:center;font-size:11px;color:#8a7ca8;">final score</div>
+              <div class="dash"></div>
+              <div class="line"><span>Best</span><span>4120 👑</span></div>
+            </div>
+          </div>
+          <div class="btns"><button class="btn ad">↩ UNDO · WATCH AD</button><button class="btn primary">↻ NEW GAME</button></div>
+        </div></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
