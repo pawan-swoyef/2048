@@ -257,65 +257,77 @@ class _AllGamesScreenState extends State<AllGamesScreen> {
     );
   }
 
-  /// A square game card: a signature gradient icon on a tinted stage, with the
-  /// name + best score on a gradient foot.
+  /// A bold game card: the whole tile is washed in the game's signature
+  /// gradient, with a large branded mark, a faint icon watermark for texture,
+  /// and the name + best score overlaid at the bottom.
   Widget _gameTile(GameTheme theme, GameInfo game) {
+    final colors = _gameGradient(game);
+    // 2048's gold gradient is light, so its text reads better in deep brown;
+    // every other gradient is saturated enough for crisp white.
+    final onCard =
+        game.id == '2048' ? const Color(0xFF5A3A00) : Colors.white;
     return GestureDetector(
       onTap: () => _open(game),
       behavior: HitTestBehavior.opaque,
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: const Color(0x0FFFFFFF),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0x24FFFFFF), width: 1),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: colors,
+          ),
+          borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.18),
-                blurRadius: 18,
-                offset: const Offset(0, 8)),
+                color: colors.last.withValues(alpha: 0.45),
+                blurRadius: 20,
+                offset: const Offset(0, 10)),
           ],
         ),
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                alignment: Alignment.center,
+            // Oversized, faint game icon bleeding off the corner for texture.
+            Positioned(
+              right: -18,
+              bottom: -12,
+              child: Icon(game.icon,
+                  size: 104, color: onCard.withValues(alpha: 0.14)),
+            ),
+            // A soft dark wash at the foot keeps the title legible on any
+            // gradient (kept subtle on 2048 so the brown text still pops).
+            Positioned.fill(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [game.accent.withValues(alpha: 0.16), Colors.transparent],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.center,
+                    colors: [
+                      Colors.black.withValues(alpha: game.id == '2048' ? 0.0 : 0.28),
+                      Colors.transparent,
+                    ],
                   ),
                 ),
-                child: _sigTile(game),
               ),
             ),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(13, 9, 13, 13),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [Color(0x4D000000), Colors.transparent],
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(15, 15, 15, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
+                  Expanded(child: Center(child: _sigMark(game, onCard))),
                   Text(game.title,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                          color: onCard,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
                           letterSpacing: -0.2)),
-                  const SizedBox(height: 1),
+                  const SizedBox(height: 2),
                   Text(game.bestText(_bests[game.id] ?? 0),
-                      style: const TextStyle(
-                          color: Color(0x99FFFFFF), fontSize: 10.5)),
+                      style: TextStyle(
+                          color: onCard.withValues(alpha: 0.82),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
@@ -325,71 +337,55 @@ class _AllGamesScreenState extends State<AllGamesScreen> {
     );
   }
 
-  /// The branded "signature tile" for each game.
-  Widget _sigTile(GameInfo game) {
+  /// The signature gradient washing each game's card.
+  List<Color> _gameGradient(GameInfo game) {
     switch (game.id) {
       case '2048':
-        return _tile(
-          const [Color(0xFFFFD76A), Color(0xFFFFAE12)],
-          const Text('2048',
-              style: TextStyle(
-                  color: Color(0xFF5A3A00),
-                  fontSize: 27,
-                  fontWeight: FontWeight.w900)),
-        );
+        return const [Color(0xFFFFD76A), Color(0xFFFFAE12)];
       case 'numbertap':
-        return _tile(
-          const [Color(0xFF7FD4FB), Color(0xFF2196D6)],
-          const Text('7',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 54,
-                  fontWeight: FontWeight.w900)),
-        );
+        return const [Color(0xFF7FD4FB), Color(0xFF2196D6)];
       case 'numbersort':
-        return _tile(
-          const [Color(0xFF9CF28E), Color(0xFF4CC23A)],
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [_bar(34), _bar(56), _bar(46)],
-          ),
-        );
+        return const [Color(0xFF9CF28E), Color(0xFF4CC23A)];
       case 'magicsquare':
-        return _tile(
-          const [Color(0xFFCB8CFF), Color(0xFF9333EA)],
-          const Text('8 1 6\n3 5 7\n4 9 2',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                  height: 1.2)),
-        );
+        return const [Color(0xFFCB8CFF), Color(0xFF9333EA)];
       default:
-        return _tile([game.accent, game.accent],
-            Icon(game.icon, color: Colors.white, size: 48));
+        return [game.accent, _darkenAccent(game.accent)];
     }
   }
 
-  Widget _tile(List<Color> colors, Widget child) {
-    return Container(
-      width: 104,
-      height: 104,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-            begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.32),
-              blurRadius: 18,
-              offset: const Offset(0, 9)),
-        ],
-      ),
-      child: child,
-    );
+  Color _darkenAccent(Color c) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl.withLightness((hsl.lightness - 0.16).clamp(0.0, 1.0)).toColor();
+  }
+
+  /// The large branded mark front-and-centre on each card.
+  Widget _sigMark(GameInfo game, Color onCard) {
+    switch (game.id) {
+      case '2048':
+        return Text('2048',
+            style: TextStyle(
+                color: onCard, fontSize: 40, fontWeight: FontWeight.w900));
+      case 'numbertap':
+        return Text('7',
+            style: TextStyle(
+                color: onCard, fontSize: 66, fontWeight: FontWeight.w900));
+      case 'numbersort':
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [_bar(38), _bar(62), _bar(50)],
+        );
+      case 'magicsquare':
+        return Text('8 1 6\n3 5 7\n4 9 2',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: onCard,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                height: 1.2));
+      default:
+        return Icon(game.icon, color: onCard, size: 58);
+    }
   }
 
   Widget _bar(double h) {

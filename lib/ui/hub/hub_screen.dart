@@ -424,15 +424,15 @@ class _HubScreenState extends State<HubScreen> {
 
   Widget _featuredCard(GameTheme theme, GameInfo game) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 22,
-              offset: const Offset(0, 10)),
+              blurRadius: 18,
+              offset: const Offset(0, 8)),
         ],
       ),
       child: IntrinsicHeight(
@@ -444,30 +444,30 @@ class _HubScreenState extends State<HubScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _miniIcon(game),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Text(game.title,
                       style: const TextStyle(
-                          fontSize: 26,
+                          fontSize: 21,
                           fontWeight: FontWeight.w900,
                           color: _cardTitle)),
                   Text(game.subtitle,
-                      style: const TextStyle(fontSize: 12.5, color: _cardSub)),
-                  const SizedBox(height: 8),
+                      style: const TextStyle(fontSize: 11.5, color: _cardSub)),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Text(game.bestText(_bests[game.id] ?? 0),
                           style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.w800,
                               color: _accent)),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   _playButton(game),
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(child: _boardPreview(theme, game)),
           ],
         ),
@@ -477,17 +477,17 @@ class _HubScreenState extends State<HubScreen> {
 
   Widget _miniIcon(GameInfo game) {
     return Container(
-      width: 44,
-      height: 44,
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [game.accent, _darken(game.accent)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(11),
       ),
-      child: Icon(game.icon, color: Colors.white, size: 24),
+      child: Icon(game.icon, color: Colors.white, size: 21),
     );
   }
 
@@ -501,12 +501,12 @@ class _HubScreenState extends State<HubScreen> {
     return GestureDetector(
       onTap: () => _openGame(game),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF7C3AED), Color(0xFFF53D9E)],
           ),
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
                 color: const Color(0xFFF53D9E).withValues(alpha: 0.4),
@@ -521,9 +521,9 @@ class _HubScreenState extends State<HubScreen> {
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 14)),
-            SizedBox(width: 7),
-            Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
+                    fontSize: 13)),
+            SizedBox(width: 6),
+            Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
           ],
         ),
       ),

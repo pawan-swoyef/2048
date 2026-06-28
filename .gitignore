@@ -8,6 +8,9 @@ secretandstunts-*.json
 *.jks
 key.properties
 
+# Brainstorming visual-companion mockups (local only)
+.superpowers/
+
 # Miscellaneous
 devtools_options.yaml
 *.class
